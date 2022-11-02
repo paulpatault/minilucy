@@ -1,0 +1,12 @@
+(ocamllex
+ (modules lexer))
+
+(menhir
+ (modules parser)
+ (flags
+  (-v --explain)))
+
+(executable
+  (name lmoch)
+  (libraries unix)
+  (flags (-w -33)))
