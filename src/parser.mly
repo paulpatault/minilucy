@@ -49,6 +49,7 @@
 
 %token MERGE
 %token RESET
+%token WHEN WHENOT
 
 %nonassoc THEN
 %nonassoc ELSE
@@ -201,8 +202,9 @@ expr:
     { mk_expr (PE_pre ($2))  $sloc}
 | LPAREN expr COMMA expr_comma_list RPAREN
     { mk_expr (PE_tuple ($2::$4))  $sloc}
-/* | MERGE expr expr expr
-    { mk_expr (PE_merge ($2, $3, $4)) $sloc } */
+/* | MERGE expr expr expr { mk_expr (PE_merge ($2, $3, $4)) $sloc } */
+/* | expr WHEN expr       { mk_expr (PE_when ($2, $3)) } */
+/* | expr WHENOT expr     { mk_expr (PE_whenot ($2, $3)) } */
 ;
 
 const:
