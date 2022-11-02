@@ -7,7 +7,7 @@ open Lexer
 open Parser
 open Parse_ast
 
-let usage = "usage: "^Sys.argv.(0)^" [options] file.lus main"
+let usage = "usage: "^Sys.argv.(0)^" [options] file.lus [main]"
 
 let parse_only = ref false
 let type_only = ref false

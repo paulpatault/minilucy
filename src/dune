@@ -7,6 +7,6 @@
   (-v --explain)))
 
 (executable
-  (name lmoch)
+  (name minilucy)
   (libraries unix)
   (flags (-w -33)))
