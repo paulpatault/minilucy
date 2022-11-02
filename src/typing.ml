@@ -54,7 +54,7 @@ let report fmt = function
       print_type t1 print_type t2
   | ExpectedPattern ty ->
       fprintf fmt "this pattern is expected to have type %a"
-	print_type ty
+    print_type ty
   | ExpectedBase ty ->
       fprintf fmt
      "this expression has type %a but is expected to have a type simple type"
@@ -71,12 +71,12 @@ let report fmt = function
   | FlatTuple -> fprintf fmt "nested tuples are forbidden"
   | UndefinedOutputs l ->
       fprintf fmt "those output variables are undefined:%a"
-	(fun fmt -> List.iter (fun x -> fprintf fmt "%s " x)) l
+    (fun fmt -> List.iter (fun x -> fprintf fmt "%s " x)) l
   | InputVar s -> fprintf fmt "%s is an input variable" s
   | Causality -> fprintf fmt "problem of causality"
   | BadMain (t_in, t_out) ->
       fprintf fmt "The main node has type %a -> %a but is expected to have type %a -> bool"
-	print_type t_in print_type t_out
+    print_type t_in print_type t_out
         print_type t_in
 
 let int_of_real = Ident.make "int_of_real" Ident.Prim
@@ -94,7 +94,7 @@ module Delta = struct
 
   let find n =
     try Hashtbl.find nodes n , false with
-	Not_found -> List.assoc n prims , true
+    Not_found -> List.assoc n prims , true
 
   let add x t =
     let x' = Ident.make x Ident.Node in
@@ -142,8 +142,8 @@ let compatible actual_ty expected_ty =
   try
     List.fold_left2
       (fun well_t ac_t ex_t ->
-	let well_t' = compatible_base ac_t ex_t in
-	(well_t && well_t'))
+    let well_t' = compatible_base ac_t ex_t in
+    (well_t && well_t'))
       true actual_ty expected_ty
   with Invalid_argument _ -> false
 
@@ -153,8 +153,8 @@ let real_expr_of_expr te =
   | [Treal] -> te
   | [Tint] ->
       { texpr_desc = TE_prim (real_of_int,[te]);
-	texpr_type = [Treal];
-	texpr_loc = (Lexing.dummy_pos,Lexing.dummy_pos);
+    texpr_type = [Treal];
+    texpr_loc = (Lexing.dummy_pos,Lexing.dummy_pos);
       }
   | _ -> assert false
 
@@ -169,11 +169,11 @@ let real_op_of_int_op op =
 let not_a_nested_tuple e loc =
   match e with
     | PE_tuple el ->
-	List.iter
-	  (fun e ->
-	     match e.pexpr_desc with
-		 PE_tuple _ -> error loc FlatTuple;
-	       | _ -> ()) el
+    List.iter
+      (fun e ->
+         match e.pexpr_desc with
+         PE_tuple _ -> error loc FlatTuple;
+           | _ -> ()) el
     | _ -> assert false
 
 let rec is_constant env e =
@@ -235,11 +235,11 @@ and type_expr_desc env loc = function
       let te2 = type_expr env e2 in
       begin match te1.texpr_type, te2.texpr_type with
       | [Tint], [Tint] ->
-	  TE_op (op, [te1; te2]), [Tint]
+      TE_op (op, [te1; te2]), [Tint]
       | [(Tint | Treal)], [(Tint | Treal)] ->
-	  TE_op(real_op_of_int_op op, [ real_expr_of_expr te1 ;
-		                           real_expr_of_expr te2 ]),
-	  [Treal]
+      TE_op(real_op_of_int_op op, [ real_expr_of_expr te1 ;
+                                   real_expr_of_expr te2 ]),
+      [Treal]
       | [(Tint | Treal)], ty -> error e2.pexpr_loc (ExpectedNum (ty))
       | ty, _ -> error e1.pexpr_loc (ExpectedNum (ty))
       end
@@ -263,9 +263,9 @@ and type_expr_desc env loc = function
       let ty2 = te2.texpr_type in
       begin match ty1, ty2 with
       | [t1], [t2] when t1 = t2 ->
-	  TE_op (op, [te1; te2]), [Tbool]
+      TE_op (op, [te1; te2]), [Tbool]
       | _ ->
-	  error loc (Other "invalid operands to equality")
+      error loc (Other "invalid operands to equality")
       end
 
   | PE_op (Op_lt | Op_le | Op_gt | Op_ge as op, [e1; e2]) ->
@@ -276,9 +276,9 @@ and type_expr_desc env loc = function
       begin match ty1, ty2 with
       | [Tint], [Tint]
       | [Treal], [Treal] ->
-	  TE_op (op, [te1; te2]), [Tbool]
+      TE_op (op, [te1; te2]), [Tbool]
       | _ ->
-	  error loc (Other "invalid operands to comparison")
+      error loc (Other "invalid operands to comparison")
       end
 
   | PE_op (Op_if, [e1; e2; e3]) ->
@@ -287,10 +287,10 @@ and type_expr_desc env loc = function
       let te3 = type_expr env e3 in
       let well_typed = compatible te2.texpr_type te3.texpr_type in
       if well_typed then
-	let tt = te2.texpr_type in
-	TE_op(Op_if, [te1; te2; te3]), tt
+    let tt = te2.texpr_type in
+    TE_op(Op_if, [te1; te2; te3]), tt
       else
-	error loc (ExpectedType (te3.texpr_type, te2.texpr_type))
+    error loc (ExpectedType (te3.texpr_type, te2.texpr_type))
 
   | PE_op ((Op_eq | Op_neq | Op_lt | Op_le | Op_gt | Op_ge
             | Op_add | Op_sub | Op_mul | Op_div | Op_mod
@@ -318,16 +318,16 @@ and type_expr_desc env loc = function
 
   | PE_app (f, el) ->
       begin try
-	let (f, (t_in,t_out)) , is_prim = Delta.find f in
-	let tel = type_args env loc t_in el in
-	let app_node = if is_prim then TE_prim(f, tel) else TE_app(f, tel) in
-	app_node ,
-	begin match t_out with
-	| [] -> assert false
-	| _ -> t_out
-	end
+    let (f, (t_in,t_out)) , is_prim = Delta.find f in
+    let tel = type_args env loc t_in el in
+    let app_node = if is_prim then TE_prim(f, tel) else TE_app(f, tel) in
+    app_node ,
+    begin match t_out with
+    | [] -> assert false
+    | _ -> t_out
+    end
       with Not_found ->
-	error loc (UnboundNode f)
+    error loc (UnboundNode f)
       end
 
   | PE_arrow (e1, e2) ->
@@ -337,7 +337,7 @@ and type_expr_desc env loc = function
       let ty2 = te2.texpr_type in
       let well_typed = compatible ty1 ty2 in
       if well_typed then
-	TE_arrow (te1, te2), ty2
+    TE_arrow (te1, te2), ty2
       else error te2.texpr_loc (ExpectedType (ty2, ty1))
 
   | PE_pre e ->
@@ -355,9 +355,9 @@ and type_args env loc params_ty el =
   let actual_types =
     List.rev
       begin
-	List.fold_left
-	  (fun res te -> List.rev_append te.texpr_type res)
-	  [] tel
+    List.fold_left
+      (fun res te -> List.rev_append te.texpr_type res)
+      [] tel
       end
   in
   let well_typed =
@@ -387,20 +387,20 @@ and type_patt_desc env loc patt =
   match patt with
   | PP_ident x -> begin
       let x, ty =
-	match Gamma.find loc env x with
-	| x, t, Vpatt -> x, t
-	| _  -> error loc (InputVar x)
+    match Gamma.find loc env x with
+    | x, t, Vpatt -> x, t
+    | _  -> error loc (InputVar x)
       in
       [x], [ty]
     end
   | PP_tuple pl ->
       let pl_tyl =
-	List.map
-	  (fun x ->
-	     match Gamma.find loc env x with
-	     | x, ty, Vpatt -> x, ty
-	     | _  -> error loc (InputVar x)
-	  ) pl
+    List.map
+      (fun x ->
+         match Gamma.find loc env x with
+         | x, ty, Vpatt -> x, ty
+         | _  -> error loc (InputVar x)
+      ) pl
       in
       List.split pl_tyl
 

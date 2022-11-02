@@ -9,3 +9,7 @@
 - features avancées
   - [ ] reset
   - [ ] merge
+
+# Dépendances
+
+`opam install goblint-cil` (interface avec `C`)

@@ -12,16 +12,18 @@ let usage = "usage: "^Sys.argv.(0)^" [options] file.lus [main]"
 let parse_only = ref false
 let type_only = ref false
 let norm_only = ref false
+let sched_only = ref false
 let lucy_printer = ref false
 let ocaml_printer = ref true
 let verbose = ref false
 
 let spec =
   ["-parse-only", Arg.Set parse_only, "  stops after parsing";
-   "-type-only", Arg.Set type_only, "  stops after typing";
-   "-norm-only", Arg.Set norm_only, "  stops after normalization";
-   "-verbose", Arg.Set verbose, "print intermediate transformations";
-   "-v", Arg.Set verbose, "print intermediate transformations";
+   "-type-only",  Arg.Set type_only,  "  stops after typing";
+   "-norm-only",  Arg.Set norm_only,  "  stops after normalization";
+   "-sched-only", Arg.Set sched_only, "  stops after scheduling";
+   "-verbose",    Arg.Set verbose,    "print intermediate transformations";
+   "-v",          Arg.Set verbose,    "print intermediate transformations";
   ]
 
 let file, main_node =
@@ -68,10 +70,30 @@ let () =
       Typed_ast_printer.print_node_list_std ft
     end;
     if !type_only then exit 0;
-    if main_node = "" then exit 0;
 
-    (* XXX TODO XXX *)
-    Format.printf "Don't know@.";
+    let ft = Normalize.file ft in (** TODO *)
+    if !verbose then begin
+      Format.printf "/**************************************/@.";
+      Format.printf "/* Normalized ast                     */@.";
+      Format.printf "/**************************************/@.";
+      Typed_ast_printer.print_node_list_std ft
+    end;
+    if !norm_only then exit 0;
+
+    let ft = Scheduling.schedule ft in
+    if !verbose then begin
+      Format.printf "/**************************************/@.";
+      Format.printf "/* Scheduled ast                      */@.";
+      Format.printf "/**************************************/@.";
+      Typed_ast_printer.print_node_list_std ft;
+    end;
+    if !sched_only then exit 0;
+
+    let ft = Cgen.compile ft in
+    let file_c = open_out (Format.sprintf "%s.c" (Filename.remove_extension file)) in
+    let out = Format.formatter_of_out_channel file_c in
+    Cgen.write_out ft out;
+    close_out file_c;
 
     exit 0
   with
