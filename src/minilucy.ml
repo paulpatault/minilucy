@@ -101,7 +101,7 @@ let () =
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
         eprintf "lexical error: %s\n@." s;
         exit 1
-    | Parsing.Parse_error ->
+    | Parser.Error ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
         eprintf "syntax error\n@.";
         exit 1

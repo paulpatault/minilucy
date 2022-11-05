@@ -4,8 +4,9 @@ let
 tel
 
 node check (x: bool) returns (ok: bool);
-var cpt : int;
+var cpt : int; a, b: bool;
 let
+  (a, b) = (true, false);
   cpt = incr(x);
   ok = true -> (pre cpt) <= cpt;
 tel

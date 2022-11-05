@@ -3,6 +3,8 @@ open Typed_ast
 open Cil_utils
 open Ident
 
+module StringMap = Map.Make(String)
+
 (* Returns a local varinfo, and struct list *)
 let compile_output_type output =
   if List.length output > 1 then
@@ -20,6 +22,9 @@ let compile_output_step fundec typ output =
     let name = let ident = fst var in ident.name in
     makeLocalVar fundec name typ
 
+let mk_mem_struct mem_structs fby_mem node_mem =
+  ()
+
 let compile_node globals node =
   (* TODO: Add mem struct *)
   let fun_args = List.map (fun ({name; _}, typ) ->
@@ -30,6 +35,15 @@ let compile_node globals node =
   let fundec = mk_fundec funglob in
   let output_step = compile_output_step fundec output_type node.tn_output in
   let funblock = mkBlock [mkStmt (Return (Some (Lval (Var output_step, NoOffset)), locUnknown))] in
+  let _locals =
+    List.map
+      (fun ({name; _}, typ) ->
+         makeLocalVar fundec name (translate_type typ))
+      node.tn_local
+    |> List.fold_left (fun locals local ->
+        StringMap.add local.vname local locals)
+      StringMap.empty
+  in
   fundec.sbody <- funblock;
   GFun (fundec, locUnknown)
 
