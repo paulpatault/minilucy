@@ -25,6 +25,7 @@ type error =
   | Causality
   | BadMain of ty * ty
   | BadMerge
+  | UnknownConstructor of string
 
 exception Error of location * error
 let dummy_loc = Lexing.dummy_pos, Lexing.dummy_pos
@@ -76,8 +77,8 @@ let report fmt = function
   | Other s -> fprintf fmt "%s" s
   | FlatTuple -> fprintf fmt "nested tuples are forbidden"
   | UndefinedOutputs l ->
-    fprintf fmt "those output variables are undefined:%a"
-      (fun fmt -> List.iter (fun x -> fprintf fmt "%s " x)) l
+      fprintf fmt "those output variables are undefined:%a"
+        (fun fmt -> List.iter (fun x -> fprintf fmt " %s" x)) l
   | InputVar s -> fprintf fmt "%s is an input variable" s
   | Causality -> fprintf fmt "problem of causality"
   | BadMain (t_in, t_out) ->
@@ -86,6 +87,7 @@ let report fmt = function
       print_type t_in
   | BadMerge ->
     fprintf fmt "There must be two merge branches with one that matches true and the other false"
+  | UnknownConstructor s -> fprintf fmt "[%s] constructor doesn't appear in automaton definition" s
 
 let int_of_real = Ident.make "int_of_real" Ident.Prim
 let real_of_int = Ident.make "real_of_int" Ident.Prim
@@ -133,6 +135,9 @@ module Gamma = struct
 
   let patts_vars env =
     M.fold (fun _ (x,_,io) s -> if io=Vpatt then S.add x s else s) env S.empty
+
+  let in_vars env =
+    M.fold (fun _ (x,_,io) s -> if io=Vinput then S.add x s else s) env S.empty
 
 end
 
@@ -447,7 +452,6 @@ and type_patt_desc env loc patt =
     in
     List.split pl_tyl
 
-
 let type_equation env eq =
   let patt = type_patt env eq.peq_patt in
   let expr = type_expr env eq.peq_expr in
@@ -458,6 +462,25 @@ let type_equation env eq =
     error
       eq.peq_expr.pexpr_loc (ExpectedType (expr.texpr_type, patt.tpatt_type))
 
+let type_case env adt {pn_constr; pn_equations; pn_cond; pn_out; pn_loc } =
+  (* let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
+  let env = Gamma.adds n.pn_loc Vinput env n.pn_input in *)
+
+  let tn_equations = List.map (type_equation env) pn_equations in
+  let tn_cond = type_expr env pn_cond in
+
+  let tn_constr =
+    if List.mem pn_constr adt then pn_out
+    else error pn_loc (UnknownConstructor pn_constr) in
+  let tn_out =
+    if List.mem pn_out adt then pn_out
+    else error pn_loc (UnknownConstructor pn_out) in
+
+  { tn_constr; tn_equations; tn_cond; tn_out; }
+
+let type_automaton env automaton =
+  let adt = List.fold_left (fun acc e -> e.pn_constr :: acc) [] automaton in
+  List.map (type_case env adt) automaton
 
 let add_vars_of_patt loc s {teq_patt = {tpatt_desc=p}} =
   let add x s =
@@ -467,6 +490,7 @@ let add_vars_of_patt loc s {teq_patt = {tpatt_desc=p}} =
   List.fold_left (fun s x -> add x s) s p
 
 let check_outputs loc env equs =
+  if true then failwith "probleme ici";
   let s = List.fold_left (add_vars_of_patt loc) S.empty equs in
   let not_defined = S.diff (Gamma.patts_vars env) s in
   if not (S.is_empty not_defined) then
@@ -484,6 +508,7 @@ let type_node n =
   let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in
   let equs = List.map (type_equation env) n.pn_equs in
+  let auto = type_automaton env n.pn_automaton in
   check_outputs n.pn_loc env equs;
   let t_in = List.map (fun (_, ty) -> ty) n.pn_input in
   let t_out = List.map (fun (_, ty) -> ty) n.pn_output in
@@ -509,6 +534,7 @@ let type_node n =
       tn_output = output;
       tn_local = local;
       tn_equs = equs;
+      tn_auto = auto;
       tn_loc = n.pn_loc; }
   in
   (* check_causality node.tn_loc node.tn_input equs; *)

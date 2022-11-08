@@ -33,12 +33,28 @@ type p_equation =
     { peq_patt: p_patt;
       peq_expr: p_expr; }
 
+(* automaton
+   | A ->
+       o1 = ... ;
+       o2 = ... ;
+       unless (...) then B
+   | B -> ...
+ *)
+type p_case =
+  { pn_constr: string;
+    pn_cond: p_expr;
+    pn_out: string;
+    pn_loc: location;
+    pn_equations: p_equation list;
+  }
+
 type p_node =
     { pn_name: ident;
       pn_input: (ident * base_ty) list;
       pn_output: (ident * base_ty) list;
       pn_local: (ident * base_ty) list;
       pn_equs: p_equation list;
+      pn_automaton: p_case list;
       pn_loc: location;
       (* pn_reset: ident option; *)
     }

@@ -31,12 +31,19 @@ type t_equation =
     { teq_patt: t_patt;
       teq_expr: t_expr; }
 
+type t_case =
+  { tn_constr:    string;
+    tn_equations: t_equation list;
+    tn_cond:      t_expr;
+    tn_out:       string }
+
 type t_node =
     { tn_name: Ident.t;
       tn_input: typed_var list;
       tn_output: typed_var list;
       tn_local: typed_var list;
       tn_equs: t_equation list;
+      tn_auto: t_case list;
       tn_loc: location; }
 
 type t_file = t_node list

@@ -10,6 +10,7 @@
 
 %token AND
 %token ARROW
+%token BAR
 %token BOOL
 %token CONST
 %token COLON
@@ -51,6 +52,12 @@
 %token RESET
 %token WHEN WHENOT
 
+%token AUTOMATON
+%token UNLESS
+%token UNTIL
+%token CONTINUE
+%token DONE
+
 %nonassoc THEN
 %nonassoc ELSE
 %right ARROW
@@ -83,13 +90,30 @@ node:
 | NODE IDENT LPAREN in_params RPAREN
   RETURNS LPAREN out_params RPAREN SEMICOL
   local_params
+  AUTOMATON autom=list(case) END semi_opt
+    { { pn_name = $2;
+    pn_input = $4;
+    pn_output = $8;
+    pn_local = $11;
+    pn_equs = [];
+    pn_automaton = autom;
+    pn_loc = $sloc; } }
+| NODE IDENT LPAREN in_params RPAREN
+  RETURNS LPAREN out_params RPAREN SEMICOL
+  local_params
   LET eq_list TEL semi_opt
     { { pn_name = $2;
     pn_input = $4;
     pn_output = $8;
     pn_local = $11;
     pn_equs = $13;
+    pn_automaton = [];
     pn_loc = $sloc; } }
+;
+
+case:
+| BAR pn_constr=IDENT ARROW pn_equations=eq_list UNLESS pn_cond=expr THEN pn_out=IDENT
+  { {pn_constr; pn_equations; pn_cond; pn_out; pn_loc = $sloc} }
 ;
 
 %public %inline loc(X):

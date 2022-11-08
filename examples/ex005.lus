@@ -1,0 +1,17 @@
+node aux (lo, hi : int) returns (x: int);
+  automaton
+  | Await ->
+      x = 0 -> pre x + 1;
+      unless (x <= lo) then Run
+  | Run ->
+      x = 0 -> pre x - 1;
+      unless (x >= hi) then Await
+  end
+
+node main () returns (o: bool);
+var x, y: int;
+let
+  x = aux (1, 3);
+  y = aux (1, 3);
+  o = (x = y);
+tel

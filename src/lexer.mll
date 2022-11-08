@@ -37,6 +37,12 @@
         "reset", RESET;
         "when", WHEN;
         "whenot", WHENOT;
+
+        "automaton", AUTOMATON;
+        "unless", UNLESS;
+        "until", UNTIL;
+        "continue", CONTINUE;
+        "done", DONE;
       ];
     fun s ->
       try Hashtbl.find h s with Not_found -> IDENT s
@@ -102,6 +108,8 @@ rule token = parse
       { SEMICOL }
   | "="
       { EQUAL }
+  | "|"
+      { BAR }
   | ","
       { COMMA }
   | _
