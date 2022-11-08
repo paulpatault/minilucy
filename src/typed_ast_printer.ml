@@ -53,6 +53,9 @@ let rec print_exp fmt e = match e.texpr_desc with
       fprintf fmt "pre (@[%a@])" print_exp e
   | TE_tuple e_list ->
       fprintf fmt "(@[%a@])" print_tuple_arg_list e_list
+  | TE_merge (name, e1, e2) ->
+    fprintf fmt "@[merge %a @[(true -> %a)@] @[(false -> %a)@]@]"
+      Ident.print name print_exp e1 print_exp e2
 
 and print_arg_list fmt e_list = match e_list with
   | [] -> ()

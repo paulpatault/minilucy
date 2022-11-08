@@ -18,6 +18,7 @@ and t_expr_desc =
   | TE_arrow of t_expr * t_expr
   | TE_pre of t_expr
   | TE_tuple of t_expr list
+  | TE_merge of Ident.t * t_expr * t_expr (* true, false *)
 
 type t_patt =
     { tpatt_desc: Ident.t list;

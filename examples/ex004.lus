@@ -1,11 +1,13 @@
-node incr (tic: bool) returns (cpt: int);
+node incr (tic: bool) returns (cpt, x: int);
 let
+  x = 1;
   cpt = (0 -> pre cpt) + if tic then 1 else 0;
 tel
 
 node check (x: bool) returns (ok: bool);
-var cpt : int;
+var cpt, y : int; a, b: bool;
 let
-  cpt = incr(x);
+  (a, b) = (true, false);
+  (cpt, y) = incr(x);
   ok = true -> (pre cpt) <= cpt;
 tel

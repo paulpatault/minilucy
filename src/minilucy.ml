@@ -92,7 +92,7 @@ let () =
     let ft = Cgen.compile ft in
     let file_c = open_out (Format.sprintf "%s.c" (Filename.remove_extension file)) in
     let out = Format.formatter_of_out_channel file_c in
-    Cgen.write_out ft out;
+    (* Cgen.write_out ft out; *)
     close_out file_c;
 
     exit 0
@@ -101,7 +101,7 @@ let () =
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
         eprintf "lexical error: %s\n@." s;
         exit 1
-    | Parsing.Parse_error ->
+    | Parser.Error ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
         eprintf "syntax error\n@.";
         exit 1
