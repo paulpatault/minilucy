@@ -50,10 +50,14 @@ let compile_node globals node =
 let compile ast =
   let globs = List.map (compile_node []) ast in
   let open GoblintCil.Errormsg in
+  (*TODO: Move it*)
+  Format.printf "/**************************************/@.";
+  Format.printf "/* C ast                              */@.";
+  Format.printf "/**************************************/@.";
   List.iter (log "%a" d_global) globs;
   ast
 
-let pp = Obj.magic ()
+let pp fmt _ = Format.fprintf fmt "Youpii"
 
 let write_out c_ast out =
   Format.fprintf out "%a" pp c_ast

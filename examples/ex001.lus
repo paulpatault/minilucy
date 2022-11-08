@@ -8,6 +8,7 @@ let
         (true -> 1)
         (false -> 2);
   OK = (n1 + 1) = n2;
+  OKK = (n1 + 1) = n2;
 tel
 
 

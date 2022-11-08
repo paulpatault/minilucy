@@ -92,7 +92,7 @@ let () =
     let ft = Cgen.compile ft in
     let file_c = open_out (Format.sprintf "%s.c" (Filename.remove_extension file)) in
     let out = Format.formatter_of_out_channel file_c in
-    Cgen.write_out ft out;
+    (* Cgen.write_out ft out; *)
     close_out file_c;
 
     exit 0
