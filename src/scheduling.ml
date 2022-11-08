@@ -31,6 +31,7 @@ let rec add_vars_of_exp s {texpr_desc=e} =
   | TE_app (_,l) -> List.fold_left add_vars_of_exp s l
   | TE_prim (_,l) -> List.fold_left add_vars_of_exp s l
   | TE_tuple l -> List.fold_left add_vars_of_exp s l
+  | TE_merge (_, e1, e2) -> add_vars_of_exp (add_vars_of_exp s e1) e2
 
 
 let schedule_equs inputs equs =

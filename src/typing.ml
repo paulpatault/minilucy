@@ -24,6 +24,7 @@ type error =
   | InputVar of string
   | Causality
   | BadMain of ty * ty
+  | BadMerge
 
 exception Error of location * error
 let dummy_loc = Lexing.dummy_pos, Lexing.dummy_pos
@@ -78,6 +79,8 @@ let report fmt = function
       fprintf fmt "The main node has type %a -> %a but is expected to have type %a -> bool"
     print_type t_in print_type t_out
         print_type t_in
+  | BadMerge ->
+    fprintf fmt "There must be two merge branches with one that matches true and the other false"
 
 let int_of_real = Ident.make "int_of_real" Ident.Prim
 let real_of_int = Ident.make "real_of_int" Ident.Prim
@@ -349,6 +352,29 @@ and type_expr_desc env loc = function
       let tel = List.map (type_expr env) el in
       TE_tuple tel,
       (List.map (fun e -> base_ty_of_ty e.texpr_loc e.texpr_type) tel)
+
+  | PE_merge (x, b1, b2) ->
+      let id = match x.pexpr_desc with PE_ident id -> id | _ -> assert false in
+      let id_loc = x.pexpr_loc in
+      let x, ty, _ = Gamma.find id_loc env id in
+      begin
+        match ty with
+        | Tbool -> ()
+        | _ -> error id_loc (ExpectedType ([ty], [Tbool]))
+      end;
+      begin
+        match b1, b2 with
+        | (true, b1), (false, b2)
+        | (false, b2), (true, b1) ->
+          let b1 = type_expr env b1 in
+          let b2 = type_expr env b2 in
+          let ty1, ty2 = b1.texpr_type, b2.texpr_type in
+          if compatible ty1 ty2 then
+            TE_merge (x, b1, b2), ty1
+          else
+            error loc (ExpectedType (ty2, ty1))
+        | _ -> error loc BadMerge
+      end
 
 and type_args env loc params_ty el =
   let tel = List.map (type_expr env) el in
