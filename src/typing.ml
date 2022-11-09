@@ -398,6 +398,8 @@ and type_expr_desc env loc = function
       | _ -> error loc BadMerge
     end
 
+  | PE_merge_adt (x, l) -> failwith "not implemented"
+
 and type_args env loc params_ty el =
   let tel = List.map (type_expr env) el in
   let actual_types =
@@ -453,20 +455,28 @@ and type_patt_desc env loc patt =
     List.split pl_tyl
 
 let type_equation env eq =
-  let patt = type_patt env eq.peq_patt in
-  let expr = type_expr env eq.peq_expr in
-  let well_typed = compatible expr.texpr_type patt.tpatt_type in
-  if well_typed then
-    { teq_patt = patt; teq_expr = expr; }
-  else
-    error
-      eq.peq_expr.pexpr_loc (ExpectedType (expr.texpr_type, patt.tpatt_type))
+  match eq with
+  | PE_eq eq ->
+      let patt = type_patt env eq.peq_patt in
+      let expr = type_expr env eq.peq_expr in
+      let well_typed = compatible expr.texpr_type patt.tpatt_type in
+      if well_typed then
+        TE_eq { teq_patt = patt; teq_expr = expr; }
+      else
+        error
+          eq.peq_expr.pexpr_loc (ExpectedType (expr.texpr_type, patt.tpatt_type))
+  | PE_automaton autom ->
+      TE_automaton (failwith "not implemented")
+  | PE_match _ ->
+      TE_match (failwith "not implemented", failwith "not implemented")
 
-let type_case env adt {pn_constr; pn_equations; pn_cond; pn_out; pn_loc } =
+let type_case env adt {pn_case; pn_cond; pn_out} =
   (* let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in *)
 
-  let tn_equations = List.map (type_equation env) pn_equations in
+  let {pn_constr; pn_equation; pn_loc } = pn_case in
+
+  let tn_equation = type_equation env pn_equation in
   let tn_cond = type_expr env pn_cond in
 
   let tn_constr =
@@ -476,18 +486,21 @@ let type_case env adt {pn_constr; pn_equations; pn_cond; pn_out; pn_loc } =
     if List.mem pn_out adt then pn_out
     else error pn_loc (UnknownConstructor pn_out) in
 
-  { tn_constr; tn_equations; tn_cond; tn_out; }
+  { tn_case = {tn_constr; tn_equation}; tn_cond; tn_out }
 
 let type_automaton env automaton =
-  let adt = List.fold_left (fun acc e -> e.pn_constr :: acc) [] automaton in
+  let adt = List.fold_left (fun acc e -> e.pn_case.pn_constr :: acc) [] automaton in
   List.map (type_case env adt) automaton
 
-let add_vars_of_patt loc s {teq_patt = {tpatt_desc=p}} =
-  let add x s =
-    if S.mem x s then error loc (Clash x.Ident.name);
-    S.add x s
-  in
-  List.fold_left (fun s x -> add x s) s p
+let add_vars_of_patt loc s eq = match eq with
+  | TE_eq {teq_patt = {tpatt_desc=p}} ->
+    let add x s =
+      if S.mem x s then error loc (Clash x.Ident.name);
+      S.add x s
+    in
+    List.fold_left (fun s x -> add x s) s p
+  | TE_automaton autom -> failwith "not implemented"
+  | TE_match _ -> failwith "not implemented"
 
 let check_outputs loc env equs =
   if true then failwith "probleme ici";
@@ -504,11 +517,11 @@ let check_outputs loc env equs =
 (*       error loc Causality *)
 (*   end *)
 
-let type_node n =
+let type_node ptypes n =
   let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in
   let equs = List.map (type_equation env) n.pn_equs in
-  let auto = type_automaton env n.pn_automaton in
+  (* let auto = type_automaton env n.pn_automaton in *)
   check_outputs n.pn_loc env equs;
   let t_in = List.map (fun (_, ty) -> ty) n.pn_input in
   let t_out = List.map (fun (_, ty) -> ty) n.pn_output in
@@ -534,7 +547,6 @@ let type_node n =
       tn_output = output;
       tn_local = local;
       tn_equs = equs;
-      tn_auto = auto;
       tn_loc = n.pn_loc; }
   in
   (* check_causality node.tn_loc node.tn_input equs; *)
@@ -552,6 +564,6 @@ let check_main ft main =
   | _ -> errors dummy_loc "The main node cannot be a primitive function"
 
 let type_file f main =
-  let ft = List.map type_node f in
+  let ft = List.map (type_node f.p_types) (f.p_nodes) in
   if main <> "" then check_main ft main;
   ft

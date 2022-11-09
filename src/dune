@@ -8,5 +8,5 @@
 
 (executable
   (name minilucy)
-  (libraries unix goblint-cil)
+  (libraries unix goblint-cil fmt)
   (flags (-w -33)))

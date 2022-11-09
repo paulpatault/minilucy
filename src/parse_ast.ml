@@ -3,6 +3,7 @@
 open Asttypes
 
 type ident = string
+type constr = string
 
 type p_expr =
   { pexpr_desc: p_expr_desc;
@@ -17,9 +18,7 @@ and p_expr_desc =
   | PE_pre of p_expr
   | PE_tuple of p_expr list
   | PE_merge of p_expr * (bool * p_expr) * (bool * p_expr)
-
-  (* | PE_when of p_expr * p_expr *)
-  (* | PE_whenot of p_expr * p_expr *)
+  | PE_merge_adt of p_expr * (constr * p_expr) list
 
 type p_patt =
   { ppatt_desc: p_patt_desc;
@@ -29,23 +28,22 @@ and p_patt_desc =
   | PP_ident of ident
   | PP_tuple of ident list
 
-type p_equation =
-    { peq_patt: p_patt;
-      peq_expr: p_expr; }
+and p_equation =
+  | PE_eq of { peq_patt: p_patt; peq_expr: p_expr; }
+  | PE_automaton of p_automaton list
+  | PE_match of p_expr * p_case list
 
-(* automaton
-   | A ->
-       o1 = ... ;
-       o2 = ... ;
-       unless (...) then B
-   | B -> ...
- *)
-type p_case =
-  { pn_constr: string;
+and p_automaton =
+  { pn_case: p_case;
     pn_cond: p_expr;
-    pn_out: string;
+    pn_out: constr;
+  }
+
+and p_case =
+  { pn_constr: constr;
+    (* pn_locals:  *)
+    pn_equation: p_equation;
     pn_loc: location;
-    pn_equations: p_equation list;
   }
 
 type p_node =
@@ -53,10 +51,15 @@ type p_node =
       pn_input: (ident * base_ty) list;
       pn_output: (ident * base_ty) list;
       pn_local: (ident * base_ty) list;
+      pn_init_local: (ident * ident * constr) list;
       pn_equs: p_equation list;
-      pn_automaton: p_case list;
       pn_loc: location;
       (* pn_reset: ident option; *)
     }
 
-type p_file = p_node list
+type p_type = { pt_name: ident; pt_constr: constr list }
+
+type p_file =
+  { p_types: p_type list;
+    p_nodes: p_node list;
+  }

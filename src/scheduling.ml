@@ -38,12 +38,13 @@ let rec add_vars_of_exp s {cexpr_desc=e} =
 
 let schedule_equs inputs equs =
   (* Construction du graphe de dépendance entre les variables. *)
+  let equs = List.filter_map (function TE_eq e -> Some e | _ -> None) equs in
   let g =
     List.fold_left
       (fun g eq ->
-         let vp = add_vars_of_patt S.empty eq.ceq_patt in
-         let ve = add_vars_of_exp S.empty eq.ceq_expr in
-         S.fold (fun x g -> Graph.add (x,ve,eq) g) vp g)
+        let vp = add_vars_of_patt S.empty eq.teq_patt in
+        let ve = add_vars_of_exp S.empty eq.teq_expr in
+        S.fold (fun x g -> Graph.add (x, ve, TE_eq eq) g) vp g)
       Graph.empty equs
   in
   (* Suppression des dépendances aux entrées. *)

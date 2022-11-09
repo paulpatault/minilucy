@@ -133,11 +133,11 @@ let () =
   with
     | Lexical_error s ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
-        eprintf "lexical error: %s\n@." s;
+        eprintf "%s%slexical error: %s%s\n@." "\027[31m" "\027[1m" "\027[0m" s;
         exit 1
     | Parser.Error ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
-        eprintf "syntax error\n@.";
+        eprintf "%s%ssyntax error%s\n@." "\027[31m" "\027[1m" "\027[0m";
         exit 1
     | Typing.Error(l,e) ->
         report_loc l;
@@ -147,5 +147,6 @@ let () =
       report_loc l;
       eprintf  "%a\n@." Clocking.report e;
     | e ->
-        eprintf "Anomaly: %s\n@." (Printexc.to_string e);
+        let _ = Fmt.comma in
+        eprintf "%s%sAnomaly:%s %s\n@." "\027[31m" "\027[1m" "\027[0m" (Printexc.to_string e);
         exit 2

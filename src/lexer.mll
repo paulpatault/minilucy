@@ -41,8 +41,11 @@
         "automaton", AUTOMATON;
         "unless", UNLESS;
         "until", UNTIL;
+        "type", TYPE;
+        "init", INIT;
         "continue", CONTINUE;
         "done", DONE;
+        "local", LOCAL;
       ];
     fun s ->
       try Hashtbl.find h s with Not_found -> IDENT s

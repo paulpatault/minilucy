@@ -76,10 +76,17 @@ and print_const_exp fmt ce_list = match ce_list with
   | [c] -> fprintf fmt "%a" print_const c
   | h :: t -> fprintf fmt "%a,@ %a" print_const h print_const_exp t
 
-let print_eq fmt eq =
-  fprintf fmt "@[(%a) = @[%a@]@]"
-    (print_list Ident.print ",") eq.teq_patt.tpatt_desc
-    print_exp eq.teq_expr
+let print_eq fmt = function
+  | TE_eq eq ->
+      fprintf fmt "@[(%a) = @[%a@]@]"
+        (print_list Ident.print ",") eq.teq_patt.tpatt_desc
+        print_exp eq.teq_expr
+  | TE_automaton autom ->
+      fprintf fmt "@[automaton ...@]" (* TODO *)
+  | TE_match _ ->
+      fprintf fmt "@[match ...@]" (* TODO *)
+        (* (print_list Ident.print ",") eq.teq_patt.tpatt_desc *)
+        (* print_exp eq.teq_expr *)
 
 let print_base_type fmt bty = match bty with
   | Tbool -> fprintf fmt "bool"

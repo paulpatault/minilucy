@@ -1,4 +1,19 @@
+type t_aux = Await | Run
+
 node aux (lo, hi : int) returns (x: int);
+local s: t_aux init Await
+let
+  x = merge s
+    (Await -> x = 0 -> pre x + 1)
+    (Run   -> x = 0 -> pre x - 1) ;
+
+  s = merge s
+    (Await -> if (x <= lo) then Run else Await)
+    (Run   -> if (x >= hi) then Await else Run) ;
+tel
+
+node aux (lo, hi : int) returns (x: int);
+let
   automaton
   | Await ->
       x = 0 -> pre x + 1;
@@ -7,6 +22,7 @@ node aux (lo, hi : int) returns (x: int);
       x = 0 -> pre x - 1;
       unless (x >= hi) then Await
   end
+tel
 
 node main () returns (o: bool);
 var x, y: int;
