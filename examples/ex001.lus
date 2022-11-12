@@ -1,14 +1,17 @@
-node check (x: bool) returns (OK: bool);
-var n1, n2: int; n3: bool; n4: int;
+node counting (tick, top:bool) returns (o:int);
+var v: int;
 let
-  n1 = 0 -> pre n1 + 1;
-  n2 = 1 -> pre n2 + 1;
-  n3 = true;
-  n4 = merge n3
-        (true -> 1)
-        (false -> 2);
-  OK = (n1 + 1) = n2;
-  OKK = (n1 + 1) = n2;
+    o = if tick then v else 0 -> pre o + v;
+    v = if top then 1 else 0;
+tel
+
+node check (x: bool) returns (OK: bool);
+var y: int;
+let
+    y = counting (x, x);
+    OK = merge x
+        (true -> false)
+        (false -> true);
 tel
 
 

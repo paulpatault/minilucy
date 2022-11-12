@@ -11,6 +11,7 @@ let usage = "usage: "^Sys.argv.(0)^" [options] file.lus [main]"
 
 let parse_only = ref false
 let type_only = ref false
+let clock_only = ref false
 let norm_only = ref false
 let sched_only = ref false
 let lucy_printer = ref false
@@ -20,6 +21,7 @@ let verbose = ref false
 let spec =
   ["-parse-only", Arg.Set parse_only, "  stops after parsing";
    "-type-only",  Arg.Set type_only,  "  stops after typing";
+   "-clock-only",  Arg.Set clock_only,  "  stops after clocking";
    "-norm-only",  Arg.Set norm_only,  "  stops after normalization";
    "-sched-only", Arg.Set sched_only, "  stops after scheduling";
    "-verbose",    Arg.Set verbose,    "print intermediate transformations";
@@ -71,28 +73,46 @@ let () =
     end;
     if !type_only then exit 0;
 
-    let ft = Normalize.file ft in (** TODO *)
+    let fc = Clocking.clock_file ft main_node in
+    if !verbose then begin
+      Format.printf "/**************************************/@.";
+      Format.printf "/* Clocked ast                          */@.";
+      Format.printf "/**************************************/@.";
+      Clocked_ast_printer.pp std_formatter fc
+    end;
+    if !clock_only then exit 0;
+
+    let fn = Normalize.file fc in (** TODO *)
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Normalized ast                     */@.";
       Format.printf "/**************************************/@.";
-      Typed_ast_printer.print_node_list_std ft
+      Clocked_ast_printer.pp std_formatter fn
     end;
     if !norm_only then exit 0;
 
-    let ft = Scheduling.schedule ft in
+    let fs = Scheduling.schedule fn in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Scheduled ast                      */@.";
       Format.printf "/**************************************/@.";
-      Typed_ast_printer.print_node_list_std ft;
+      Clocked_ast_printer.pp std_formatter fs;
     end;
     if !sched_only then exit 0;
+
+    (* let fi = Imp.compile fs in *)
+    (* if !verbose then begin *)
+    (*   Format.printf "/**************************************/@."; *)
+    (*   Format.printf "/* Imp ast                            */@."; *)
+    (*   Format.printf "/**************************************/@."; *)
+    (*   Format.printf "TODO"; *)
+    (* end; *)
+    (* if !imp_only then exit 0; *)
 
     let ft = Cgen.compile ft in
     let file_c = open_out (Format.sprintf "%s.c" (Filename.remove_extension file)) in
     let out = Format.formatter_of_out_channel file_c in
-    (* Cgen.write_out ft out; *)
+    Cgen.write_out ft out;
     close_out file_c;
 
     exit 0
@@ -109,6 +129,9 @@ let () =
         report_loc l;
         eprintf "%a\n@." Typing.report e;
         exit 1
+    | Clocking.Error (l, e) ->
+      report_loc l;
+      eprintf  "%a\n@." Clocking.report e;
     | e ->
         eprintf "Anomaly: %s\n@." (Printexc.to_string e);
         exit 2

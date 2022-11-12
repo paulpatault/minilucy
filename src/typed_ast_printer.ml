@@ -56,6 +56,10 @@ let rec print_exp fmt e = match e.texpr_desc with
   | TE_merge (name, e1, e2) ->
     fprintf fmt "@[merge %a @[(true -> %a)@] @[(false -> %a)@]@]"
       Ident.print name print_exp e1 print_exp e2
+  | TE_fby (e1, e2) ->
+    fprintf fmt "@[%a fby %a@]" print_exp e1 print_exp e2
+  | TE_when (e1, b, id) ->
+    fprintf fmt "@[%a when %b(%a)@]" print_exp e1 b Ident.print id
 
 and print_arg_list fmt e_list = match e_list with
   | [] -> ()
