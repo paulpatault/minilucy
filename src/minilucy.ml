@@ -14,6 +14,7 @@ let type_only = ref false
 let clock_only = ref false
 let norm_only = ref false
 let sched_only = ref false
+let imp_only = ref false
 let lucy_printer = ref false
 let ocaml_printer = ref true
 let verbose = ref false
@@ -24,6 +25,7 @@ let spec =
    "-clock-only",  Arg.Set clock_only,  "  stops after clocking";
    "-norm-only",  Arg.Set norm_only,  "  stops after normalization";
    "-sched-only", Arg.Set sched_only, "  stops after scheduling";
+   "-imp-only", Arg.Set imp_only, "  stops after imp translation";
    "-verbose",    Arg.Set verbose,    "print intermediate transformations";
    "-v",          Arg.Set verbose,    "print intermediate transformations";
   ]
@@ -100,14 +102,14 @@ let () =
     end;
     if !sched_only then exit 0;
 
-    (* let fi = Imp.compile fs in *)
-    (* if !verbose then begin *)
-    (*   Format.printf "/**************************************/@."; *)
-    (*   Format.printf "/* Imp ast                            */@."; *)
-    (*   Format.printf "/**************************************/@."; *)
-    (*   Format.printf "TODO"; *)
-    (* end; *)
-    (* if !imp_only then exit 0; *)
+    let _fi = Imp.compile fs in
+    if !verbose then begin
+      Format.printf "/**************************************/@.";
+      Format.printf "/* Imp ast                            */@.";
+      Format.printf "/**************************************/@.";
+      Format.printf "TODO\n";
+    end;
+    if !imp_only then exit 0;
 
     let ft = Cgen.compile ft in
     let file_c = open_out (Format.sprintf "%s.c" (Filename.remove_extension file)) in

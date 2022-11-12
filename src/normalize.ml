@@ -5,13 +5,6 @@ let new_local =
   let cpt = ref 0 in fun () -> incr cpt;
     Ident.make ("aux'"^(string_of_int !cpt)) Ident.Stream
 
-let rec combine3 l1 l2 l3 =
-  match l1, l2, l3 with
-  | h1::t1, h2::t2, h3::t3 ->
-    (h1, h2, h3)::(combine3 t1 t2 t3)
-  | [], [], [] -> []
-  | _ -> raise (Invalid_argument "Not same length")
-
 let new_patt ({cexpr_type = ty; cexpr_loc = loc; cexpr_clock = ct; _} as e) =
   match ty, ct with
   | [t], Ck ck ->
@@ -23,7 +16,7 @@ let new_patt ({cexpr_type = ty; cexpr_loc = loc; cexpr_clock = ct; _} as e) =
   | tl, Cprod cl ->
     let xl = List.map (fun _ -> new_local ()) tl in
     let ckl = List.map (function Ck ck -> ck | _ -> failwith "Not good clock") cl in
-    let decl = combine3 xl tl ckl in
+    let decl = Utils.combine3 xl tl ckl in
     let patt = {cpatt_desc = xl; cpatt_type = tl; cpatt_clock = Cprod cl; cpatt_loc = loc} in
     let le =
       List.map (fun (id,ty,cl) ->
