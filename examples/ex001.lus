@@ -1,14 +1,15 @@
-node counting (tick, top:bool) returns (o:int);
+node counting (tick, top:bool) returns (o, y:int);
 var v: int;
 let
     o = if tick then v else 0 -> pre o + v;
     v = if top then 1 else 0;
+    y = v;
 tel
 
 node check (x: bool) returns (OK: bool);
-var y: int;
+var y, z: int;
 let
-    y = counting (x, x);
+    (y,z) = counting (x, x);
     OK = merge x
         (true -> false)
         (false -> true);

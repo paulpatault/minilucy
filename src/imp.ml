@@ -63,7 +63,7 @@ let rec compile_base_expr e =
       let case_f = {iexpr_desc = IE_const (Cbool false);
                     iexpr_type = [Tbool];}
       in
-      IE_case (id, [case_t, [e_t']; case_f, [e_f']])
+      IE_case (id, [case_t, e_t'; case_f, e_f'])
   in
   { iexpr_desc = desc; iexpr_type = e.cexpr_type; }
 
@@ -104,7 +104,7 @@ let compile_equation
       let cnext_id = (next_id, ty, ck)  in
       let fby_init = (next_id, compile_atom e1) in
       let compute =
-        let ce = { iexpr_desc = IE_mem id; iexpr_type = [ty]; } in
+        let ce = { iexpr_desc = IE_mem next_id; iexpr_type = [ty]; } in
         { ieq_patt = cvars ; ieq_expr = ce }
       in
       let update = (next_id, compile_atom e2) in

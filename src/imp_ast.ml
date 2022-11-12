@@ -30,7 +30,7 @@ and i_expr_desc =
   | IE_app of Ident.t * Ident.t * i_expr list
   | IE_prim of Ident.t * i_expr list
   | IE_tuple of i_expr list
-  | IE_case of Ident.t * (i_expr * i_expr list) list
+  | IE_case of Ident.t * (i_expr * i_expr) list
 
 type i_equation = {
   ieq_patt: cvar list;

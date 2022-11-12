@@ -20,6 +20,7 @@ type error =
   | NotNormalized
   | Unreachable
   | EmptyClock of Ident.t
+  | Causality
 
 let rec pp_ck fmt = function
   | Cbase -> fprintf fmt "Base"
@@ -59,6 +60,8 @@ let report fmt = function
     fprintf fmt "A unexpected expression was found"
   | Unreachable ->
     fprintf fmt "Unreachable"
+  | Causality ->
+    fprintf fmt "Causality"
 
 exception Error of location * error
 let dummy_loc = Lexing.dummy_pos, Lexing.dummy_pos
@@ -232,6 +235,14 @@ let clock_equation env eq =
   let patt, env = clock_patt env eq.teq_patt expr.cexpr_clock in
   {ceq_patt = patt; ceq_expr = expr; }
 
+let check_causality loc inputs equs =
+  begin try ignore (Scheduling.schedule_equs inputs equs)
+    with Scheduling.Causality ->
+      List.iter (Clocked_ast_printer.pp_eq std_formatter) equs;
+      error loc Causality
+  end
+
+
 let clock_node n =
   let env0 = Gamma.adds n.tn_loc Vlocal Gamma.empty n.tn_local in
   let env0 = Gamma.adds n.tn_loc Vinput env0 n.tn_input in
@@ -267,6 +278,7 @@ let clock_node n =
       cn_equs = equs;
       cn_loc = n.tn_loc; }
   in
+  check_causality node.cn_loc input equs;
   node
 
 let clock_file f main =
