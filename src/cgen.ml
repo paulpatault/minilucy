@@ -112,12 +112,14 @@ let compile_fundec file node mem_comp =
   let func_var = makeGlobalVar (node.in_name.name) func_type in
   let fundec = mk_fundec func_var in
   let fundec, locals = compile_locals file fundec node.in_local in
-  let fundec, locals = compile_locals file fundec node.in_output_step in (* INFO: Maybe do this another way *)
+  (* let fundec, locals = compile_locals file fundec node.in_output_step in (* INFO: Maybe do this another way *) *)
   begin
     match return_type with
     | TComp (compinfo, _) ->
       ignore @@ makeLocalVar fundec "ret_" return_type
-    | _ -> () (* already added with output_step above *)
+    | _ ->
+      let name, _, _ = List.hd node.in_output_step in
+      ignore @@ makeLocalVar fundec (name.name) return_type(* already added with output_step above *)
   end;
   file, fundec
 
@@ -476,6 +478,49 @@ let compile_compute file node fundec =
   fundec.sbody <- block;
   file, fundec
 
+let compile_atom file node fundec = function
+  | Const c -> GoblintCil.Const (translate_const c)
+  | Ident id ->
+    try
+      let var = find_formal fundec (id.name) in
+      Lval (Var var, NoOffset)
+    with Not_found ->
+      begin try
+          let var = find_local fundec (id.name) in
+          Lval (Var var, NoOffset)
+        with Not_found ->
+          let ret_v = find_local fundec "ret_" in
+          let field = find_field_globals (node.in_name.name^"_ret") (id.name) file.globals in
+          Lval (Var ret_v, Field (field, NoOffset))
+      end
+
+let compile_update file node fundec =
+  if node.in_update <> [] then
+    let mem_comp = find_gcomp (node.in_name.name^"_mem") file.globals in
+    let mem_var = find_formal fundec "mem" in
+    List.iter (fun (id, atom) ->
+        let e = compile_atom file node fundec atom in
+        let mem_field = find_field_list (id.name) mem_comp.cfields in
+        let set_lval = Mem (Lval (Var mem_var, NoOffset)), Field (mem_field, NoOffset) in
+        let set_instr = Set (set_lval, e, locUnknown, locUnknown) in
+        let stmt = mkStmtOneInstr set_instr in
+        fundec.sbody <- append_stmt stmt fundec.sbody)
+      node.in_update;
+    file, fundec
+  else
+    file, fundec
+
+let compile_return file node fundec =
+  let name =
+    match node.in_output_step with
+  | [(n, _, _)] -> n.name
+  | _ -> "ret_"
+  in
+  let var = find_local fundec name in
+  let lval = Lval (Var var, NoOffset) in
+  let ret_stmt = mkStmt (Return (Some lval, locUnknown)) in
+  fundec.sbody <- append_stmt ret_stmt fundec.sbody;
+  file, fundec
 
 let compile_node file node =
   let mem_comp = compile_mem_comp file.globals node in
@@ -487,6 +532,8 @@ let compile_node file node =
   in
   let file, fundec = compile_fundec file node mem_comp in
   let file, fundec = compile_compute file node fundec in
+  let file, fundec = compile_update file node fundec in
+  let file, fundec = compile_return file node fundec in
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
@@ -498,6 +545,7 @@ let compile ast file_name =
     globinitcalled = false;
   } in
   let file = List.fold_left compile_node file ast in
+  (*TODO: make main*)
   file.globals <- List.rev file.globals;
   file
 
