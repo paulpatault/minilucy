@@ -385,16 +385,18 @@ let rec compile_expr file node fundec expr =
     let switch_res = makeLocalVar fundec (gen_switch_name ()) res_ty in
     let switch_lval = Var switch_res, NoOffset in
     let file, switch_stmts =
-      List.fold_left_map (fun file (case, e) ->
+      List.fold_left (fun (file, stmts) (case, e) ->
           let file, case', _ = compile_expr file node fundec case in
           let file, e', _ = compile_expr file node fundec e in
           let set_instr = Set (switch_lval, e', locUnknown, locUnknown) in
           let stmt = mkStmtOneInstr set_instr in
           stmt.labels <- (Case (case', locUnknown, locUnknown))::stmt.labels;
-          file, stmt)
-        file
+          let brk_stmt = mkStmt (Break (locUnknown)) in
+          file, brk_stmt::stmt::stmts)
+        (file, [])
         cases
     in
+    let switch_stmts = List.rev switch_stmts in
     let switch_block = mkBlock switch_stmts in
     let lval =
       try

@@ -120,7 +120,7 @@ let () =
       Format.printf "/**************************************/@.";
       Format.printf "/* C file                             */@.";
       Format.printf "/**************************************/@.";
-      Cgen.pp std_formatter fc;
+      C_printer.pp std_formatter fc;
     end;
     if !c_only then exit 0;
 

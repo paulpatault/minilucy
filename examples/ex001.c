@@ -33,8 +33,10 @@ struct counting_ret counting(struct counting_mem *mem , int tick , int top )
   switch (top) {
   case 1: 
   switch_1 = 1;
+  break;
   case 0: 
   switch_1 = 0;
+  break;
   }
   v = switch_1;
   aux__1 = 0;
@@ -43,8 +45,10 @@ struct counting_ret counting(struct counting_mem *mem , int tick , int top )
   switch (tick) {
   case 1: 
   switch_2 = v;
+  break;
   case 0: 
   switch_2 = aux__2 ? 0 : aux__4 + v;
+  break;
   }
   ret_.o = switch_2;
   ret_.y = v;
@@ -88,8 +92,10 @@ int check(struct check_mem *mem , int x )
   switch (x) {
   case 1: 
   switch_3 = 0;
+  break;
   case 0: 
   switch_3 = 1;
+  break;
   }
   OK = switch_3;
   call_1 = counting(& mem->counting_next1, x, x);
