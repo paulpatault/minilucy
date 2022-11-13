@@ -126,7 +126,7 @@ let () =
 
     let file_c = open_out file_name in
     let out = Format.formatter_of_out_channel file_c in
-    Cgen.pp out fc;
+    C_printer.pp out fc;
     close_out file_c;
 
     exit 0

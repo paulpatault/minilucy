@@ -3,11 +3,16 @@ open GoblintCil
 open Format
 
 let rec pp_type fmt = function
-  | TInt (_, _) -> fprintf fmt "int"
+  | TInt (ity, _) ->
+    begin match ity with
+      | IInt -> fprintf fmt "int"
+      | IChar -> fprintf fmt "char"
+      | _ -> assert false
+    end
   | TFloat (_, _) -> fprintf fmt  "float"
   | TPtr (ty, _) -> fprintf fmt "%a*" pp_type ty
   | TVoid _ -> fprintf fmt "void"
-  | TComp ({cname; _}, _) -> fprintf fmt "%s" cname
+  | TComp ({cname; _}, _) -> fprintf fmt "struct %s" cname
   | _ as ty->
     let d = defaultCilPrinter#pType None () ty in
     print_endline @@ Pretty.sprint ~width:80 d;
