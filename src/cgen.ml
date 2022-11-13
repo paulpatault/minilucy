@@ -537,7 +537,34 @@ let compile_node file node =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
-let compile ast file_name =
+let compile_main file ast main_node =
+  let args = [
+    "argc", TInt (IInt, []), [];
+    "argv", TArray (TPtr (TInt (IInt, []), []), None, []), []
+  ]
+  in
+  let main_ty = TFun (TInt (IInt, []), Some args, false, []) in
+  let fun_var = makeGlobalVar "main" main_ty in
+  let fundec = mk_fundec fun_var in
+  let mem_comp = find_gcomp (main_node^"_mem") file.globals in
+  let mem_local = makeLocalVar fundec "mem" (TComp (mem_comp, [])) in
+  let mem_lval = Var mem_local, NoOffset in
+  let mem_init_fundec = find_fun (main_node^"_init") file.globals in
+  let mem_init_expr = Lval (Var mem_init_fundec.svar, NoOffset) in
+  let mem_init_call = Call (None, mem_init_expr, [AddrOf (mem_lval)], locUnknown, locUnknown) in
+  let mem_init_stmt = mkStmtOneInstr mem_init_call in
+  fundec.sbody <- append_stmt mem_init_stmt fundec.sbody;
+  let step_fun = find_fun main_node file.globals in
+  let step_lval = Lval (Var step_fun.svar, NoOffset) in
+  let step_call = Call (None, step_lval, [AddrOf (mem_lval)], locUnknown, locUnknown) in
+  let step_stmt = mkStmtOneInstr step_call in
+  let while_block = mkBlock [step_stmt] in
+  let while_stmt = mkStmt (Loop (while_block, locUnknown, locUnknown, None, None)) in
+  fundec.sbody <- append_stmt while_stmt fundec.sbody;
+  file.globals <- (GFun (fundec, locUnknown))::file.globals;
+  file
+
+let compile ast main_node file_name =
   let file = {
     fileName = file_name;
     globals = [];
@@ -546,6 +573,7 @@ let compile ast file_name =
   } in
   let file = List.fold_left compile_node file ast in
   (*TODO: make main*)
+  let file = compile_main file ast main_node in
   file.globals <- List.rev file.globals;
   file
 

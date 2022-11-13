@@ -102,3 +102,15 @@ int check(struct check_mem *mem , int x )
   return (OK);
 }
 }
+
+int main(int argc , int *argv[] ) 
+{ 
+  struct check_mem mem ;
+
+  {
+  check_init(& mem);
+  while (1) {
+    check(& mem);
+  }
+}
+}
