@@ -26,26 +26,8 @@ let pp_comp_info fmt compinfo =
 let pp_comma fmt () =
   fprintf fmt ", "
 
-let pp_arg fmt (n, ty, _) =
-  fprintf fmt "%a %s"
-    pp_type ty
-    n
-
-let pp_args fmt = function
-  | Some args -> fprintf fmt "%a" (pp_print_list ~pp_sep:pp_comma pp_arg) args
-  | None -> fprintf fmt ""
-
-let pp_local fmt local =
-  let ty, name = local.vtype, local.vname in
-  fprintf fmt "%a %s;"
-    pp_type ty
-    name
-
-let pp_locals fmt locals =
-  fprintf fmt "%a" (pp_print_list ~pp_sep:pp_print_cut pp_local) locals
-
 let pp_eol_semi fmt () =
-  fprintf fmt ";@;"
+  fprintf fmt ";@\n"
 
 let pp_2eol_semi fmt () =
   fprintf fmt ";@;@;"
@@ -124,6 +106,43 @@ and pp_call fmt ret call args =
       pp_exp call
       (pp_print_list ~pp_sep:pp_comma pp_exp) args
 
+let pp_arg fmt (n, ty, _) =
+  match ty with
+  | TArray (ty, size, _) ->
+    fprintf fmt "%a %s[%a]"
+      pp_type ty
+      n
+      (fun fmt -> function
+         | Some e -> pp_exp fmt e
+         | None -> ()) size
+  | _ ->
+    fprintf fmt "%a %s"
+      pp_type ty
+      n
+
+let pp_args fmt = function
+  | Some args -> fprintf fmt "%a" (pp_print_list ~pp_sep:pp_comma pp_arg) args
+  | None -> fprintf fmt ""
+
+
+let pp_local fmt local =
+  let ty, name = local.vtype, local.vname in
+  match ty with
+  | TArray (t, size, _) ->
+    fprintf fmt "%a %s[%a];"
+      pp_type ty
+      name
+      (fun fmt -> function
+         | Some s -> pp_exp fmt s
+         | None -> ()) size
+  | _ ->
+    fprintf fmt "%a %s;"
+      pp_type ty
+      name
+
+let pp_locals fmt locals =
+  fprintf fmt "%a" (pp_print_list ~pp_sep:pp_print_cut pp_local) locals
+
 
 let pp_instr fmt = function
   | Set (lval, e, _, _) -> fprintf fmt "%a = %a" pp_lval lval pp_exp e
@@ -177,16 +196,19 @@ and pp_stmt fmt stmt =
       pp_exp e
       pp_stmt_case stmts
   | Break _ -> fprintf fmt "break"
+  | Loop (b, _, _, _, _) ->
+    fprintf fmt "while (1) {@;<2 2>@[<v>%a@]@;}"
+      (pp_block false) b
   | _ -> assert false
 
-let pp_block brackets fmt block =
+and pp_block brackets fmt block =
   begin
     if brackets then
       fprintf fmt "{@;<2 2>@[<v>%a;@]@;}@\n"
     else
       fprintf fmt "%a;"
   end
-  (pp_print_list ~pp_sep:pp_2eol_semi pp_stmt) block.bstmts
+    (pp_print_list ~pp_sep:pp_2eol_semi pp_stmt) block.bstmts
 
 let pp_fundec fmt fundec =
   let ret_ty, args = match fundec.svar.vtype with
