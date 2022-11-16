@@ -10,6 +10,7 @@ open Parse_ast
 let usage = "usage: "^Sys.argv.(0)^" [options] file.lus [main]"
 
 let parse_only = ref false
+let automaton_only = ref false
 let type_only = ref false
 let clock_only = ref false
 let norm_only = ref false
@@ -22,6 +23,7 @@ let verbose = ref false
 
 let spec =
   ["-parse-only", Arg.Set parse_only, "  stops after parsing";
+   "-automaton-only", Arg.Set automaton_only, "  stops after compile automaton";
    "-type-only",  Arg.Set type_only,  "  stops after typing";
    "-clock-only",  Arg.Set clock_only,  "  stops after clocking";
    "-norm-only",  Arg.Set norm_only,  "  stops after normalization";
@@ -68,6 +70,16 @@ let () =
     let f = Parser.file Lexer.token lb in
     close_in c;
     if !parse_only then exit 0;
+
+    let ft = Compile_automaton.compile f in
+    if !verbose then begin
+      Format.printf "\n/**************************************/@.";
+      Format.printf "/* Compile_automaton ast              */@.";
+      Format.printf "/**************************************/@.";
+      Parsed_ast_printer.print_node_list_std ft.p_nodes
+    end;
+    if !automaton_only then exit 0;
+
     let ft = Typing.type_file f main_node in
     if !verbose then begin
       Format.printf "/**************************************/@.";

@@ -29,11 +29,16 @@ and p_patt_desc =
   | PP_tuple of ident list
 
 and p_equation =
-  | PE_eq of { peq_patt: p_patt; peq_expr: p_expr; }
-  | PE_automaton of p_automaton list
+  | PE_eq of p_eq
+  | PE_automaton of p_automaton
   | PE_match of p_expr * p_case list
 
+and p_eq = { peq_patt: p_patt; peq_expr: p_expr; }
+
 and p_automaton =
+  {pautom : p_automaton_core list; pautom_loc: location}
+
+and p_automaton_core =
   { pn_case: p_case;
     pn_cond: p_expr;
     pn_out: constr;

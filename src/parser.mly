@@ -184,8 +184,8 @@ eq_list:
 eq:
 | pattern EQUAL expr SEMICOL
     { PE_eq { peq_patt = $1; peq_expr = $3; } }
-| AUTOMATON autom=list(case_autom) END semi_opt
-    { PE_automaton autom }
+| AUTOMATON pautom=list(case_autom) END semi_opt
+    { PE_automaton ({pautom ; pautom_loc = $sloc}) }
 ;
 
 case_autom:

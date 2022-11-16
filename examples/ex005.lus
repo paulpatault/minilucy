@@ -1,7 +1,7 @@
-type t_aux = Await | Run
+(* type t = Await | Run
 
 node aux (lo, hi : int) returns (x: int);
-local s: t_aux init Await
+local s: t init Await
 let
   x = merge s
     (Await -> x = 0 -> pre x + 1)
@@ -10,7 +10,7 @@ let
   s = merge s
     (Await -> if (x <= lo) then Run else Await)
     (Run   -> if (x >= hi) then Await else Run) ;
-tel
+tel *)
 
 node aux (lo, hi : int) returns (x: int);
 let
