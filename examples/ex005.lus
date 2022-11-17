@@ -1,17 +1,6 @@
-(* type t = Await | Run
-
-node aux (lo, hi : int) returns (x: int);
-local s: t init Await
-let
-  x = merge s
-    (Await -> x = 0 -> pre x + 1)
-    (Run   -> x = 0 -> pre x - 1) ;
-
-  s = merge s
-    (Await -> if (x <= lo) then Run else Await)
-    (Run   -> if (x >= hi) then Await else Run) ;
-tel *)
-
+(*-
+     Le programme aux ci dessous :
+-*)
 node aux (lo, hi : int) returns (x: int);
 let
   automaton
@@ -23,6 +12,26 @@ let
       unless (x >= hi) then Await
   end
 tel
+
+(*-
+     compile vers
+
+type typ__1 =
+  | Await
+  | Run
+
+node aux(lo : int; hi : int) returns (x : int)
+var ;
+local state__2: typ__1 init Await;
+let
+  (state__2) = merge state__2 
+                 (Await -> ite(le(x, lo), Run, Await))
+                 (Run -> ite(ge(x, hi), Await, Run));
+  (x) = merge state__2 
+          (Await -> (0) -> (add(pre (x), 1)))
+          (Run -> (0) -> (sub(pre (x), 1)));
+tel
+-*)
 
 node main () returns (o: bool);
 var x, y: int;

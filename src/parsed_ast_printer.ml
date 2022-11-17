@@ -4,10 +4,15 @@ open Format
 open Asttypes
 open Parse_ast
 
-let rec print_list f sep fmt l = match l with
+let rec print_list_sp f sep fmt l = match l with
   | [] -> ()
   | [x] -> f fmt x
-  | h :: t -> fprintf fmt "%a%s@ %a" f h sep (print_list f sep) t
+  | h :: t -> fprintf fmt "%a%s@ %a" f h sep (print_list_sp f sep) t
+
+let rec print_list_nl f fmt l = match l with
+  | [] -> ()
+  | [x] -> f fmt x
+  | h :: t -> fprintf fmt "%a@\n%a" f h (print_list_nl f) t
 
 let rec print_list_eol f sep fmt l = match l with
   | [] -> ()
@@ -43,6 +48,7 @@ let print_op fmt op = match op with
 
 let rec print_exp fmt e = match e.pexpr_desc with
   | PE_const c -> print_const fmt c
+  | PE_constr x
   | PE_ident x -> fprintf fmt "%s" x
   | PE_op (op, el) -> fprintf fmt "%a(%a)" print_op op print_arg_list el
   | PE_app (name, e_list) ->
@@ -55,10 +61,10 @@ let rec print_exp fmt e = match e.pexpr_desc with
       fprintf fmt "(@[%a@])" print_tuple_arg_list e_list
   | PE_merge (name, e1, e2) ->
     fprintf fmt "@[merge %a %a@]" print_exp name
-    (print_list (fun fmt (b, exp) -> fprintf fmt "@\n(%b -> %a)" b print_exp exp) "") [e1;e2]
+    (print_list_sp (fun fmt (b, exp) -> fprintf fmt "@\n(%b -> %a)" b print_exp exp) "") [e1;e2]
   | PE_merge_adt (name, l) ->
     fprintf fmt "@[merge %a @\n  @[%a@]@]" print_exp name
-    (print_list (fun fmt (id,exp) -> fprintf fmt "(%s -> %a)" id print_exp exp) "") l
+    (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%s -> %a)" id print_exp exp)) l
 
 and print_arg_list fmt e_list = match e_list with
   | [] -> ()
@@ -77,7 +83,7 @@ and print_const_exp fmt ce_list = match ce_list with
 
 let print_ident fmt = function
   | PP_ident s -> fprintf fmt "%s" s
-  | PP_tuple t -> print_list (fun fmt s -> fprintf fmt "%s" s) "," fmt t
+  | PP_tuple t -> print_list_sp (fun fmt s -> fprintf fmt "%s" s) "," fmt t
 
 let print_eq fmt = function
   | PE_eq eq ->
@@ -101,16 +107,34 @@ let print_base_type fmt bty = match bty with
 let print_var_dec fmt (name, ty) =
   fprintf fmt "%s : %a" name print_base_type ty
 
-let rec print_var_dec_list = print_list print_var_dec ";"
+let print_var_init_dec fmt (name, ty, init) =
+  fprintf fmt "%s: %s init %s" name ty init
+
+let rec print_var_dec_list = print_list_sp print_var_dec ";"
+
+let rec print_var_init_dec_list = print_list_sp print_var_init_dec ";"
 
 let print_node fmt nd =
   fprintf fmt
-    "@[node %s(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %s(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\nlocal @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     nd.pn_name
     print_var_dec_list nd.pn_input
     print_var_dec_list nd.pn_output
     print_var_dec_list nd.pn_local
+    print_var_init_dec_list nd.pn_init_local
     (print_list_eol print_eq ";") nd.pn_equs
 
-let print_node_list_std ndl =
-  List.iter (fun nd -> Format.printf "%a@\n@." print_node nd) ndl
+let print_node_list_std fmt ndl =
+  List.iter (fun nd -> Format.fprintf fmt "%a@\n@." print_node nd) ndl
+
+let print_type_list_std fmt tl =
+  List.iter (fun {pt_name; pt_constr} ->
+    Format.fprintf fmt "type %s =@\n  @[%a@]"
+      pt_name
+      (print_list_nl (fun fmt e -> fprintf fmt "| %s" e)) pt_constr
+  ) tl
+
+let print_file_std {p_types; p_nodes} =
+  Format.printf "%a@\n@\n%a"
+  print_type_list_std p_types
+  print_node_list_std p_nodes

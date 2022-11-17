@@ -76,7 +76,7 @@ let () =
       Format.printf "\n/**************************************/@.";
       Format.printf "/* Compile_automaton ast              */@.";
       Format.printf "/**************************************/@.";
-      Parsed_ast_printer.print_node_list_std ft.p_nodes
+      Parsed_ast_printer.print_file_std ft
     end;
     if !automaton_only then exit 0;
 
