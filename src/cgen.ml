@@ -42,17 +42,6 @@ let switch_cnt = ref 0
 let gen_switch_name () =
   incr switch_cnt; "switch_"^(string_of_int !switch_cnt)
 
-let pp_global fmt global =
-  let open GoblintCil in
-  let doc = Pretty.dprintf "%a" Cil.d_global global in
-  Format.fprintf fmt "%s" (Pretty.sprint ~width:80 doc)
-
-let pp fmt file =
-  Format.(fprintf fmt "%a" (pp_print_list ~pp_sep:pp_print_newline pp_global)) file.globals
-
-let write_out c_ast out =
-  Format.fprintf out "%a" pp c_ast
-
 let mk_mem_node_fields globals mem_comp node_mem =
   let fields =
     List.map (fun (field_id, node_id) ->
@@ -199,8 +188,6 @@ let rec compile_expr file node fundec expr =
     let fieldinfo =
       try find_field_globals (node.in_name.name^"_mem") (id.name) file.globals 
       with Not_found ->
-        pp Format.std_formatter file;
-        flush_all ();
         failwith (Format.sprintf "Mem or field not found: %s %s" (node.in_name.name^"_mem") (id.name))
     in
     file, Lval (Mem (Lval (Var mem_var, NoOffset)), Field (fieldinfo, NoOffset)), fieldinfo.ftype
@@ -385,16 +372,18 @@ let rec compile_expr file node fundec expr =
     let switch_res = makeLocalVar fundec (gen_switch_name ()) res_ty in
     let switch_lval = Var switch_res, NoOffset in
     let file, switch_stmts =
-      List.fold_left_map (fun file (case, e) ->
+      List.fold_left (fun (file, stmts) (case, e) ->
           let file, case', _ = compile_expr file node fundec case in
           let file, e', _ = compile_expr file node fundec e in
           let set_instr = Set (switch_lval, e', locUnknown, locUnknown) in
           let stmt = mkStmtOneInstr set_instr in
           stmt.labels <- (Case (case', locUnknown, locUnknown))::stmt.labels;
-          file, stmt)
-        file
+          let brk_stmt = mkStmt (Break (locUnknown)) in
+          file, brk_stmt::stmt::stmts)
+        (file, [])
         cases
     in
+    let switch_stmts = List.rev switch_stmts in
     let switch_block = mkBlock switch_stmts in
     let lval =
       try
@@ -540,7 +529,7 @@ let compile_node file node =
 let compile_main file ast main_node =
   let args = [
     "argc", TInt (IInt, []), [];
-    "argv", TArray (TPtr (TInt (IInt, []), []), None, []), []
+    "argv", TArray (TPtr (TInt (IChar, []), []), None, []), []
   ]
   in
   let main_ty = TFun (TInt (IInt, []), Some args, false, []) in
