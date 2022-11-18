@@ -8,10 +8,10 @@ open Print_base
 
 let rec pp_ck fmt = function
   | Cbase -> fprintf fmt "Base"
-  | Con (c, b, id) ->
-    fprintf fmt "@[%a on %b(%a)@]"
+  | Con (c, s, id) ->
+    fprintf fmt "@[%a on %s(%a)@]"
       pp_ck c
-      b
+      s
       Ident.print id
   | (Cvar {contents = Clink _}) as c ->
     let c = ck_repr c in
@@ -72,8 +72,8 @@ let rec pp_exp fmt e = match e.cexpr_desc with
       Ident.print name pp_exp e1 pp_exp e2
   | CE_fby (e1, e2) ->
     fprintf fmt "@[%a fby %a@]" pp_exp e1 pp_exp e2
-  | CE_when (e1, b, id) ->
-    fprintf fmt "@[%a when %b(%a)@]" pp_exp e1 b Ident.print id
+  | CE_when (e1, s, id) ->
+    fprintf fmt "@[%a when %s(%a)@]" pp_exp e1 s Ident.print id
 
 and pp_arg_list fmt e_list = match e_list with
   | [] -> ()

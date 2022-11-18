@@ -5,7 +5,7 @@ type ct =
 and ck =
   | Cbase
   | Cvar of link ref
-  | Con of ck * bool * Ident.t
+  | Con of ck * string * Ident.t
 
 and link =
   | Cindex of int

@@ -21,7 +21,7 @@ and c_expr_desc =
   | CE_tuple of c_expr list
   | CE_merge of Ident.t * c_expr * c_expr
   | CE_fby of c_expr * c_expr
-  | CE_when of c_expr * bool * Ident.t
+  | CE_when of c_expr * constr * Ident.t
 
 type c_patt =
   { cpatt_desc: Ident.t list;

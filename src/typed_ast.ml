@@ -21,9 +21,9 @@ and t_expr_desc =
   | TE_arrow of t_expr * t_expr
   | TE_pre of t_expr
   | TE_tuple of t_expr list
-  | TE_merge of Ident.t * (constr * t_expr) list (* true, false *)
+  | TE_merge of Ident.t * (constr * t_expr) list
   | TE_fby of t_expr * t_expr
-  | TE_when of t_expr * bool * Ident.t
+  | TE_when of t_expr * constr * Ident.t
 
 type t_patt =
     { tpatt_desc: Ident.t list;
@@ -41,7 +41,7 @@ type t_node =
       tn_equs: t_equation list;
       tn_loc: location; }
 
-type t_type = { pt_name: string; pt_constr: constr list }
+type t_type = { tt_name: string; tt_constr: constr list }
 
 type t_file =
   { t_nodes: t_node list;

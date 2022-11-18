@@ -3,7 +3,6 @@
 open Asttypes
 
 type ident = string
-type constr = string
 
 type p_expr =
   { pexpr_desc: p_expr_desc;

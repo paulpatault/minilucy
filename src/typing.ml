@@ -26,7 +26,9 @@ type error =
   | BadMain of ty * ty
   | BadMerge
   | UnknownConstructor of string
+  | UnknownAdtType of string
   | Unreachable of string
+  | NotExhaustiveMerge of string
 
 exception Error of location * error
 let dummy_loc = Lexing.dummy_pos, Lexing.dummy_pos
@@ -76,7 +78,9 @@ let report fmt = function
   | BadMerge ->
     fprintf fmt "There must be two merge branches with one that matches true and the other false"
   | UnknownConstructor s -> fprintf fmt "[%s] constructor doesn't appear in automaton definition" s
+  | UnknownAdtType s -> fprintf fmt "[%s] type unfound" s
   | Unreachable s -> fprintf fmt "Internal error (should be an unreachable point) [%s]" s
+  | NotExhaustiveMerge s -> fprintf fmt "the merge is not exhaustive over [%s] type" s
 
 let int_of_real = Ident.make "int_of_real" Ident.Prim
 let real_of_int = Ident.make "real_of_int" Ident.Prim
@@ -294,8 +298,8 @@ and type_expr_desc env loc = function
       let tt = te2.texpr_type in
       match te1 with
       | {texpr_desc = TE_ident id; _} ->
-        let then_ = {texpr_desc = TE_when (te2, true, id); texpr_type = tt; texpr_loc = te2.texpr_loc} in
-        let else_ = {texpr_desc = TE_when (te3, false, id); texpr_type = tt; texpr_loc = te3.texpr_loc} in
+        let then_ = {texpr_desc = TE_when (te2, "True", id); texpr_type = tt; texpr_loc = te2.texpr_loc} in
+        let else_ = {texpr_desc = TE_when (te3, "False", id); texpr_type = tt; texpr_loc = te3.texpr_loc} in
         TE_merge (id, ["True", then_; "False", else_]), tt
       | _ -> error loc (Other "The condition must be an identifier")
     else
@@ -380,8 +384,8 @@ and type_expr_desc env loc = function
         let b1 = type_expr env b1 in
         let b2 = type_expr env b2 in
         let ty1, ty2 = b1.texpr_type, b2.texpr_type in
-        let te1 = {texpr_desc = TE_when (b1, true, x); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
-        let te2 = {texpr_desc = TE_when (b2, false, x); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
+        let te1 = {texpr_desc = TE_when (b1, "True", x); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
+        let te2 = {texpr_desc = TE_when (b2, "False", x); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
         if compatible ty1 ty2 then
           TE_merge (x, ["True", te1; "False", te2]), ty1
         else
@@ -393,8 +397,19 @@ and type_expr_desc env loc = function
       let id = match x.pexpr_desc with PE_ident id -> id | _ -> assert false in
       let id_loc = x.pexpr_loc in
       let x, ty, _ = Gamma.find id_loc env.vars id in
-      (* assert (List.for_all () l); *)
-      failwith "not implemented"
+      let tname = match ty with
+        | Tadt t -> t
+        | _ -> error id_loc (ExpectedType ([ty], [Tadt "?t"]))
+      in
+     match List.find_opt (fun {pt_name; _} -> pt_name = tname) env.types with
+      | None -> error id_loc (UnknownAdtType tname)
+      | Some tl ->
+          let sl = List.map fst l |> List.sort compare in
+          let stl = List.sort compare tl.pt_constr in
+          if sl = stl then ()
+          else error id_loc (NotExhaustiveMerge tname);
+
+          failwith "not implemented"
 
 and type_args env loc params_ty el =
   let tel = List.map (type_expr env) el in
@@ -509,7 +524,8 @@ let check_outputs loc env equs =
 
 let type_node ptypes n =
   let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
-  (* let env = Gamma.adds n.pn_loc () env n.pn_init_local in *)
+  let l = List.map (fun (a,b,c) -> a,b) n.pn_init_local in
+  let env = Gamma.adds n.pn_loc Vpatt env l in
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in
   let env = { vars = env; types = ptypes } in
   let equs = List.map (type_equation env) n.pn_equs in

@@ -24,10 +24,10 @@ type error =
 
 let rec pp_ck fmt = function
   | Cbase -> fprintf fmt "Base"
-  | Con (c, b, id) ->
-    fprintf fmt "@[%a on %b(%a)@]"
+  | Con (c, s, id) ->
+    fprintf fmt "@[%a on %s(%a)@]"
       pp_ck c
-      b
+      s
       Ident.print id
   | (Cvar {contents = Clink _}) as c ->
     let c = ck_repr c in

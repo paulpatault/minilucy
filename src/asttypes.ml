@@ -20,3 +20,5 @@ type op =
   | Op_not
   | Op_and | Op_or | Op_impl
   | Op_if
+
+type constr = string
