@@ -82,11 +82,14 @@ let print_node_list_std fmt ndl =
   List.iter (fun nd -> Format.fprintf fmt "%a@\n@." print_node nd) ndl
 
 let print_adttype_list_std fmt tl =
-  List.iter (fun {pt_name; pt_constr} ->
-    Format.fprintf fmt "type %s =@\n  @[%a@]"
-      pt_name
-      (print_list_nl (fun fmt e -> fprintf fmt "| %s" e)) pt_constr
-  ) tl
+  fprintf fmt "%a"
+    (print_list_nl
+      (fun fmt {pt_name; pt_constr} ->
+        fprintf fmt "type %s =@\n  @[%a@]"
+          pt_name
+          (print_list_nl (fun fmt e -> fprintf fmt "| %s" e))
+          pt_constr))
+    tl
 
 let print_file_std {p_types; p_nodes} =
   Format.printf "%a@\n@\n%a"

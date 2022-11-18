@@ -155,11 +155,11 @@ let () =
         exit 1
     | Typing.Error(l,e) ->
         report_loc l;
-        eprintf "%a\n@." Typing.report e;
+        eprintf "%s%styping error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Typing.report e;
         exit 1
     | Clocking.Error (l, e) ->
       report_loc l;
-      eprintf  "%a\n@." Clocking.report e;
+      eprintf "%s%sclocking error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Clocking.report e;
     | e ->
         let _ = Fmt.comma in
         eprintf "%s%sAnomaly:%s %s\n@." "\027[31m" "\027[1m" "\027[0m" (Printexc.to_string e);
