@@ -30,8 +30,12 @@ type c_patt =
     cpatt_loc: location; }
 
 type c_equation =
+  | CE_eq of c_basic_equation
+
+and c_basic_equation =
   { ceq_patt: c_patt;
     ceq_expr: c_expr; }
+
 
 type c_node =
   { cn_name: Ident.t;
