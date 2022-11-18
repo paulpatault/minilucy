@@ -82,7 +82,7 @@ let () =
     end;
     if !automaton_only then exit 0;
 
-    let ft = Typing.type_file f main_node in
+    let ft = Typing.type_file ft main_node in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Typed ast                          */@.";
@@ -147,19 +147,19 @@ let () =
   with
     | Lexical_error s ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
-        eprintf "%s%slexical error: %s%s\n@." "\027[31m" "\027[1m" "\027[0m" s;
+        eprintf "%s%sLexical error: %s%s\n@." "\027[31m" "\027[1m" "\027[0m" s;
         exit 1
     | Parser.Error ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
-        eprintf "%s%ssyntax error%s\n@." "\027[31m" "\027[1m" "\027[0m";
+        eprintf "%s%sSyntax error%s\n@." "\027[31m" "\027[1m" "\027[0m";
         exit 1
     | Typing.Error(l,e) ->
         report_loc l;
-        eprintf "%s%styping error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Typing.report e;
+        eprintf "%s%sTyping error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Typing.report e;
         exit 1
     | Clocking.Error (l, e) ->
       report_loc l;
-      eprintf "%s%sclocking error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Clocking.report e;
+      eprintf "%s%sClocking error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Clocking.report e;
     | e ->
         let _ = Fmt.comma in
         eprintf "%s%sAnomaly:%s %s\n@." "\027[31m" "\027[1m" "\027[0m" (Printexc.to_string e);

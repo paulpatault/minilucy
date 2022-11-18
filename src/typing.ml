@@ -206,7 +206,12 @@ let rec type_expr env e =
   { texpr_desc = desc; texpr_type = t; texpr_loc = e.pexpr_loc; }
 
 and type_expr_desc env loc = function
-  | PE_constr _ -> failwith "not implemented"
+  | PE_constr c ->
+      let pt = match List.find_opt (fun {pt_constr; _} -> List.mem c pt_constr) env.types with
+        | None -> assert false
+        | Some e -> e in
+      TE_constr c, [Tadt pt.pt_name]
+
   | PE_const c ->
     TE_const c , type_constant c
 
@@ -401,15 +406,28 @@ and type_expr_desc env loc = function
         | Tadt t -> t
         | _ -> error id_loc (ExpectedType ([ty], [Tadt "?t"]))
       in
-     match List.find_opt (fun {pt_name; _} -> pt_name = tname) env.types with
-      | None -> error id_loc (UnknownAdtType tname)
-      | Some tl ->
-          let sl = List.map fst l |> List.sort compare in
-          let stl = List.sort compare tl.pt_constr in
-          if sl = stl then ()
-          else error id_loc (NotExhaustiveMerge tname);
+      let tl = 
+   match List.find_opt (fun {pt_name; _} -> pt_name = tname) env.types with
+   | None -> error id_loc (UnknownAdtType tname)
+   | Some e -> e in
+      let sl = List.map fst l |> List.sort compare in
+      let stl = List.sort compare tl.pt_constr in
+      if sl = stl then ()
+      else error id_loc (NotExhaustiveMerge tname);
 
-          failwith "not implemented"
+      let r = ref None in
+      let _when_ = List.map (fun (c, e) ->
+        let e = type_expr env e in
+        r := Some e.texpr_type;
+        c,
+        { texpr_desc = TE_when (e, c, x);
+          texpr_type = e.texpr_type;
+          texpr_loc  = e.texpr_loc}
+       ) l in
+      (* if compatible ... TODO *)
+
+      let ty = Option.get !r in
+      TE_merge (x, _when_), ty
 
 and type_args env loc params_ty el =
   let tel = List.map (type_expr env) el in
