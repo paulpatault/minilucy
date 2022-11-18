@@ -43,3 +43,19 @@ let print_op fmt op = match op with
   | Op_or -> fprintf fmt "or"
   | Op_impl -> fprintf fmt "impl"
   | Op_if -> fprintf fmt "ite"
+
+let print_base_type fmt bty = match bty with
+  | Tbool -> fprintf fmt "bool"
+  | Tint -> fprintf fmt "int"
+  | Treal -> fprintf fmt "real"
+  | Tadt s -> fprintf fmt "adt(%s)" s
+
+let print_type fmt = function
+  | ([]) -> fprintf fmt "empty tuple"
+  | [t] -> print_base_type fmt t
+  | (t::tl) ->
+    fprintf fmt "(";
+    print_base_type fmt t;
+    List.iter (fun t -> fprintf fmt " * %a" print_base_type t) tl;
+    fprintf fmt ")"
+

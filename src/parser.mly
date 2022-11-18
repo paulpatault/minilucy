@@ -127,7 +127,7 @@ node:
 
 local_params_init:
 | LOCAL id=IDENT COLON t=IDENT INIT vo=IDENT
-    { (id, t, vo) }
+    { (id, Tadt t, vo) }
 ;
 
 %public %inline loc(X):

@@ -4,6 +4,7 @@ type base_ty =
   | Tbool
   | Tint
   | Treal
+  | Tadt of string
 
 type ty = base_ty list
 

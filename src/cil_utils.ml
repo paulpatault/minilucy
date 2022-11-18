@@ -14,6 +14,7 @@ let translate_type = function
   | Tbool -> TInt (IInt, [])
   | Tint -> TInt (IInt, [])
   | Treal -> TFloat (FFloat, [])
+  | Tadt s -> failwith "not implemented"
 
 let translate_const = function
   | Cbool b ->

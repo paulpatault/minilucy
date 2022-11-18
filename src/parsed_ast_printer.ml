@@ -56,18 +56,13 @@ let print_eq fmt = function
         (* (print_list Ident.print ",") eq.teq_patt.tpatt_desc *)
         (* print_exp eq.teq_expr *)
 
-let print_base_type fmt bty = match bty with
-  | Tbool -> fprintf fmt "bool"
-  | Tint -> fprintf fmt "int"
-  | Treal -> fprintf fmt "real"
-
 (* let print_type = print_list print_cbase_type "*" *)
 
 let print_var_dec fmt (name, ty) =
   fprintf fmt "%s : %a" name print_base_type ty
 
 let print_var_init_dec fmt (name, ty, init) =
-  fprintf fmt "%s: %s init %s" name ty init
+  fprintf fmt "%s: %a init %s" name print_base_type ty init
 
 let rec print_var_dec_list = print_list_sp print_var_dec ";"
 
@@ -86,7 +81,7 @@ let print_node fmt nd =
 let print_node_list_std fmt ndl =
   List.iter (fun nd -> Format.fprintf fmt "%a@\n@." print_node nd) ndl
 
-let print_type_list_std fmt tl =
+let print_adttype_list_std fmt tl =
   List.iter (fun {pt_name; pt_constr} ->
     Format.fprintf fmt "type %s =@\n  @[%a@]"
       pt_name
@@ -95,5 +90,5 @@ let print_type_list_std fmt tl =
 
 let print_file_std {p_types; p_nodes} =
   Format.printf "%a@\n@\n%a"
-  print_type_list_std p_types
+  print_adttype_list_std p_types
   print_node_list_std p_nodes

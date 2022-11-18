@@ -4,6 +4,7 @@ open Format
 open Asttypes
 open Clocked_ast
 open Clocks
+open Print_base
 
 let rec pp_ck fmt = function
   | Cbase -> fprintf fmt "Base"
@@ -94,17 +95,12 @@ let pp_eq fmt eq =
     (pp_print_list ~pp_sep:pp_comma Ident.print) eq.ceq_patt.cpatt_desc
     pp_exp eq.ceq_expr
 
-let pp_base_type fmt = function
-  | Tbool -> fprintf fmt "bool"
-  | Tint -> fprintf fmt "int"
-  | Treal -> fprintf fmt "real"
-
 (* let pp_type = pp_list pp_cbase_type "*" *)
 
 let pp_var fmt (name, ty, ck) =
   fprintf fmt "%a : %a (%a)"
     Ident.print name
-    pp_base_type ty
+    print_base_type ty
     pp_ck ck
 
 let pp_var_list fmt =

@@ -2,10 +2,10 @@ open Asttypes
 open Parse_ast
 open Typed_ast
 open Format
+open Print_base
 
 module S = Set.Make(Ident)
 module M = Map.Make(String)
-
 
 type error =
   | ExpectedType of ty * ty
@@ -35,23 +35,10 @@ let nil = function
   | Tbool -> TE_const (Cbool false)
   | Tint -> TE_const (Cint 0)
   | Treal -> TE_const (Creal 0.0)
+  | Tadt s -> TE_default s
 
 let error loc e = raise (Error (loc, e))
 let errors loc s = error loc (Other s)
-
-let print_base_type fmt = function
-  | Tbool -> fprintf fmt "bool"
-  | Tint -> fprintf fmt "int"
-  | Treal -> fprintf fmt "real"
-
-let print_type fmt = function
-  | ([]) -> fprintf fmt "empty tuple"
-  | [t] -> print_base_type fmt t
-  | (t::tl) ->
-    fprintf fmt "(";
-    print_base_type fmt t;
-    List.iter (fun t -> fprintf fmt " * %a" print_base_type t) tl;
-    fprintf fmt ")"
 
 let report fmt = function
   | UnboundVar id -> fprintf fmt "unbound variable %s" id
@@ -402,7 +389,12 @@ and type_expr_desc env loc = function
       | _ -> error loc BadMerge
     end
 
-  | PE_merge_adt (x, l) -> failwith "not implemented"
+  | PE_merge_adt (x, l) ->
+      let id = match x.pexpr_desc with PE_ident id -> id | _ -> assert false in
+      let id_loc = x.pexpr_loc in
+      let x, ty, _ = Gamma.find id_loc env.vars id in
+      (* assert (List.for_all () l); *)
+      failwith "not implemented"
 
 and type_args env loc params_ty el =
   let tel = List.map (type_expr env) el in
@@ -477,9 +469,7 @@ let type_equation env eq =
 (* let type_case env adt {pn_case; pn_cond; pn_out} =
   (* let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in *)
-
-  let {pn_constr; pn_equation; pn_loc } = pn_case in
-
+let {pn_constr; pn_equation; pn_loc } = pn_case in
   let tn_equation = type_equation env pn_equation in
   let tn_cond = type_expr env pn_cond in
 
@@ -519,6 +509,7 @@ let check_outputs loc env equs =
 
 let type_node ptypes n =
   let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
+  (* let env = Gamma.adds n.pn_loc () env n.pn_init_local in *)
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in
   let env = { vars = env; types = ptypes } in
   let equs = List.map (type_equation env) n.pn_equs in

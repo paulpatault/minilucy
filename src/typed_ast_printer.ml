@@ -7,6 +7,8 @@ open Print_base
 
 let rec print_exp fmt e = match e.texpr_desc with
   | TE_const c -> print_const fmt c
+  | TE_constr s -> fprintf fmt "%s" s
+  | TE_default s -> fprintf fmt "default(%s)" s
   | TE_ident x -> fprintf fmt "%a" Ident.print x
   | TE_op (op, el) -> fprintf fmt "%a(%a)" print_op op print_arg_list el
   | TE_app (name, e_list) | TE_prim (name, e_list) ->
@@ -44,11 +46,6 @@ let print_eq fmt eq =
   fprintf fmt "@[(%a) = @[%a@]@]"
     (print_list_sp Ident.print ",") eq.teq_patt.tpatt_desc
     print_exp eq.teq_expr
-
-let print_base_type fmt bty = match bty with
-  | Tbool -> fprintf fmt "bool"
-  | Tint -> fprintf fmt "int"
-  | Treal -> fprintf fmt "real"
 
 (* let print_type = print_list print_cbase_type "*" *)
 

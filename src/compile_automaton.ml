@@ -15,7 +15,7 @@ let trad {pautom_loc; pautom} =
   let eqs = List.map (fun {pn_case={pn_equation;_}; _} -> pn_equation) pautom in
   let t = {pt_name = gen "typ" ; pt_constr = constrs} in
 
-  let (n, _, _) as state_init_local = gen "state", t.pt_name, List.hd constrs in
+  let (n, _, _) as state_init_local = gen "state", Asttypes.Tadt t.pt_name, List.hd constrs in
 
 
   let vv = ref None in
