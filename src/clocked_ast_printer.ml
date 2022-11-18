@@ -120,7 +120,7 @@ let pp_node fmt nd =
     pp_var_list nd.cn_input
     pp_var_list nd.cn_output
     pp_var_list nd.cn_local
-    (pp_print_list ~pp_sep:pp_eol pp_eq) (List.map (function CE_eq e -> e) nd.cn_equs)
+    (pp_print_list ~pp_sep:pp_eol pp_eq) nd.cn_equs
 
 let pp fmt =
   fprintf fmt "%a@." (pp_print_list ~pp_sep:pp_print_newline pp_node)

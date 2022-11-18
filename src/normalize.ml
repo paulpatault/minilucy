@@ -103,10 +103,9 @@ let normalize_eq node eq =
   let (new_eqs, locals), e' = normalize ([], []) eq.ceq_expr in
   {node with
    cn_local = locals@node.cn_local;
-   cn_equs = (CE_eq {eq with ceq_expr = e'})::(List.rev_map (fun e -> CE_eq e) new_eqs) @ node.cn_equs}
+   cn_equs = {eq with ceq_expr = e'}::(List.rev new_eqs) @ node.cn_equs}
 
 let file =
   List.map (fun node ->
-      let cn_equs = (List.map (function CE_eq e -> e) node.cn_equs) in
-      let node = List.fold_left normalize_eq {node with cn_equs = []} cn_equs in
+      let node = List.fold_left normalize_eq {node with cn_equs = []} node.cn_equs in
       {node with cn_equs = List.rev node.cn_equs})

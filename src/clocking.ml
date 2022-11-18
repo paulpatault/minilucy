@@ -238,7 +238,7 @@ let clock_equation env eq =
 let check_causality loc inputs equs =
   begin try ignore (Scheduling.schedule_equs inputs equs)
     with Scheduling.Causality ->
-      List.iter (Clocked_ast_printer.pp_eq std_formatter) (List.map (function CE_eq e -> e) equs);
+      List.iter (Clocked_ast_printer.pp_eq std_formatter) equs;
       error loc Causality
   end
 
@@ -247,7 +247,7 @@ let clock_node n =
   let env0 = Gamma.adds n.tn_loc Vlocal Gamma.empty n.tn_local in
   let env0 = Gamma.adds n.tn_loc Vinput env0 n.tn_input in
   let env = Gamma.adds n.tn_loc Voutput env0 n.tn_output in
-  let equs = List.map (clock_equation env) (List.map (function TE_eq e -> e | _ -> assert false) n.tn_equs) in
+  let equs = List.map (clock_equation env) n.tn_equs in
   M.iter (fun _ ck -> unify_ck Cbase (root_ck_of ck)) env0;
   let rec ct_of_ck = function
     | [ck] -> Ck ck
@@ -270,7 +270,6 @@ let clock_node n =
     id, ty, Gamma.find n.tn_loc env id)
       n.tn_local
   in
-  let equs = List.map (fun e -> CE_eq e) equs in
   let node =
     { cn_name = name;
       cn_input = input;

@@ -29,22 +29,7 @@ type t_patt =
 
 type constr = string
 
-type t_equation =
-  | TE_eq of t_basic_equation
-  | TE_automaton of t_automaton list
-  | TE_match of t_expr * t_case list
-
-and t_basic_equation = { teq_patt: t_patt; teq_expr: t_expr; }
-
-and t_automaton =
-  { tn_case: t_case;
-    tn_cond: t_expr;
-    tn_out:  constr;
-  }
-
-and t_case =
-  { tn_constr:    string;
-    tn_equation: t_equation ; }
+type t_equation = { teq_patt: t_patt; teq_expr: t_expr; }
 
 type t_node =
     { tn_name: Ident.t;

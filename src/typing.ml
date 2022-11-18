@@ -26,6 +26,7 @@ type error =
   | BadMain of ty * ty
   | BadMerge
   | UnknownConstructor of string
+  | Unreachable of string
 
 exception Error of location * error
 let dummy_loc = Lexing.dummy_pos, Lexing.dummy_pos
@@ -88,6 +89,7 @@ let report fmt = function
   | BadMerge ->
     fprintf fmt "There must be two merge branches with one that matches true and the other false"
   | UnknownConstructor s -> fprintf fmt "[%s] constructor doesn't appear in automaton definition" s
+  | Unreachable s -> fprintf fmt "Internal error (should be an unreachable point) [%s]" s
 
 let int_of_real = Ident.make "int_of_real" Ident.Prim
 let real_of_int = Ident.make "real_of_int" Ident.Prim
@@ -212,6 +214,7 @@ let rec type_expr env e =
   { texpr_desc = desc; texpr_type = t; texpr_loc = e.pexpr_loc; }
 
 and type_expr_desc env loc = function
+  | PE_constr _ -> failwith "not implemented"
   | PE_const c ->
     TE_const c , type_constant c
 
@@ -461,16 +464,16 @@ let type_equation env eq =
       let expr = type_expr env eq.peq_expr in
       let well_typed = compatible expr.texpr_type patt.tpatt_type in
       if well_typed then
-        TE_eq { teq_patt = patt; teq_expr = expr; }
+        { teq_patt = patt; teq_expr = expr; }
       else
         error
           eq.peq_expr.pexpr_loc (ExpectedType (expr.texpr_type, patt.tpatt_type))
-  | PE_automaton autom ->
-      TE_automaton (failwith "not implemented")
   | PE_match _ ->
-      TE_match (failwith "not implemented", failwith "not implemented")
+      failwith "not implemented"
+  | PE_automaton autom ->
+      error autom.pautom_loc (Unreachable "uncompiled automaton")
 
-let type_case env adt {pn_case; pn_cond; pn_out} =
+(* let type_case env adt {pn_case; pn_cond; pn_out} =
   (* let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in *)
 
@@ -486,24 +489,20 @@ let type_case env adt {pn_case; pn_cond; pn_out} =
     if List.mem pn_out adt then pn_out
     else error pn_loc (UnknownConstructor pn_out) in
 
-  { tn_case = {tn_constr; tn_equation}; tn_cond; tn_out }
+  { tn_case = {tn_constr; tn_equation}; tn_cond; tn_out } *)
 
-let type_automaton env automaton =
+(* let type_automaton env automaton =
   let adt = List.fold_left (fun acc e -> e.pn_case.pn_constr :: acc) [] automaton in
-  List.map (type_case env adt) automaton
+  List.map (type_case env adt) automaton *)
 
-let add_vars_of_patt loc s eq = match eq with
-  | TE_eq {teq_patt = {tpatt_desc=p}} ->
-    let add x s =
-      if S.mem x s then error loc (Clash x.Ident.name);
-      S.add x s
-    in
-    List.fold_left (fun s x -> add x s) s p
-  | TE_automaton autom -> failwith "not implemented"
-  | TE_match _ -> failwith "not implemented"
+let add_vars_of_patt loc s eq =
+  let add x s =
+    if S.mem x s then error loc (Clash x.Ident.name);
+    S.add x s
+  in
+  List.fold_left (fun s x -> add x s) s eq.teq_patt.tpatt_desc
 
 let check_outputs loc env equs =
-  if true then failwith "probleme ici";
   let s = List.fold_left (add_vars_of_patt loc) S.empty equs in
   let not_defined = S.diff (Gamma.patts_vars env) s in
   if not (S.is_empty not_defined) then
