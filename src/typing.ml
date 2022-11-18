@@ -143,12 +143,13 @@ module Gamma = struct
 
 end
 
+type env = { vars : (Ident.t * base_ty * io) M.t; types : p_type list}
+
+
 let base_ty_of_ty loc t =
   match t with
   | [t'] -> t'
   | _ -> error loc (ExpectedBase t)
-
-
 
 let compatible_base actual_ty expected_ty =
   actual_ty = expected_ty
@@ -219,7 +220,7 @@ and type_expr_desc env loc = function
     TE_const c , type_constant c
 
   | PE_ident x ->
-    let x, ty, _ = Gamma.find loc env x in
+    let x, ty, _ = Gamma.find loc env.vars x in
     TE_ident x , [ty]
 
   | PE_op (Op_not, [e]) ->
@@ -379,7 +380,7 @@ and type_expr_desc env loc = function
   | PE_merge (x, b1, b2) ->
     let id = match x.pexpr_desc with PE_ident id -> id | _ -> assert false in
     let id_loc = x.pexpr_loc in
-    let x, ty, _ = Gamma.find id_loc env id in
+    let x, ty, _ = Gamma.find id_loc env.vars id in
     begin
       match ty with
       | Tbool -> ()
@@ -440,7 +441,7 @@ and type_patt_desc env loc patt =
   match patt with
   | PP_ident x -> begin
       let x, ty =
-        match Gamma.find loc env x with
+        match Gamma.find loc env.vars x with
         | x, t, Vpatt -> x, t
         | _  -> error loc (InputVar x)
       in
@@ -450,7 +451,7 @@ and type_patt_desc env loc patt =
     let pl_tyl =
       List.map
         (fun x ->
-           match Gamma.find loc env x with
+           match Gamma.find loc env.vars x with
            | x, ty, Vpatt -> x, ty
            | _  -> error loc (InputVar x)
         ) pl
@@ -504,7 +505,7 @@ let add_vars_of_patt loc s eq =
 
 let check_outputs loc env equs =
   let s = List.fold_left (add_vars_of_patt loc) S.empty equs in
-  let not_defined = S.diff (Gamma.patts_vars env) s in
+  let not_defined = S.diff (Gamma.patts_vars env.vars) s in
   if not (S.is_empty not_defined) then
     error loc (UndefinedOutputs
                  (List.map (fun x -> x.Ident.name) (S.elements not_defined)))
@@ -519,6 +520,7 @@ let check_outputs loc env equs =
 let type_node ptypes n =
   let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in
+  let env = { vars = env; types = ptypes } in
   let equs = List.map (type_equation env) n.pn_equs in
   (* let auto = type_automaton env n.pn_automaton in *)
   check_outputs n.pn_loc env equs;
@@ -527,17 +529,17 @@ let type_node ptypes n =
   let name = Delta.add n.pn_name (t_in,t_out) in
   let input =
     List.map
-      (fun (x, ty) -> let x', _, _ = Gamma.find n.pn_loc env x in (x', ty))
+      (fun (x, ty) -> let x', _, _ = Gamma.find n.pn_loc env.vars x in (x', ty))
       n.pn_input
   in
   let output =
     List.map
-      (fun (x, ty) -> let x', _, _ = Gamma.find n.pn_loc env x in (x', ty))
+      (fun (x, ty) -> let x', _, _ = Gamma.find n.pn_loc env.vars x in (x', ty))
       n.pn_output
   in
   let local =
     List.map
-      (fun (x, ty) -> let x', _, _ = Gamma.find  n.pn_loc env x in (x', ty))
+      (fun (x, ty) -> let x', _, _ = Gamma.find  n.pn_loc env.vars x in (x', ty))
       n.pn_local
   in
   let node =
