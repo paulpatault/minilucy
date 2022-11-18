@@ -3,6 +3,7 @@
 open Asttypes
 
 type typed_var = Ident.t * base_ty
+type constr = string
 
 type t_expr =
     { texpr_desc: t_expr_desc;
@@ -18,7 +19,7 @@ and t_expr_desc =
   | TE_arrow of t_expr * t_expr
   | TE_pre of t_expr
   | TE_tuple of t_expr list
-  | TE_merge of Ident.t * t_expr * t_expr (* true, false *)
+  | TE_merge of Ident.t * (constr * t_expr) list (* true, false *)
   | TE_fby of t_expr * t_expr
   | TE_when of t_expr * bool * Ident.t
 
@@ -27,7 +28,6 @@ type t_patt =
       tpatt_type: ty;
       tpatt_loc: location; }
 
-type constr = string
 
 type t_equation = { teq_patt: t_patt; teq_expr: t_expr; }
 
@@ -39,4 +39,8 @@ type t_node =
       tn_equs: t_equation list;
       tn_loc: location; }
 
-type t_file = t_node list
+type t_type = { pt_name: string; pt_constr: constr list }
+
+type t_file =
+  { t_nodes: t_node list;
+    t_types: t_type list; }

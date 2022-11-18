@@ -309,7 +309,7 @@ and type_expr_desc env loc = function
       | {texpr_desc = TE_ident id; _} ->
         let then_ = {texpr_desc = TE_when (te2, true, id); texpr_type = tt; texpr_loc = te2.texpr_loc} in
         let else_ = {texpr_desc = TE_when (te3, false, id); texpr_type = tt; texpr_loc = te3.texpr_loc} in
-        TE_merge (id, then_, else_), tt
+        TE_merge (id, ["True", then_; "False", else_]), tt
       | _ -> error loc (Other "The condition must be an identifier")
     else
       error loc (ExpectedType (te3.texpr_type, te2.texpr_type))
@@ -396,7 +396,7 @@ and type_expr_desc env loc = function
         let te1 = {texpr_desc = TE_when (b1, true, x); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
         let te2 = {texpr_desc = TE_when (b2, false, x); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
         if compatible ty1 ty2 then
-          TE_merge (x, te1, te2), ty1
+          TE_merge (x, ["True", te1; "False", te2]), ty1
         else
           error loc (ExpectedType (ty2, ty1))
       | _ -> error loc BadMerge

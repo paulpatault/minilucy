@@ -187,11 +187,13 @@ and clock_expr_desc env loc = function
     let cel = List.map (clock_expr env) el in
     CE_tuple cel,
     Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
-  | TE_merge (id, te1, te2) ->
+  | TE_merge (id, ["True", te1; "False", te2]) ->
     let ce1 = clock_expr env te1 in
     let ce2 = clock_expr env te2 in
     let c = full_clock ce1.cexpr_clock ce2.cexpr_clock in
     CE_merge (id, ce1, ce2), Ck c
+  | TE_merge (id, _) ->
+      failwith "todo"
   | TE_fby (e1, e2) ->
     let ce1 = clock_expr env e1 in
     let ce2 = clock_expr env e2 in
