@@ -134,85 +134,86 @@ let rec clock_expr env e =
 
 and clock_expr_desc env loc = function
   | TE_const c ->
-    CE_const c, Ck (fresh_ck ())
+      CE_const c, Ck (fresh_ck ())
   | TE_ident x ->
-    let ck = Gamma.find loc env x in
-    CE_ident x, Ck ck
+      let ck = Gamma.find loc env x in
+      CE_ident x, Ck ck
   | TE_op (op, el) ->
-    let el, cl =
-      match op, el with
-      | (Op_not | Op_sub | Op_sub_f), [e] ->
-        let e = clock_expr env e in
-        let cl = e.cexpr_clock in
-        [e], cl
-      | (Op_and | Op_or | Op_impl
-        | Op_add | Op_sub | Op_mul | Op_div | Op_mod
-        | Op_div_f | Op_mul_f | Op_sub_f | Op_add_f
-        | Op_eq | Op_neq | Op_lt | Op_le | Op_gt | Op_ge), [e1; e2] ->
-        let ce1 = clock_expr env e1 in
-        let ce2 = clock_expr env e2 in
-        let ct1 = ce1.cexpr_clock in
-        let ct2 = ce2.cexpr_clock in
-        begin
-          try
-            unify ct1 ct2;
-            [ce1; ce2], Ck (first_ck ct1)
-          with Unify ->
-            error loc (ExpectedClock (ct1, ct2))
-        end
-      | Op_if, [e1; e2; e3] ->
-        let ce1 = clock_expr env e1 in
-        let ce2 = clock_expr env e2 in
-        let ce3 = clock_expr env e3 in
-        begin
-          try unify ce1.cexpr_clock ce2.cexpr_clock
-          with Unify ->
-            error loc (ExpectedClock (ce1.cexpr_clock, ce2.cexpr_clock))
-        end;
-        begin
-          try unify ce2.cexpr_clock ce3.cexpr_clock
-          with Unify ->
-            error loc (ExpectedClock (ce2.cexpr_clock, ce3.cexpr_clock))
-        end;
-        [ce1; ce2; ce3], ce1.cexpr_clock
-      | _ -> error loc Unreachable
+      let el, cl =
+        match op, el with
+        | (Op_not | Op_sub | Op_sub_f), [e] ->
+          let e = clock_expr env e in
+          let cl = e.cexpr_clock in
+          [e], cl
+        | (Op_and | Op_or | Op_impl
+          | Op_add | Op_sub | Op_mul | Op_div | Op_mod
+          | Op_div_f | Op_mul_f | Op_sub_f | Op_add_f
+          | Op_eq | Op_neq | Op_lt | Op_le | Op_gt | Op_ge), [e1; e2] ->
+          let ce1 = clock_expr env e1 in
+          let ce2 = clock_expr env e2 in
+          let ct1 = ce1.cexpr_clock in
+          let ct2 = ce2.cexpr_clock in
+          begin
+            try
+              unify ct1 ct2;
+              [ce1; ce2], Ck (first_ck ct1)
+            with Unify ->
+              error loc (ExpectedClock (ct1, ct2))
+          end
+        | Op_if, [e1; e2; e3] ->
+          let ce1 = clock_expr env e1 in
+          let ce2 = clock_expr env e2 in
+          let ce3 = clock_expr env e3 in
+          begin
+            try unify ce1.cexpr_clock ce2.cexpr_clock
+            with Unify ->
+              error loc (ExpectedClock (ce1.cexpr_clock, ce2.cexpr_clock))
+          end;
+          begin
+            try unify ce2.cexpr_clock ce3.cexpr_clock
+            with Unify ->
+              error loc (ExpectedClock (ce2.cexpr_clock, ce3.cexpr_clock))
+          end;
+          [ce1; ce2; ce3], ce1.cexpr_clock
+        | _ -> error loc Unreachable
 
-    in
-    CE_op (op, el), cl
+      in
+      CE_op (op, el), cl
   | TE_app (f, el) ->
-    let (f, (c_in, c_out)) = Delta.find f in
-    let cel = clock_args env loc c_in el in
-    CE_app (f, cel), c_out
+      let (f, (c_in, c_out)) = Delta.find f in
+      let cel = clock_args env loc c_in el in
+      CE_app (f, cel), c_out
   | TE_tuple el ->
-    let cel = List.map (clock_expr env) el in
-    CE_tuple cel,
-    Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
+      let cel = List.map (clock_expr env) el in
+      CE_tuple cel,
+      Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
   | TE_merge (id, ["True", te1; "False", te2]) ->
-    let ce1 = clock_expr env te1 in
-    let ce2 = clock_expr env te2 in
-    let c = full_clock ce1.cexpr_clock ce2.cexpr_clock in
-    CE_merge (id, ce1, ce2), Ck c
+      let cid = clock_expr env id in
+      let ce1 = clock_expr env te1 in
+      let ce2 = clock_expr env te2 in
+      let c = full_clock ce1.cexpr_clock ce2.cexpr_clock in
+      CE_merge (cid, ce1, ce2), Ck c
   | TE_merge (id, _) ->
       failwith "todo"
   | TE_fby (e1, e2) ->
-    let ce1 = clock_expr env e1 in
-    let ce2 = clock_expr env e2 in
-    CE_fby (ce1, ce2), ce1.cexpr_clock
+      let ce1 = clock_expr env e1 in
+      let ce2 = clock_expr env e2 in
+      CE_fby (ce1, ce2), ce1.cexpr_clock
   | TE_when (e, b, id) ->
-    let ck = Gamma.find loc env id in
-    let ce = clock_expr env e in
-    begin
-      match ce.cexpr_clock with
-      | Ck cke -> 
-        begin
-          try unify_ck ck cke;
-            CE_when (ce, b, id), Ck (Con (ck, b, id))
-          with Unify ->
-            error loc (ExpectedClock (Ck ck, ce.cexpr_clock))
-        end
-      | _ as ct ->
-        error loc (ExpectedBaseClock ct)
-    end
+      let ck = Gamma.find loc env id in
+      let ce = clock_expr env e in
+      begin
+        match ce.cexpr_clock with
+        | Ck cke -> 
+          begin
+            try unify_ck ck cke;
+              CE_when (ce, b, id), Ck (Con (ck, b, id))
+            with Unify ->
+              error loc (ExpectedClock (Ck ck, ce.cexpr_clock))
+          end
+        | _ as ct ->
+          error loc (ExpectedBaseClock ct)
+      end
   | TE_pre _
   | TE_arrow _
   | _ -> error loc Unreachable

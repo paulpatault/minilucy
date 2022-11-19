@@ -357,7 +357,7 @@ let rec compile_expr types file node fundec expr =
     let call_stmt = mkStmtOneInstr call_instr in
     fundec.sbody <- append_stmt call_stmt fundec.sbody;
     file, Lval res_lval, ret_ty
-  | IE_case (id, cases) ->
+  | IE_case ({iexpr_desc = IE_ident id; _}, cases) ->
     let res_ty =
       let hd, _ = List.hd cases in
       let ty = hd.iexpr_type in
@@ -402,6 +402,9 @@ let rec compile_expr types file node fundec expr =
     let switch_stmt = mkStmt (Switch (lval, switch_block, switch_stmts, locUnknown, locUnknown)) in
     fundec.sbody <- append_stmt switch_stmt fundec.sbody;
     file, Lval (Var switch_res, NoOffset), res_ty
+
+  | IE_case _ -> failwith "not implemented"
+
   | IE_prim (n, el) ->
     match n.name, el with
     | "int_of_real", [e] ->

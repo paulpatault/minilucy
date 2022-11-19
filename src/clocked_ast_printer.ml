@@ -67,9 +67,9 @@ let rec pp_exp fmt e = match e.cexpr_desc with
       fprintf fmt "pre (@[%a@])" pp_exp e
   | CE_tuple e_list ->
       fprintf fmt "(@[%a@])" pp_tuple_arg_list e_list
-  | CE_merge (name, e1, e2) ->
+  | CE_merge (m, e1, e2) ->
     fprintf fmt "@[merge %a @[(true -> %a)@] @[(false -> %a)@]@]"
-      Ident.print name pp_exp e1 pp_exp e2
+      pp_exp m pp_exp e1 pp_exp e2
   | CE_fby (e1, e2) ->
     fprintf fmt "@[%a fby %a@]" pp_exp e1 pp_exp e2
   | CE_when (e1, s, id) ->

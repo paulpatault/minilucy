@@ -19,7 +19,7 @@ and c_expr_desc =
   | CE_arrow of c_expr * c_expr
   | CE_pre of c_expr
   | CE_tuple of c_expr list
-  | CE_merge of Ident.t * c_expr * c_expr
+  | CE_merge of c_expr * c_expr * c_expr
   | CE_fby of c_expr * c_expr
   | CE_when of c_expr * constr * Ident.t
 
