@@ -10,11 +10,15 @@ let get_next_comp_name () =
   incr comp_num;
   name
 
-let translate_type = function
+let translate_type types = function
   | Tbool -> TInt (IInt, [])
   | Tint -> TInt (IInt, [])
   | Treal -> TFloat (FFloat, [])
-  | Tadt s -> failwith "not implemented"
+  | Tadt s ->
+      let _ = List.find (fun {tt_name; tt_constr} -> tt_name = s) types in
+      let enuminfo = assert false in (* TODO *)
+      let attributes = assert false in (* TODO *)
+      TEnum (enuminfo, attributes)
 
 let translate_const = function
   | Cbool b ->
@@ -36,10 +40,10 @@ let clean_name name =
   let str = Str.regexp {|'|} in
   Str.global_replace str "__" name
 
-let mk_struct name var_l =
+let mk_struct types name var_l =
   let comp = mkCompInfo true name (fun _ -> []) [] in
   let fields = List.map (fun ({name; _}, typ, _) ->
-      {fcomp = comp; fname = clean_name name; ftype = translate_type typ; fbitfield = None; fattr = []; floc = locUnknown})
+      {fcomp = comp; fname = clean_name name; ftype = translate_type types typ; fbitfield = None; fattr = []; floc = locUnknown})
       var_l
   in
   comp.cfields <- fields;

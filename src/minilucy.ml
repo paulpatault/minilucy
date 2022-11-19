@@ -73,25 +73,25 @@ let () =
     close_in c;
     if !parse_only then exit 0;
 
-    let ft = Compile_automaton.compile f in
+    let fa = Compile_automaton.compile f in
     if !verbose then begin
       Format.printf "\n/**************************************/@.";
       Format.printf "/* Compile_automaton ast              */@.";
       Format.printf "/**************************************/@.";
-      Parsed_ast_printer.print_file_std ft
+      Parsed_ast_printer.print_file_std fa
     end;
     if !automaton_only then exit 0;
 
-    let ft = Typing.type_file ft main_node in
+    let ft = Typing.type_file fa main_node in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Typed ast                          */@.";
       Format.printf "/**************************************/@.";
-      Typed_ast_printer.print_node_list_std ft
+      Typed_ast_printer.print_node_list_std ft.t_nodes
     end;
     if !type_only then exit 0;
 
-    let fc = Clocking.clock_file ft main_node in
+    let fc = Clocking.clock_file ft.t_nodes main_node in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Clocked ast                          */@.";
@@ -129,7 +129,7 @@ let () =
 
     let file_name = (Format.sprintf "%s.c" (Filename.remove_extension file)) in
 
-    let fc = Cgen.compile fi main_node file_name in
+    let fc = Cgen.compile ft.t_types fi main_node file_name in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* C file                             */@.";

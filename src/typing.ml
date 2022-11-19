@@ -406,7 +406,7 @@ and type_expr_desc env loc = function
         | Tadt t -> t
         | _ -> error id_loc (ExpectedType ([ty], [Tadt "?t"]))
       in
-      let tl = 
+      let tl =
    match List.find_opt (fun {pt_name; _} -> pt_name = tname) env.types with
    | None -> error id_loc (UnknownAdtType tname)
    | Some e -> e in
@@ -589,7 +589,11 @@ let check_main ft main =
     error n.tn_loc (BadMain (t_in, t_out))
   | _ -> errors dummy_loc "The main node cannot be a primitive function"
 
+let translate_types =
+  fun {pt_name;pt_constr} -> { tt_name = pt_name; tt_constr = pt_constr}
+
 let type_file f main =
   let ft = List.map (type_node f.p_types) (f.p_nodes) in
+  let tt = List.map translate_types f.p_types in
   if main <> "" then check_main ft main;
-  ft
+  { t_nodes = ft; t_types = tt }
