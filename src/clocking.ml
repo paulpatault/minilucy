@@ -192,14 +192,17 @@ and clock_expr_desc env loc = function
       let ce1 = clock_expr env te1 in
       let ce2 = clock_expr env te2 in
       let c = full_clock ce1.cexpr_clock ce2.cexpr_clock in
-      CE_merge (cid, ce1, ce2), Ck c
-  | TE_merge (id, _) ->
-      failwith "todo"
+      CE_merge (cid, ["True", ce1; "False", ce2]), Ck c
+  | TE_merge (id, tes) -> failwith "todo"
+      (* let cid = clock_expr env id in
+      let ces = List.map (fun (l, r) -> clock_expr env r) tes in
+      let c = full_clock_list ces in
+      CE_merge (cid, ce1, ce2), Ck c *)
   | TE_fby (e1, e2) ->
       let ce1 = clock_expr env e1 in
       let ce2 = clock_expr env e2 in
       CE_fby (ce1, ce2), ce1.cexpr_clock
-  | TE_when (e, b, id) ->
+  | TE_when (e, b, {texpr_desc = TE_ident id; _}) ->
       let ck = Gamma.find loc env id in
       let ce = clock_expr env e in
       begin
@@ -214,6 +217,8 @@ and clock_expr_desc env loc = function
         | _ as ct ->
           error loc (ExpectedBaseClock ct)
       end
+
+  | TE_when (e, b, {texpr_desc = _; _}) -> failwith "not implemented"
   | TE_pre _
   | TE_arrow _
   | _ -> error loc Unreachable

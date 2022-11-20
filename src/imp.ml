@@ -54,7 +54,7 @@ let rec compile_base_expr e =
     | CE_when (e, _, _) ->
         let e' = compile_base_expr e in
         e'.iexpr_desc
-    | CE_merge (id, e_t, e_f) ->
+    | CE_merge (id, ["True", e_t; "False", e_f]) ->
         let ide = compile_base_expr id in
         let e_t' = compile_base_expr e_t in
         let e_f' = compile_base_expr e_f in
@@ -65,6 +65,7 @@ let rec compile_base_expr e =
                       iexpr_type = [Tbool];}
         in
         IE_case (ide, [case_t, e_t'; case_f, e_f'])
+    | CE_merge (id, l) -> failwith "not implemented"
   in
   { iexpr_desc = desc; iexpr_type = e.cexpr_type; }
 

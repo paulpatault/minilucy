@@ -302,14 +302,11 @@ and type_expr_desc env loc = function
     if well_typed then
       let tt = te2.texpr_type in
       match te1 with
-      | {texpr_desc = TE_ident id; _} ->
-          let then_ = {texpr_desc = TE_when (te2, "True", id); texpr_type = tt; texpr_loc = te2.texpr_loc} in
-          let else_ = {texpr_desc = TE_when (te3, "False", id); texpr_type = tt; texpr_loc = te3.texpr_loc} in
+      | {texpr_desc = TE_ident _; _}
+      | {texpr_desc = TE_op ((Op_eq | Op_neq | Op_lt | Op_le | Op_gt | Op_ge | Op_not | Op_and | Op_or), _); _} ->
+          let then_ = {texpr_desc = TE_when (te2, "True", te1); texpr_type = tt; texpr_loc = te2.texpr_loc} in
+          let else_ = {texpr_desc = TE_when (te3, "False", te1); texpr_type = tt; texpr_loc = te3.texpr_loc} in
           TE_merge (te1, ["True", then_; "False", else_]), tt
-      | {texpr_desc = TE_op (Op_eq, [eq1;eq2]); _} ->
-        let then_ = {texpr_desc = TE_when (te2, "True", id); texpr_type = tt; texpr_loc = te2.texpr_loc} in
-        let else_ = {texpr_desc = TE_when (te3, "False", id); texpr_type = tt; texpr_loc = te3.texpr_loc} in
-        TE_merge (id, ["True", then_; "False", else_]), tt
       | {texpr_desc = TE_app (f, args); _} ->
           failwith "not implemented"
       | _ -> error loc (Other "The condition must be an identifier")
@@ -395,14 +392,14 @@ and type_expr_desc env loc = function
           let b1 = type_expr env b1 in
           let b2 = type_expr env b2 in
           let ty1, ty2 = b1.texpr_type, b2.texpr_type in
-          let te1 = {texpr_desc = TE_when (b1, "True", x); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
-          let te2 = {texpr_desc = TE_when (b2, "False", x); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
           if compatible ty1 ty2 then
             let exr =
               { texpr_desc = TE_ident x;
                 texpr_type = [ty];
                 texpr_loc  = id_loc }
               in
+          let te1 = {texpr_desc = TE_when (b1, "True", exr); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
+          let te2 = {texpr_desc = TE_when (b2, "False", exr); texpr_type = ty1; texpr_loc = b1.texpr_loc} in
             TE_merge (exr, ["True", te1; "False", te2]), ty1
           else
             error loc (ExpectedType (ty2, ty1))
@@ -425,22 +422,23 @@ and type_expr_desc env loc = function
       if sl = stl then ()
       else error id_loc (NotExhaustiveMerge tname);
 
-      let r = ref None in
-      let _when_ = List.map (fun (c, e) ->
-        let e = type_expr env e in
-        r := Some e.texpr_type;
-        c,
-        { texpr_desc = TE_when (e, c, x);
-          texpr_type = e.texpr_type;
-          texpr_loc  = e.texpr_loc}
-       ) l in
-      (* if compatible ... TODO *)
-
       let exr =
         { texpr_desc = TE_ident x;
           texpr_type = [ty];
           texpr_loc  = id_loc }
         in
+
+      let r = ref None in
+      let _when_ = List.map (fun (c, e) ->
+        let e = type_expr env e in
+        r := Some e.texpr_type;
+        c,
+        { texpr_desc = TE_when (e, c, exr);
+          texpr_type = e.texpr_type;
+          texpr_loc  = e.texpr_loc}
+       ) l in
+      (* if compatible ... TODO *)
+
       let ty = Option.get !r in
       TE_merge (exr, _when_), ty
 

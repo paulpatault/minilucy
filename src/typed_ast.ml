@@ -23,7 +23,7 @@ and t_expr_desc =
   | TE_tuple of t_expr list
   | TE_merge of t_expr * (constr * t_expr) list
   | TE_fby of t_expr * t_expr
-  | TE_when of t_expr * constr * Ident.t
+  | TE_when of t_expr * constr * t_expr
 
 type t_patt =
     { tpatt_desc: Ident.t list;
