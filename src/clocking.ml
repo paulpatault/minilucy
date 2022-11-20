@@ -214,15 +214,16 @@ and clock_expr_desc env loc = function
       let ce1 = clock_expr env e1 in
       let ce2 = clock_expr env e2 in
       CE_fby (ce1, ce2), ce1.cexpr_clock
-  | TE_when (e, b, {texpr_desc = TE_ident id; _}) ->
+  | TE_when (e, b, ({texpr_desc = TE_ident id; _} as eid)) ->
       let ck = Gamma.find loc env id in
       let ce = clock_expr env e in
+      let ceid = clock_expr env eid in
       begin
         match ce.cexpr_clock with
         | Ck cke -> 
           begin
             try unify_ck ck cke;
-              CE_when (ce, b, id), Ck (Con (ck, b, id))
+              CE_when (ce, b, ceid), Ck (Con (ck, b, id))
             with Unify ->
               error loc (ExpectedClock (Ck ck, ce.cexpr_clock))
           end

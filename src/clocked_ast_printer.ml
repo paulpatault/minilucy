@@ -72,8 +72,8 @@ let rec pp_exp fmt e = match e.cexpr_desc with
         (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%s -> %a)" id pp_exp exp)) l
   | CE_fby (e1, e2) ->
     fprintf fmt "@[%a fby %a@]" pp_exp e1 pp_exp e2
-  | CE_when (e1, s, id) ->
-    fprintf fmt "@[%a when %s(%a)@]" pp_exp e1 s Ident.print id
+  | CE_when (e1, s, eid) ->
+    fprintf fmt "@[%a when %s(%a)@]" pp_exp e1 s pp_exp eid
 
 and pp_arg_list fmt e_list = match e_list with
   | [] -> ()
