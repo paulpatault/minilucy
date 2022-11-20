@@ -164,6 +164,7 @@ let rec compile_expr types file node fundec expr =
       | Cbool _ -> bool_t
       | Cint _ -> int_t
       | Creal _ -> real_t
+      | Cadt (s, _) -> adt_t s
     end
   | IE_ident id ->
     let lval, ty =

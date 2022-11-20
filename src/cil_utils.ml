@@ -22,19 +22,29 @@ let translate_type types = function
 
 let translate_const = function
   | Cbool b ->
-    let cilint = mkCilint IInt (if b then 1L else 0L) in
-    CInt (cilint, IInt, None)
+      let cilint = mkCilint IInt (if b then 1L else 0L) in
+      CInt (cilint, IInt, None)
   | Cint i ->
-    let cilint = mkCilint IInt (Int64.of_int i) in
-    CInt (cilint, IInt, None)
+      let cilint = mkCilint IInt (Int64.of_int i) in
+      CInt (cilint, IInt, None)
   | Creal f ->
-    CReal (f, FFloat, None)
+      CReal (f, FFloat, None)
+
+  | Cadt (s, Some e) ->
+      let exp = failwith "todo" in
+      let string = failwith "todo" in
+      let enuminfo = failwith "todo" in
+      CEnum (exp, string, enuminfo)
+
+  | Cadt (s, None) -> (* get_default s *)
+      assert false
 
 let true_const = integer 1
 let false_const = integer 0
 let bool_t = TInt (IInt, [])
 let int_t = TInt (IInt, [])
 let real_t = TFloat (FFloat, [])
+let adt_t s = failwith "todo"
 
 let clean_name name =
   let str = Str.regexp {|'|} in
