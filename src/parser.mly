@@ -189,8 +189,12 @@ eq:
 ;
 
 case_autom:
+| pn_case=case UNTIL pn_cond=expr CONTINUE pn_out=IDENT
+  { {pn_case; pn_cond; pn_out; pn_weak=true}  }
 | pn_case=case UNLESS pn_cond=expr THEN pn_out=IDENT
-  { {pn_case; pn_cond; pn_out}  }
+  { {pn_case; pn_cond; pn_out; pn_weak=false}  }
+/* | pn_case=case
+  { {pn_case; pn_cond = mk_expr (PE_const (Cbool false)) $sloc; pn_out = "todo"; pn_weak=false}  } */
 ;
 
 case:

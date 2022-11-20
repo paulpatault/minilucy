@@ -6,10 +6,10 @@ let
   automaton
   | Await ->
       x = 0 -> pre x + 1;
-      unless (x <= lo) then Run
+      until (x <= lo) continue Run
   | Run ->
       x = 0 -> pre x - 1;
-      unless (x >= hi) then Await
+      until (x >= hi) continue Await
   end
 tel
 

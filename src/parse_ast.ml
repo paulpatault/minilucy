@@ -42,6 +42,10 @@ and p_automaton_core =
   { pn_case: p_case;
     pn_cond: p_expr;
     pn_out: constr;
+    pn_weak: bool; (* slide 30
+                      until : weak    (delay)       -> "default"
+                      unless : strong (instantanné) -> TODO
+                      https://www.di.ens.fr/~pouzet/cours/synchrone/cours-lustre2/cours-lustre2.pdf *)
   }
 
 and p_case =

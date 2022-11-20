@@ -10,7 +10,10 @@ let mk_merge var over t eqs loc =
 let mk_constr_expr name loc = { pexpr_desc = PE_constr name; pexpr_loc = loc }
 
 let trad {pautom_loc; pautom} =
-  let constrs = List.map (fun {pn_case={pn_constr;_}; _} -> pn_constr) pautom in
+  let constrs = List.map (function
+    | {pn_weak=false;_} -> failwith {|automaton with "unless" clause (strong transitions) are not implemented yet|}
+    | {pn_case={pn_constr;_};_} -> pn_constr
+  ) pautom in
 
   let eqs = List.map (fun {pn_case={pn_equation;_}; _} -> pn_equation) pautom in
   let t = {pt_name = gen "typ" ; pt_constr = constrs} in
