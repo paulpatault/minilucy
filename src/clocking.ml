@@ -116,10 +116,10 @@ module Gamma = struct
 
 end
 
-let full_clock c1 c2 =
+let full_clock c1 c2 env =
   match c1, c2 with
   | Ck Cbase, Ck Cbase -> Cbase
-  |  Ck (Con (ck1, b1, i1)), Ck (Con (ck2, b2, i2)) when b1 <> b2 ->
+  | Ck (Con (ck1, b1, i1)), Ck (Con (ck2, b2, i2)) when b1 <> b2 ->
     begin
       try unify_ck ck1 ck2;
         ck1
@@ -128,23 +128,51 @@ let full_clock c1 c2 =
     end
   | _ -> error dummy_loc (Other "Cannot merge clocks")
 
-let full_clock_list cl =
-  let rec aux acc prev = function
-    | [] -> acc
-    | e::k -> begin
-        let cc = full_clock prev.cexpr_clock e.cexpr_clock in
-        aux (Some cc) e k
-    end
+let full_clock_list types cl =
+  let rec aux ck' ctors = function
+    | [] -> ()
+    | Ck (Con (ck, b, i))::k -> begin
+        unify_ck ck ck';
+        if List.mem b ctors then
+          aux ck (List.filter ((<>) b) ctors) k
+        else
+          error dummy_loc (Other "Cannot merge clocks")
+      end
+    | _ -> assert false
   in
-  match aux None (List.hd cl) cl with
-  | None -> assert false
-  | Some t -> t
+  let is_base = List.for_all (function
+      | Ck Cbase -> true
+      | _ -> false)
+    cl
+  in
+  if is_base then
+    Cbase
+  else
+    if
+      not @@ List.for_all (function
+            Ck (Con (ck, b, i)) ->
+            true
+          | _ -> false)
+        cl
+    then
+      error dummy_loc (Other "Cannot merge clocks")
+    else
+      let (ck, ctor)  =
+        match List.hd cl with
+        | Ck (Con (ck, ctor, _)) -> ck, ctor
+        | _ -> assert false
+      in
+      let pt = match List.find_opt (fun {tt_constr; _} -> List.mem ctor tt_constr) types with
+        | None -> assert false
+        | Some e -> e in
+      aux (ck) pt.tt_constr cl;
+      ck
 
-let rec clock_expr env e =
-  let desc, cl = clock_expr_desc env e.texpr_loc e.texpr_desc in
+let rec clock_expr env types e =
+  let desc, cl = clock_expr_desc env types e.texpr_loc e.texpr_desc in
   {cexpr_desc = desc; cexpr_type = e.texpr_type; cexpr_clock = cl; cexpr_loc = e.texpr_loc; }
 
-and clock_expr_desc env loc = function
+and clock_expr_desc env types loc = function
   | TE_const c ->
       CE_const c, Ck (fresh_ck ())
   | TE_ident x ->
@@ -154,15 +182,15 @@ and clock_expr_desc env loc = function
       let el, cl =
         match op, el with
         | (Op_not | Op_sub | Op_sub_f), [e] ->
-          let e = clock_expr env e in
+          let e = clock_expr env types e in
           let cl = e.cexpr_clock in
           [e], cl
         | (Op_and | Op_or | Op_impl
           | Op_add | Op_sub | Op_mul | Op_div | Op_mod
           | Op_div_f | Op_mul_f | Op_sub_f | Op_add_f
           | Op_eq | Op_neq | Op_lt | Op_le | Op_gt | Op_ge), [e1; e2] ->
-          let ce1 = clock_expr env e1 in
-          let ce2 = clock_expr env e2 in
+          let ce1 = clock_expr env types e1 in
+          let ce2 = clock_expr env types e2 in
           let ct1 = ce1.cexpr_clock in
           let ct2 = ce2.cexpr_clock in
           begin
@@ -173,9 +201,9 @@ and clock_expr_desc env loc = function
               error loc (ExpectedClock (ct1, ct2))
           end
         | Op_if, [e1; e2; e3] ->
-          let ce1 = clock_expr env e1 in
-          let ce2 = clock_expr env e2 in
-          let ce3 = clock_expr env e3 in
+          let ce1 = clock_expr env types e1 in
+          let ce2 = clock_expr env types e2 in
+          let ce3 = clock_expr env types e3 in
           begin
             try unify ce1.cexpr_clock ce2.cexpr_clock
             with Unify ->
@@ -193,31 +221,31 @@ and clock_expr_desc env loc = function
       CE_op (op, el), cl
   | TE_app (f, el) ->
       let (f, (c_in, c_out)) = Delta.find f in
-      let cel = clock_args env loc c_in el in
+      let cel = clock_args env types loc c_in el in
       CE_app (f, cel), c_out
   | TE_tuple el ->
-      let cel = List.map (clock_expr env) el in
+      let cel = List.map (clock_expr env types) el in
       CE_tuple cel,
       Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
-  | TE_merge (id, ["True", te1; "False", te2]) ->
-      let cid = clock_expr env id in
-      let ce1 = clock_expr env te1 in
-      let ce2 = clock_expr env te2 in
-      let c = full_clock ce1.cexpr_clock ce2.cexpr_clock in
-      CE_merge (cid, ["True", ce1; "False", ce2]), Ck c
+  (* | TE_merge (id, ["True", te1; "False", te2]) -> *)
+  (*     let cid = clock_expr env id in *)
+  (*     let ce1 = clock_expr env te1 in *)
+  (*     let ce2 = clock_expr env te2 in *)
+  (*     let c = full_clock ce1.cexpr_clock ce2.cexpr_clock in *)
+  (*     CE_merge (cid, ["True", ce1; "False", ce2]), Ck c *)
   | TE_merge (id, tes) ->
-      let cid = clock_expr env id in
-      let ces = List.map (fun (l, r) -> l, clock_expr env r) tes in
-      let c = full_clock_list (List.map snd ces) in
+      let cid = clock_expr env types id in
+      let ces = List.map (fun (l, r) -> l, clock_expr env types r) tes in
+      let c = full_clock_list types (List.map (fun (_, {cexpr_clock; _}) -> cexpr_clock) ces) in
       CE_merge (cid, ces), Ck c
   | TE_fby (e1, e2) ->
-      let ce1 = clock_expr env e1 in
-      let ce2 = clock_expr env e2 in
+      let ce1 = clock_expr env types e1 in
+      let ce2 = clock_expr env types e2 in
       CE_fby (ce1, ce2), ce1.cexpr_clock
   | TE_when (e, b, ({texpr_desc = TE_ident id; _} as eid)) ->
       let ck = Gamma.find loc env id in
-      let ce = clock_expr env e in
-      let ceid = clock_expr env eid in
+      let ce = clock_expr env types e in
+      let ceid = clock_expr env types eid in
       begin
         match ce.cexpr_clock with
         | Ck cke ->
@@ -236,8 +264,8 @@ and clock_expr_desc env loc = function
   | TE_prim _
   | TE_arrow _ -> error loc Unreachable
 
-and clock_args env loc params_cl el =
-  let cel = List.map (clock_expr env) el in
+and clock_args env types loc params_cl el =
+  let cel = List.map (clock_expr env types) el in
   let actual_clocks =
     Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
   in
@@ -251,8 +279,8 @@ let rec clock_patt env patt cl =
   {cpatt_desc = patt.tpatt_desc; cpatt_type = patt.tpatt_type; cpatt_clock = cl; cpatt_loc = patt.tpatt_loc; },
   env
 
-let clock_equation env eq =
-  let expr = clock_expr env eq.teq_expr in
+let clock_equation env types eq =
+  let expr = clock_expr env types eq.teq_expr in
   let patt, env = clock_patt env eq.teq_patt expr.cexpr_clock in
   {ceq_patt = patt; ceq_expr = expr; }
 
@@ -264,7 +292,7 @@ let check_causality loc inputs equs =
   end
 
 
-let clock_node n =
+let clock_node types n =
   let env0 = Gamma.adds n.tn_loc Vlocal Gamma.empty n.tn_local in
   let env0 = Gamma.adds n.tn_loc Vinput env0 n.tn_input in
 
@@ -272,7 +300,7 @@ let clock_node n =
   let env0 = Gamma.adds n.tn_loc Vlocal env0 l in
 
   let env = Gamma.adds n.tn_loc Voutput env0 n.tn_output in
-  let equs = List.map (clock_equation env) n.tn_equs in
+  let equs = List.map (clock_equation env types) n.tn_equs in
   M.iter (fun _ ck -> unify_ck Cbase (root_ck_of ck)) env0;
   let rec ct_of_ck = function
     | [ck] -> Ck ck
@@ -312,5 +340,5 @@ let clock_node n =
   node
 
 let clock_file f main =
-  let fc = List.map clock_node f in
+  let fc = List.map (clock_node f.t_types) f.t_nodes in
   fc

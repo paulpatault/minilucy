@@ -91,7 +91,7 @@ let () =
     end;
     if !type_only then exit 0;
 
-    let fc = Clocking.clock_file ft.t_nodes main_node in
+    let fc = Clocking.clock_file ft main_node in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Clocked ast                          */@.";

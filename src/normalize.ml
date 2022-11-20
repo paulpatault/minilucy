@@ -82,7 +82,14 @@ let rec normalize ctx e =
       let ctx, e_true' = normalize ctx e_true in
       let ctx, e_false' = normalize ctx e_false in
       ctx, {e with cexpr_desc = CE_merge (id, ["True", e_true'; "False", e_false'])}
-  | CE_merge (id, l) -> failwith "not implemented 1"
+  | CE_merge (id, el) -> 
+    let ctx, el' = List.fold_left_map (fun ctx (ctor, e) ->
+        let ctx, e' = normalize ctx e in
+        ctx, (ctor, e'))
+        ctx
+        el
+    in
+    ctx, {e with cexpr_desc = CE_merge (id, el')}
   | CE_when (e1, b, id) ->
       let ctx, e1' = normalize ctx e1 in
       ctx, {e with cexpr_desc = CE_when (e1', b, id)}
