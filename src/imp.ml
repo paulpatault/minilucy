@@ -65,7 +65,15 @@ let rec compile_base_expr e =
                       iexpr_type = [Tbool];}
         in
         IE_case (ide, [case_t, e_t'; case_f, e_f'])
-    | CE_merge (id, l) -> failwith "not implemented 2"
+    | CE_merge (id, l) ->
+        let ty = id.cexpr_type in
+        let ide = compile_base_expr id in
+        let l = List.map (fun (name, e) ->
+          let lty = match ty with [Tadt s] -> s | _ -> assert false in
+          let case = { iexpr_desc = IE_const (Cadt (lty, Some name)); iexpr_type = ty } in
+          case, compile_base_expr e
+          ) l in
+        IE_case (ide, l)
   in
   { iexpr_desc = desc; iexpr_type = e.cexpr_type; }
 
