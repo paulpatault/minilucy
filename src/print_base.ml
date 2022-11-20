@@ -21,6 +21,8 @@ let print_const fmt c = match c with
   | Cbool b -> fprintf fmt "%b" b
   | Cint i -> fprintf fmt "%d" i
   | Creal f -> fprintf fmt "%f" f
+  | Cadt (s, None) -> fprintf fmt "default(%s)" s
+  | Cadt (s, Some v) -> fprintf fmt "%s(%s)" s v
 
 let print_op fmt op = match op with
   | Op_eq -> fprintf fmt "eq"

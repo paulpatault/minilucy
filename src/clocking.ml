@@ -34,7 +34,7 @@ let rec pp_ck fmt = function
     pp_ck fmt c
   | (Cvar {contents = Cindex i}) ->
     fprintf fmt "@[ck%i@]" i
-  
+
 
 let rec pp_ct fmt = function
   | Ck ck -> fprintf fmt "%a" pp_ck ck
@@ -220,7 +220,7 @@ and clock_expr_desc env loc = function
       let ceid = clock_expr env eid in
       begin
         match ce.cexpr_clock with
-        | Ck cke -> 
+        | Ck cke ->
           begin
             try unify_ck ck cke;
               CE_when (ce, b, ceid), Ck (Con (ck, b, id))
@@ -233,8 +233,8 @@ and clock_expr_desc env loc = function
 
   | TE_when (e, b, {texpr_desc = _; _}) -> failwith "not implemented 6"
   | TE_pre _
-  | TE_arrow _
-  | _ -> error loc Unreachable
+  | TE_prim _
+  | TE_arrow _ -> error loc Unreachable
 
 and clock_args env loc params_cl el =
   let cel = List.map (clock_expr env) el in

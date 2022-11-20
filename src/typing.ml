@@ -37,7 +37,7 @@ let nil = function
   | Tbool -> TE_const (Cbool false)
   | Tint -> TE_const (Cint 0)
   | Treal -> TE_const (Creal 0.0)
-  | Tadt s -> TE_default s
+  | Tadt s -> TE_const (Cadt (s, None))
 
 let error loc e = raise (Error (loc, e))
 let errors loc s = error loc (Other s)
@@ -200,6 +200,7 @@ let type_constant = function
   | Cbool _ -> [Tbool]
   | Cint _ -> [Tint]
   | Creal _ -> [Treal]
+  | Cadt (s, _) -> [Tadt s]
 
 let rec type_expr env e =
   let desc,t = type_expr_desc env e.pexpr_loc e.pexpr_desc in
@@ -210,7 +211,7 @@ and type_expr_desc env loc = function
       let pt = match List.find_opt (fun {pt_constr; _} -> List.mem c pt_constr) env.types with
         | None -> assert false
         | Some e -> e in
-      TE_constr c, [Tadt pt.pt_name]
+      TE_const (Cadt (pt.pt_name, Some c)), [Tadt pt.pt_name]
 
   | PE_const c ->
     TE_const c , type_constant c

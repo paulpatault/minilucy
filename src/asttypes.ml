@@ -12,6 +12,7 @@ type const =
   | Cbool of bool
   | Cint of int
   | Creal of float
+  | Cadt of string * string option
 
 type op =
   | Op_eq | Op_neq | Op_lt | Op_le | Op_gt | Op_ge

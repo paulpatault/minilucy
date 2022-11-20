@@ -1,6 +1,7 @@
 (*-
      Le programme aux ci dessous :
 -*)
+
 node aux (lo, hi : int) returns (x: int);
 let
   automaton
@@ -22,12 +23,16 @@ tel
   | Run
 
 node aux(lo : int; hi : int) returns (x : int)
-var ;
+var cond_1, cond_2 : bool;
 local state__2: typ__1 init Await;
 let
+  cond_1 = le(x, lo);
+  cond_2 = gt(x, hi);
+
   (state__2) = merge state__2
-                 (Await -> ite(le(x, lo), Run, Await))
-                 (Run -> ite(ge(x, hi), Await, Run));
+                 (Await -> ite(cond_1, Run, Await))
+                 (Run ->   ite(cond_2, Await, Run));
+
   (x) = merge state__2
           (Await -> (0) -> (add(pre (x), 1)))
           (Run -> (0) -> (sub(pre (x), 1)));

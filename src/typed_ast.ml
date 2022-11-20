@@ -12,8 +12,6 @@ type t_expr =
 
 and t_expr_desc =
   | TE_const of const
-  | TE_constr of constr
-  | TE_default of constr
   | TE_ident of Ident.t
   | TE_op of op * t_expr list
   | TE_app of Ident.t * t_expr list

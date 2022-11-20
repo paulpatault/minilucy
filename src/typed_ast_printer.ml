@@ -7,8 +7,6 @@ open Print_base
 
 let rec print_exp fmt e = match e.texpr_desc with
   | TE_const c -> print_const fmt c
-  | TE_constr s -> fprintf fmt "%s" s
-  | TE_default s -> fprintf fmt "default(%s)" s
   | TE_ident x -> fprintf fmt "%a" Ident.print x
   | TE_op (op, el) -> fprintf fmt "%a(%a)" print_op op print_arg_list el
   | TE_app (name, e_list) | TE_prim (name, e_list) ->
