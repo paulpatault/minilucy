@@ -38,6 +38,7 @@ type t_node =
       tn_input: typed_var list;
       tn_output: typed_var list;
       tn_local: typed_var list;
+      tn_init_local: (typed_var * constr) list;
       tn_equs: t_equation list;
       tn_loc: location; }
 

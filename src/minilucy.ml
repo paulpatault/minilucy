@@ -87,7 +87,7 @@ let () =
       Format.printf "/**************************************/@.";
       Format.printf "/* Typed ast                          */@.";
       Format.printf "/**************************************/@.";
-      Typed_ast_printer.print_node_list_std ft.t_nodes
+      Typed_ast_printer.print_file_std ft
     end;
     if !type_only then exit 0;
 

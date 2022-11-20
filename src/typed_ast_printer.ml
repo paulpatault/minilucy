@@ -52,16 +52,36 @@ let print_eq fmt eq =
 let print_var_dec fmt (name, ty) =
   fprintf fmt "%a : %a" Ident.print name print_base_type ty
 
+let print_var_init_dec fmt ((name, ty), init) =
+  fprintf fmt "%a: %a init %s" Ident.print name print_base_type ty init
+
 let rec print_var_dec_list = print_list_sp print_var_dec ";"
+let rec print_var_init_dec_list = print_list_sp print_var_init_dec ";"
 
 let print_node fmt nd =
   fprintf fmt
-    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n local @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     Ident.print nd.tn_name
     print_var_dec_list nd.tn_input
     print_var_dec_list nd.tn_output
     print_var_dec_list nd.tn_local
+    print_var_init_dec_list nd.tn_init_local
     (print_list_eol print_eq ";") nd.tn_equs
 
-let print_node_list_std ndl =
-  List.iter (fun nd -> Format.printf "%a@\n@." print_node nd) ndl
+let print_node_list_std fmt ndl =
+  List.iter (fun nd -> fprintf fmt "%a@\n@." print_node nd) ndl
+
+let print_adttype_list_std fmt tl =
+  fprintf fmt "%a"
+    (print_list_nl
+      (fun fmt {tt_name; tt_constr} ->
+        fprintf fmt "type %s =@\n  @[%a@]"
+          tt_name
+          (print_list_nl (fun fmt e -> fprintf fmt "| %s" e))
+          tt_constr))
+    tl
+
+let print_file_std {t_types; t_nodes} =
+  Format.printf "%a@\n@\n%a"
+  print_adttype_list_std t_types
+  print_node_list_std t_nodes

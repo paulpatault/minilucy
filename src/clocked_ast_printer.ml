@@ -103,20 +103,33 @@ let pp_var fmt (name, ty, ck) =
     print_base_type ty
     pp_ck ck
 
+let pp_var_init fmt ((name, ty, ck), v) =
+  fprintf fmt "%a : %a (%a) init %s"
+    Ident.print name
+    print_base_type ty
+    pp_ck ck
+    v
+
 let pp_var_list fmt =
   pp_print_list ~pp_sep:pp_comma pp_var fmt
+
+let pp_var_init_list fmt =
+  pp_print_list ~pp_sep:pp_comma pp_var_init fmt
 
 let pp_eol fmt () =
   fprintf fmt ";@\n"
 
 let pp_node fmt nd =
   fprintf fmt
-    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\nlocal @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     Ident.print nd.cn_name
     pp_var_list nd.cn_input
     pp_var_list nd.cn_output
     pp_var_list nd.cn_local
+    pp_var_init_list nd.cn_init_local
     (pp_print_list ~pp_sep:pp_eol pp_eq) nd.cn_equs
 
 let pp fmt =
   fprintf fmt "%a@." (pp_print_list ~pp_sep:pp_print_newline pp_node)
+
+(* let print_file file *)

@@ -577,14 +577,22 @@ let type_node ptypes n =
   in
   let local =
     List.map
-      (fun (x, ty) -> let x', _, _ = Gamma.find  n.pn_loc env.vars x in (x', ty))
+      (fun (x, ty) -> let x', _, _ = Gamma.find n.pn_loc env.vars x in (x', ty))
       n.pn_local
+  in
+  let init_local =
+    List.map
+      (fun (x, ty, ival) ->
+         let x', _, _ = Gamma.find n.pn_loc env.vars x in
+         (x', ty), ival
+      ) n.pn_init_local
   in
   let node =
     { tn_name = name;
       tn_input = input;
       tn_output = output;
       tn_local = local;
+      tn_init_local = init_local;
       tn_equs = equs;
       tn_loc = n.pn_loc; }
   in

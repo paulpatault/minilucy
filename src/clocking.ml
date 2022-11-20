@@ -128,6 +128,18 @@ let full_clock c1 c2 =
     end
   | _ -> error dummy_loc (Other "Cannot merge clocks")
 
+let full_clock_list cl =
+  let rec aux acc prev = function
+    | [] -> acc
+    | e::k -> begin
+        let cc = full_clock prev.cexpr_clock e.cexpr_clock in
+        aux (Some cc) e k
+    end
+  in
+  match aux None (List.hd cl) cl with
+  | None -> assert false
+  | Some t -> t
+
 let rec clock_expr env e =
   let desc, cl = clock_expr_desc env e.texpr_loc e.texpr_desc in
   {cexpr_desc = desc; cexpr_type = e.texpr_type; cexpr_clock = cl; cexpr_loc = e.texpr_loc; }
@@ -193,11 +205,11 @@ and clock_expr_desc env loc = function
       let ce2 = clock_expr env te2 in
       let c = full_clock ce1.cexpr_clock ce2.cexpr_clock in
       CE_merge (cid, ["True", ce1; "False", ce2]), Ck c
-  | TE_merge (id, tes) -> failwith "todo"
-      (* let cid = clock_expr env id in
-      let ces = List.map (fun (l, r) -> clock_expr env r) tes in
-      let c = full_clock_list ces in
-      CE_merge (cid, ce1, ce2), Ck c *)
+  | TE_merge (id, tes) ->
+      let cid = clock_expr env id in
+      let ces = List.map (fun (l, r) -> l, clock_expr env r) tes in
+      let c = full_clock_list (List.map snd ces) in
+      CE_merge (cid, ces), Ck c
   | TE_fby (e1, e2) ->
       let ce1 = clock_expr env e1 in
       let ce2 = clock_expr env e2 in
@@ -254,6 +266,10 @@ let check_causality loc inputs equs =
 let clock_node n =
   let env0 = Gamma.adds n.tn_loc Vlocal Gamma.empty n.tn_local in
   let env0 = Gamma.adds n.tn_loc Vinput env0 n.tn_input in
+
+  let l = List.map fst n.tn_init_local in
+  let env0 = Gamma.adds n.tn_loc Vlocal env0 l in
+
   let env = Gamma.adds n.tn_loc Voutput env0 n.tn_output in
   let equs = List.map (clock_equation env) n.tn_equs in
   M.iter (fun _ ck -> unify_ck Cbase (root_ck_of ck)) env0;
@@ -278,11 +294,16 @@ let clock_node n =
     id, ty, Gamma.find n.tn_loc env id)
       n.tn_local
   in
+  let init_local = List.map (fun ((id, ty), v) ->
+    (id, ty, Gamma.find n.tn_loc env id), v)
+      n.tn_init_local
+  in
   let node =
     { cn_name = name;
       cn_input = input;
       cn_output = output;
       cn_local = local;
+      cn_init_local = init_local;
       cn_equs = equs;
       cn_loc = n.tn_loc; }
   in
