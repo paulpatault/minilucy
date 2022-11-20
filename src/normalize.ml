@@ -82,7 +82,7 @@ let rec normalize ctx e =
       let ctx, e_true' = normalize ctx e_true in
       let ctx, e_false' = normalize ctx e_false in
       ctx, {e with cexpr_desc = CE_merge (id, ["True", e_true'; "False", e_false'])}
-  | CE_merge (id, l) -> failwith "not implemented"
+  | CE_merge (id, l) -> failwith "not implemented 1"
   | CE_when (e1, b, id) ->
       let ctx, e1' = normalize ctx e1 in
       ctx, {e with cexpr_desc = CE_when (e1', b, id)}

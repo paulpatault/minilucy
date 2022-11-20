@@ -65,7 +65,7 @@ let rec compile_base_expr e =
                       iexpr_type = [Tbool];}
         in
         IE_case (ide, [case_t, e_t'; case_f, e_f'])
-    | CE_merge (id, l) -> failwith "not implemented"
+    | CE_merge (id, l) -> failwith "not implemented 2"
   in
   { iexpr_desc = desc; iexpr_type = e.cexpr_type; }
 

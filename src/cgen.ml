@@ -121,7 +121,7 @@ let compile_init file node mem_comp =
   let init_fby =
     List.map (fun (id, atom) ->
         match atom with
-        | Ident _ -> failwith "Not implemented yet"
+        | Ident _ -> failwith "Not implemented 5"
         | Const c ->
           let field = find_field_list (id.name) mem_comp.cfields in
           let c = translate_const c in
@@ -403,7 +403,7 @@ let rec compile_expr types file node fundec expr =
     fundec.sbody <- append_stmt switch_stmt fundec.sbody;
     file, Lval (Var switch_res, NoOffset), res_ty
 
-  | IE_case _ -> failwith "not implemented"
+  | IE_case _ -> failwith "not implemented 4"
 
   | IE_prim (n, el) ->
     match n.name, el with

@@ -308,7 +308,7 @@ and type_expr_desc env loc = function
           let else_ = {texpr_desc = TE_when (te3, "False", te1); texpr_type = tt; texpr_loc = te3.texpr_loc} in
           TE_merge (te1, ["True", then_; "False", else_]), tt
       | {texpr_desc = TE_app (f, args); _} ->
-          failwith "not implemented"
+          failwith "not implemented 3"
       | _ -> error loc (Other "The condition must be an identifier")
     else
       error loc (ExpectedType (te3.texpr_type, te2.texpr_type))
@@ -508,7 +508,7 @@ let type_equation env eq =
         error
           eq.peq_expr.pexpr_loc (ExpectedType (expr.texpr_type, patt.tpatt_type))
   | PE_match _ ->
-      failwith "not implemented"
+      failwith "not implemented 4"
   | PE_automaton autom ->
       error autom.pautom_loc (Unreachable "uncompiled automaton")
 
