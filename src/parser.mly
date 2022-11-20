@@ -101,16 +101,6 @@ ptype:
 ;
 
 node:
-/* | NODE IDENT LPAREN in_params RPAREN
-  RETURNS LPAREN out_params RPAREN SEMICOL
-  local_params
-  AUTOMATON autom=list(case) END semi_opt
-    { { pn_name = $2;
-    pn_input = $4;
-    pn_output = $8;
-    pn_local = $11;
-    pn_equs = [];
-    pn_loc = $sloc; } } */
 | NODE n=IDENT LPAREN p=in_params RPAREN
   RETURNS LPAREN op=out_params RPAREN SEMICOL
   lp=local_params
