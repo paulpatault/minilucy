@@ -1,6 +1,6 @@
 enum inductive_bool{TRUE, FALSE};
-enum typ__1{AWAIT, RUN};
-struct aux_mem {
+enum typ__1{CHAUD, FROID};
+struct oscillateur_mem {
 
   int aux__2_next6;
   enum typ__1 aux__4_next5;
@@ -10,10 +10,10 @@ struct aux_mem {
   int aux__12_next1;
 };
 
-void aux_init (struct aux_mem* mem) {
+void oscillateur_init (struct oscillateur_mem* mem) {
   mem->aux__2_next6 = 1;
   
-  mem->aux__4_next5 = AWAIT;
+  mem->aux__4_next5 = CHAUD;
   
   mem->aux__6_next4 = 1;
   
@@ -24,7 +24,7 @@ void aux_init (struct aux_mem* mem) {
   mem->aux__12_next1 = 0;
 }
 
-int aux (struct aux_mem* mem, int lo, int hi) {
+int oscillateur (struct oscillateur_mem* mem, int lo, int hi) {
   int aux__12;
   int aux__11;
   int aux__10;
@@ -64,14 +64,14 @@ int aux (struct aux_mem* mem, int lo, int hi) {
   
   aux__12 = mem->aux__12_next1;
   
-  state__2 = aux__2 ? AWAIT : aux__4;
+  state__2 = aux__2 ? CHAUD : aux__4;
   
   switch (state__2) {
-    case AWAIT: {
+    case CHAUD: {
       switch_1 = aux__6 ? 0 : (aux__8 + 1);
       break;
     }
-    case RUN: {
+    case FROID: {
       switch_1 = aux__10 ? 0 : (aux__12 - 1);
       break;
     }
@@ -89,32 +89,32 @@ int aux (struct aux_mem* mem, int lo, int hi) {
   
   switch (cond__3) {
     case 1: {
-      switch_3 = RUN;
+      switch_3 = FROID;
       break;
     }
     case 0: {
-      switch_3 = AWAIT;
+      switch_3 = CHAUD;
       break;
     }
   };
   
   switch (cond__4) {
     case 1: {
-      switch_4 = AWAIT;
+      switch_4 = CHAUD;
       break;
     }
     case 0: {
-      switch_4 = RUN;
+      switch_4 = FROID;
       break;
     }
   };
   
   switch (state__2) {
-    case AWAIT: {
+    case CHAUD: {
       switch_2 = switch_3;
       break;
     }
-    case RUN: {
+    case FROID: {
       switch_2 = switch_4;
       break;
     }
@@ -138,11 +138,11 @@ int aux (struct aux_mem* mem, int lo, int hi) {
 }
 
 struct main1_mem {
-  struct aux_mem aux_next1;
+  struct oscillateur_mem oscillateur_next1;
 };
 
 void main1_init (struct main1_mem* mem) {
-  aux_init(&(mem->aux_next1));
+  oscillateur_init(&(mem->oscillateur_next1));
 }
 
 int main1 (struct main1_mem* mem) {
@@ -153,7 +153,7 @@ int main1 (struct main1_mem* mem) {
   
   o = 1;
   
-  call_1 = aux(&(mem->aux_next1), -(5), 5);
+  call_1 = oscillateur(&(mem->oscillateur_next1), -(5), 5);
   
   aux__13 = call_1;
   

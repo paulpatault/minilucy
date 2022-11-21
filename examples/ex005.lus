@@ -2,21 +2,21 @@
      Le programme aux ci dessous :
 -*)
 
-node aux (lo, hi : int) returns (x: int);
+node oscillateur (lo, hi : int) returns (x: int);
 let
   automaton
-  | Await ->
+  | Chaud ->
       x = 0 -> pre x + 1;
-      until (x >= hi) continue Run
-  | Run ->
+      until (x >= hi) continue Froid
+  | Froid ->
       x = 0 -> pre x - 1;
-      until (x <= lo) continue Await
+      until (x <= lo) continue Chaud
   end
 tel
 
 node main1 () returns (o: bool);
 var x: int;
 let
-  x = aux (-5, 5);
+  x = oscillateur (-5, 5);
   o = true;
 tel
