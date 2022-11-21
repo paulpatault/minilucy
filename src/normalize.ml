@@ -75,7 +75,7 @@ let rec normalize ctx e =
       let y_eq = {ceq_patt = y_patt; ceq_expr = e2'} in
       let x_decl, x_patt, x_expr = new_patt e in
       let x_eq = {ceq_patt = x_patt;
-                  ceq_expr = {e with cexpr_desc = CE_fby (e1', e2')}}
+                  ceq_expr = {e with cexpr_desc = CE_fby (e1', y_expr)}}
       in
       (x_eq::y_eq::new_eqs, x_decl@y_decl@new_vars), x_expr
   | CE_merge (id, ["True", e_true; "False", e_false]) ->

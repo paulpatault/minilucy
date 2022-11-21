@@ -4,8 +4,18 @@ let gen = let r = ref 0 in fun s -> incr r; Printf.sprintf "%s__%d" s !r
 
 let mk_merge var over t eqs loc =
   let merge = PE_merge_adt (over, (List.map2 (fun tt eq -> tt, eq) t eqs)) in
-  let peq_expr = {pexpr_desc = merge; pexpr_loc = loc} in
-  PE_eq ({peq_patt = var; peq_expr})
+  {pexpr_desc = merge; pexpr_loc = loc}
+
+let mk_merge_eq var over t eqs loc =
+   let peq_expr = mk_merge var over t eqs loc in
+   PE_eq ({peq_patt = var; peq_expr})
+
+let mk_fby_merge init var over t eqs loc =
+  let expr_merge = mk_merge var over t eqs loc in
+  let pre = {pexpr_desc = PE_pre expr_merge; pexpr_loc = loc} in
+  let fby = PE_arrow (init, pre) in
+  let fby = {pexpr_desc = fby; pexpr_loc = loc } in
+  PE_eq ({peq_patt = var; peq_expr = fby})
 
 let mk_constr_expr name loc = { pexpr_desc = PE_constr name; pexpr_loc = loc }
 
@@ -18,7 +28,7 @@ let trad {pautom_loc; pautom} =
   let eqs = List.map (fun {pn_case={pn_equation;_}; _} -> pn_equation) pautom in
   let t = Asttypes.{ name = gen "typ" ; constr = constrs } in
 
-  let (n, _, _) as state_init_local = gen "state", Asttypes.Tadt t.name, List.hd constrs in
+  let (n, _) as state_init_local = gen "state", Asttypes.Tadt t.name in
 
   let vv = ref None in
   let eqs_var =
@@ -53,8 +63,13 @@ let trad {pautom_loc; pautom} =
     { pexpr_desc = PE_ident n;
       pexpr_loc = pautom_loc } in
 
-  let merge_var   = mk_merge var_var   over t.constr eqs_var   pautom_loc in
-  let merge_state = mk_merge var_state over t.constr eqs_state pautom_loc in
+  let merge_var = mk_merge_eq var_var over t.constr eqs_var pautom_loc in
+
+  let init =
+    { pexpr_desc = PE_const (Cadt (t.name, Some (List.hd constrs)));
+      pexpr_loc = pautom_loc } in
+
+  let merge_state = mk_fby_merge init var_state over t.constr eqs_state pautom_loc in
 
   let set_conds = cond_locals in
 
@@ -62,18 +77,18 @@ let trad {pautom_loc; pautom} =
 
 let map_eq l =
   let acc, l =
-    List.fold_left_map (fun ((locals_non_init, loc_acc, typ_acc) as acc) e -> match e with
+    List.fold_left_map (fun ((locals_non_init, typ_acc) as acc) e -> match e with
     | PE_automaton a ->
         let t, v, state, a = trad a in
-        (v @ locals_non_init, state :: loc_acc, t :: typ_acc), a
-    | _ -> acc, [e]) ([], [], []) l
+        let v = List.map (fun e -> e, Asttypes.Tbool) v in
+        (state :: v @ locals_non_init, t :: typ_acc), a
+    | _ -> acc, [e]) ([], []) l
   in
   acc, List.flatten l
 
 let apply node =
-  let (locals, locals_init, types), pn_equs = map_eq node.pn_equs in
-  let locals = List.map (fun e -> e, Asttypes.Tbool) locals in
-  types, { node with pn_init_local = locals_init ; pn_equs ; pn_local = locals @ node.pn_local}
+  let (locals, types), pn_equs = map_eq node.pn_equs in
+  types, { node with pn_equs ; pn_local = locals @ node.pn_local}
 
 let compile { p_nodes; p_types } =
   let acc, nodes = List.fold_left_map (fun acc e -> let types, trad = apply e in types @ acc, trad) [] p_nodes in

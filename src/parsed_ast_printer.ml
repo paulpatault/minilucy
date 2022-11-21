@@ -57,21 +57,15 @@ let print_eq fmt = function
 let print_var_dec fmt (name, ty) =
   fprintf fmt "%s : %a" name print_base_type ty
 
-let print_var_init_dec fmt (name, ty, init) =
-  fprintf fmt "%s: %a init %s" name print_base_type ty init
-
 let rec print_var_dec_list = print_list_sp print_var_dec ";"
-
-let rec print_var_init_dec_list = print_list_sp print_var_init_dec ";"
 
 let print_node fmt nd =
   fprintf fmt
-    "@[node %s(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\nlocal @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %s(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     nd.pn_name
     print_var_dec_list nd.pn_input
     print_var_dec_list nd.pn_output
     print_var_dec_list nd.pn_local
-    print_var_init_dec_list nd.pn_init_local
     (print_list_eol print_eq ";") nd.pn_equs
 
 let print_node_list_std fmt ndl =

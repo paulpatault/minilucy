@@ -6,5 +6,7 @@
 * main-node accepte n'importe quel type de variable
 * automate :
   - "Automate d'automate" : cf. ex006.lus
-  - sortes automates : `until-then`, `until-continue`, `unless-then`
+  - sortes automates : `until-then`, `unless-continue`, `unless-then`
   - ajouter les enum(init) dans la mémoire du noeud
+
+

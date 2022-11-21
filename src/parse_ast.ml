@@ -60,7 +60,6 @@ type p_node =
       pn_input: (ident * base_ty) list;
       pn_output: (ident * base_ty) list;
       pn_local: (ident * base_ty) list;
-      pn_init_local: (ident * base_ty * string) list;
       pn_equs: p_equation list;
       pn_loc: location;
       (* pn_reset: ident option; *)

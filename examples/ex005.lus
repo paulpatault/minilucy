@@ -7,41 +7,16 @@ let
   automaton
   | Await ->
       x = 0 -> pre x + 1;
-      until (x <= lo) continue Run
+      until (x >= hi) continue Run
   | Run ->
       x = 0 -> pre x - 1;
-      until (x >= hi) continue Await
+      until (x <= lo) continue Await
   end
 tel
 
-(*-
-     compile vers
--*)
-
-(* type typ__1 =
-  | Await
-  | Run
-
-node aux(lo : int; hi : int) returns (x : int)
-var cond_1, cond_2 : bool;
-local state__2: typ__1 init Await;
-let
-  cond_1 = le(x, lo);
-  cond_2 = gt(x, hi);
-
-  (state__2) = merge state__2
-                 (Await -> ite(cond_1, Run, Await))
-                 (Run ->   ite(cond_2, Await, Run));
-
-  (x) = merge state__2
-          (Await -> (0) -> (add(pre (x), 1)))
-          (Run -> (0) -> (sub(pre (x), 1)));
-tel *)
-
 node main1 () returns (o: bool);
-var x, y: int;
+var x: int;
 let
-  x = aux (1, 3);
-  y = aux (1, 3);
-  o = (x = y);
+  x = aux (-5, 5);
+  o = true;
 tel

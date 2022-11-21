@@ -136,7 +136,6 @@ end
 
 type env = { vars : (Ident.t * base_ty * io) M.t; types : adt_type list}
 
-
 let base_ty_of_ty loc t =
   match t with
   | [t'] -> t'
@@ -547,21 +546,11 @@ let check_outputs loc env equs =
     error loc (UndefinedOutputs
                  (List.map (fun x -> x.Ident.name) (S.elements not_defined)))
 
-(* let check_causality loc inputs equs = *)
-(*   begin try ignore (Scheduling.schedule_equs inputs equs) *)
-(*     with Scheduling.Causality -> *)
-(*       List.iter (Typed_ast_printer.print_eq std_formatter) equs; *)
-(*       error loc Causality *)
-(*   end *)
-
 let type_node ptypes n =
   let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in
-  let l = List.map (fun (a,b,c) -> a,b) n.pn_init_local in
-  let env = Gamma.adds n.pn_loc Vpatt env l in
   let env = Gamma.adds n.pn_loc Vinput env n.pn_input in
   let env = { vars = env; types = ptypes } in
   let equs = List.map (type_equation env) n.pn_equs in
-  (* let auto = type_automaton env n.pn_automaton in *)
   check_outputs n.pn_loc env equs;
   let t_in = List.map (fun (_, ty) -> ty) n.pn_input in
   let t_out = List.map (fun (_, ty) -> ty) n.pn_output in
@@ -581,23 +570,14 @@ let type_node ptypes n =
       (fun (x, ty) -> let x', _, _ = Gamma.find n.pn_loc env.vars x in (x', ty), None)
       n.pn_local
   in
-  let init_local =
-    List.map
-      (fun (x, ty, ival) ->
-         let x', _, _ = Gamma.find n.pn_loc env.vars x in
-         let ename = match ty with Tadt s -> s | _ -> assert false in
-         (x', ty), Some (Cadt (ename, Some ival))
-      ) n.pn_init_local
-  in
   let node =
     { tn_name = name;
       tn_input = input;
       tn_output = output;
-      tn_local = local @ init_local;
+      tn_local = local;
       tn_equs = equs;
       tn_loc = n.pn_loc; }
   in
-  (* check_causality node.tn_loc node.tn_input equs; *)
   node
 
 let check_main ft main =

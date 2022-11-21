@@ -104,13 +104,13 @@ node:
 | NODE n=IDENT LPAREN p=in_params RPAREN
   RETURNS LPAREN op=out_params RPAREN SEMICOL
   lp=local_params
-  lip=list(local_params_init)
+  /* lip=list(local_params_init) */
   LET eql=eq_list TEL semi_opt
     { { pn_name = n;
     pn_input = p;
     pn_output = op;
     pn_local = lp;
-    pn_init_local = lip;
+    (* pn_init_local = lip; *)
     pn_equs = eql;
     pn_loc = $sloc; } }
 ;

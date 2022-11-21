@@ -31,7 +31,8 @@ let rec translate_const types = function
       CEnum (exp, enuminfo.ename, enuminfo)
 
   | Cadt (s, None) -> (* get_default s *)
-      assert false
+      let ts = List.find (fun {name; constr} -> name = s) types in
+      translate_const types (Cadt (s, Some (List.hd ts.constr)))
 
 and mk_enum =
   let h = Hashtbl.create 20 in
