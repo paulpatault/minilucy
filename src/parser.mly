@@ -10,6 +10,7 @@
 
 %token AND
 %token ARROW
+%token BAR
 %token BOOL
 %token CONST
 %token COLON
@@ -51,6 +52,15 @@
 %token RESET
 %token WHEN WHENOT
 
+%token AUTOMATON
+%token UNLESS
+%token UNTIL
+%token CONTINUE
+%token DONE
+%token TYPE
+%token INIT
+%token LOCAL
+
 %nonassoc THEN
 %nonassoc ELSE
 %right ARROW
@@ -71,7 +81,13 @@
 
 %%
 
-file: node_decs EOF { $1 }
+file: type_decs node_decs EOF
+  { { p_types = $1 ; p_nodes = $2; } }
+;
+
+type_decs:
+| /* empty */       { [] }
+| ptype type_decs    { $1 :: $2 }
 ;
 
 node_decs:
@@ -79,17 +95,29 @@ node_decs:
 | node node_decs    { $1 :: $2 }
 ;
 
+ptype:
+| TYPE tname=IDENT EQUAL BAR? l=separated_list(BAR, IDENT)
+  { {name = tname; constr = l} }
+;
+
 node:
-| NODE IDENT LPAREN in_params RPAREN
-  RETURNS LPAREN out_params RPAREN SEMICOL
-  local_params
-  LET eq_list TEL semi_opt
-    { { pn_name = $2;
-    pn_input = $4;
-    pn_output = $8;
-    pn_local = $11;
-    pn_equs = $13;
+| NODE n=IDENT LPAREN p=in_params RPAREN
+  RETURNS LPAREN op=out_params RPAREN SEMICOL
+  lp=local_params
+  lip=list(local_params_init)
+  LET eql=eq_list TEL semi_opt
+    { { pn_name = n;
+    pn_input = p;
+    pn_output = op;
+    pn_local = lp;
+    pn_init_local = lip;
+    pn_equs = eql;
     pn_loc = $sloc; } }
+;
+
+local_params_init:
+| LOCAL id=IDENT COLON t=IDENT INIT vo=IDENT
+    { (id, Tadt t, vo) }
 ;
 
 %public %inline loc(X):
@@ -130,11 +158,10 @@ param_list_semicol:
     { $1 @ $3 }
 ;
 
-
 param:
-  | ident_comma_list COLON typ
-      { let typ = $3 in
-        List.map (fun id -> (id, typ)) $1 }
+| ident_comma_list COLON typ
+    { let typ = $3 in
+      List.map (fun id -> (id, typ)) $1 }
 ;
 
 eq_list:
@@ -146,7 +173,23 @@ eq_list:
 
 eq:
 | pattern EQUAL expr SEMICOL
-    { { peq_patt = $1; peq_expr = $3; } }
+    { PE_eq { peq_patt = $1; peq_expr = $3; } }
+| AUTOMATON pautom=list(case_autom) END semi_opt
+    { PE_automaton ({pautom ; pautom_loc = $sloc}) }
+;
+
+case_autom:
+| pn_case=case UNTIL pn_cond=expr CONTINUE pn_out=IDENT
+  { {pn_case; pn_cond; pn_out; pn_weak=true}  }
+| pn_case=case UNLESS pn_cond=expr THEN pn_out=IDENT
+  { {pn_case; pn_cond; pn_out; pn_weak=false}  }
+/* | pn_case=case
+  { {pn_case; pn_cond = mk_expr (PE_const (Cbool false)) $sloc; pn_out = "todo"; pn_weak=false}  } */
+;
+
+case:
+| BAR pn_constr=IDENT ARROW pn_equation=eq
+  { {pn_constr; pn_equation; pn_loc = $sloc} }
 ;
 
 pattern:
@@ -202,15 +245,19 @@ expr:
     { mk_expr (PE_pre ($2))  $sloc}
 | LPAREN expr COMMA expr_comma_list RPAREN
     { mk_expr (PE_tuple ($2::$4))  $sloc}
-| MERGE IDENT merge_branche merge_branche
+| MERGE IDENT merge_branche(CONST_BOOL) merge_branche(CONST_BOOL)
     { let ident = mk_expr (PE_ident $2) $loc($2) in
     mk_expr (PE_merge (ident, $3, $4)) $sloc }
+
+| MERGE IDENT list(merge_branche(IDENT))
+    { let ident = mk_expr (PE_ident $2) $loc($2) in
+    mk_expr (PE_merge_adt (ident, $3)) $sloc }
 /* | expr WHEN expr       { mk_expr (PE_when ($2, $3)) } */
 /* | expr WHENOT expr     { mk_expr (PE_whenot ($2, $3)) } */
 ;
 
-merge_branche:
- LPAREN CONST_BOOL ARROW expr RPAREN { ($2, $4) }
+merge_branche(X):
+ LPAREN X ARROW expr RPAREN { ($2, $4) }
 ;
 
 const:

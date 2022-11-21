@@ -4,13 +4,14 @@ open Format
 open Asttypes
 open Clocked_ast
 open Clocks
+open Print_base
 
 let rec pp_ck fmt = function
   | Cbase -> fprintf fmt "Base"
-  | Con (c, b, id) ->
-    fprintf fmt "@[%a on %b(%a)@]"
+  | Con (c, s, id) ->
+    fprintf fmt "@[%a on %s(%a)@]"
       pp_ck c
-      b
+      s
       Ident.print id
   | (Cvar {contents = Clink _}) as c ->
     let c = ck_repr c in
@@ -31,6 +32,8 @@ let pp_const fmt c = match c with
   | Cbool b -> fprintf fmt "%b" b
   | Cint i -> fprintf fmt "%d" i
   | Creal f -> fprintf fmt "%f" f
+  | Cadt (s, None) -> fprintf fmt "default(%s)" s
+  | Cadt (s, Some v) -> fprintf fmt "%s(%s)" s v
 
 let pp_op fmt op = match op with
   | Op_eq -> fprintf fmt "eq"
@@ -66,13 +69,13 @@ let rec pp_exp fmt e = match e.cexpr_desc with
       fprintf fmt "pre (@[%a@])" pp_exp e
   | CE_tuple e_list ->
       fprintf fmt "(@[%a@])" pp_tuple_arg_list e_list
-  | CE_merge (name, e1, e2) ->
-    fprintf fmt "@[merge %a @[(true -> %a)@] @[(false -> %a)@]@]"
-      Ident.print name pp_exp e1 pp_exp e2
+  | CE_merge (m, l) ->
+      fprintf fmt "@[merge %a @\n  @[%a@]@]" pp_exp m
+        (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%s -> %a)" id pp_exp exp)) l
   | CE_fby (e1, e2) ->
     fprintf fmt "@[%a fby %a@]" pp_exp e1 pp_exp e2
-  | CE_when (e1, b, id) ->
-    fprintf fmt "@[%a when %b(%a)@]" pp_exp e1 b Ident.print id
+  | CE_when (e1, s, eid) ->
+    fprintf fmt "@[%a when %s(%a)@]" pp_exp e1 s pp_exp eid
 
 and pp_arg_list fmt e_list = match e_list with
   | [] -> ()
@@ -94,33 +97,43 @@ let pp_eq fmt eq =
     (pp_print_list ~pp_sep:pp_comma Ident.print) eq.ceq_patt.cpatt_desc
     pp_exp eq.ceq_expr
 
-let pp_base_type fmt = function
-  | Tbool -> fprintf fmt "bool"
-  | Tint -> fprintf fmt "int"
-  | Treal -> fprintf fmt "real"
-
 (* let pp_type = pp_list pp_cbase_type "*" *)
 
 let pp_var fmt (name, ty, ck) =
   fprintf fmt "%a : %a (%a)"
     Ident.print name
-    pp_base_type ty
+    print_base_type ty
     pp_ck ck
+
+let pp_var_init fmt ((name, ty, ck), v) =
+  fprintf fmt "%a : %a (%a) init %a"
+    Ident.print name
+    print_base_type ty
+    pp_ck ck
+    pp_const v
 
 let pp_var_list fmt =
   pp_print_list ~pp_sep:pp_comma pp_var fmt
+
+let pp_var_init_list fmt =
+  pp_print_list ~pp_sep:pp_comma pp_var_init fmt
 
 let pp_eol fmt () =
   fprintf fmt ";@\n"
 
 let pp_node fmt nd =
   fprintf fmt
-    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\nlocal @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     Ident.print nd.cn_name
     pp_var_list nd.cn_input
     pp_var_list nd.cn_output
     pp_var_list nd.cn_local
+    pp_var_init_list nd.cn_init_local
     (pp_print_list ~pp_sep:pp_eol pp_eq) nd.cn_equs
 
-let pp fmt =
-  fprintf fmt "%a@." (pp_print_list ~pp_sep:pp_print_newline pp_node)
+let pp fmt f =
+  fprintf fmt "%a@\n@\n%a@."
+  print_adttype_list_std f.c_types
+  (pp_print_list ~pp_sep:pp_print_newline pp_node) f.c_nodes
+
+(* let print_file file *)

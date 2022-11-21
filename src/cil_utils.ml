@@ -2,6 +2,7 @@ open GoblintCil.Cil
 open Asttypes
 open Typed_ast
 open Ident
+open Utils
 
 let comp_num = ref 0
 
@@ -10,35 +11,66 @@ let get_next_comp_name () =
   incr comp_num;
   name
 
-let translate_type = function
+let rec translate_const types = function
+  | Cbool b ->
+      let cilint = mkCilint IInt (if b then 1L else 0L) in
+      CInt (cilint, IInt, None)
+  | Cint i ->
+      let cilint = mkCilint IInt (Int64.of_int i) in
+      CInt (cilint, IInt, None)
+  | Creal f ->
+      CReal (f, FFloat, None)
+
+  | Cadt (s, Some e) ->
+      let enuminfo = match mk_enum types s with
+        | TEnum (enuminfo, attribute) -> enuminfo
+        | _ -> assert false in
+      let e_uppercase = Bytes.of_string e |> Bytes.uppercase_ascii |> Bytes.to_string in
+      let _, exp, _ = List.find (fun (name, exp, loc) ->
+        name = e_uppercase) enuminfo.eitems in
+      CEnum (exp, enuminfo.ename, enuminfo)
+
+  | Cadt (s, None) -> (* get_default s *)
+      assert false
+
+and mk_enum =
+  let h = Hashtbl.create 20 in
+  fun types ename ->
+    if Hashtbl.mem h ename then Hashtbl.find h ename
+    else
+      let enum =
+        let ts = List.find (fun {name; constr} -> name = ename) types in
+        let eitems = List.mapi (fun i c ->
+          let ename = Bytes.of_string c |> Bytes.uppercase_ascii |> Bytes.to_string in
+          let exp = Const (translate_const types (Cint i)) in
+          ename, exp, locUnknown) ts.constr in
+        let enuminfo = { ename; eitems; ekind = IInt; eattr = []; ereferenced = false; } in
+        let attributes = [] in
+        TEnum (enuminfo, attributes) in
+      Hashtbl.add h ename enum;
+      enum
+
+and translate_type types = function
   | Tbool -> TInt (IInt, [])
   | Tint -> TInt (IInt, [])
   | Treal -> TFloat (FFloat, [])
-
-let translate_const = function
-  | Cbool b ->
-    let cilint = mkCilint IInt (if b then 1L else 0L) in
-    CInt (cilint, IInt, None)
-  | Cint i ->
-    let cilint = mkCilint IInt (Int64.of_int i) in
-    CInt (cilint, IInt, None)
-  | Creal f ->
-    CReal (f, FFloat, None)
+  | Tadt s -> mk_enum types s
 
 let true_const = integer 1
 let false_const = integer 0
 let bool_t = TInt (IInt, [])
 let int_t = TInt (IInt, [])
 let real_t = TFloat (FFloat, [])
+let adt_t types s = translate_type types (Tadt s)
 
 let clean_name name =
   let str = Str.regexp {|'|} in
   Str.global_replace str "__" name
 
-let mk_struct name var_l =
+let mk_struct types name var_l =
   let comp = mkCompInfo true name (fun _ -> []) [] in
   let fields = List.map (fun ({name; _}, typ, _) ->
-      {fcomp = comp; fname = clean_name name; ftype = translate_type typ; fbitfield = None; fattr = []; floc = locUnknown})
+      {fcomp = comp; fname = clean_name name; ftype = translate_type types typ; fbitfield = None; fattr = []; floc = locUnknown})
       var_l
   in
   comp.cfields <- fields;

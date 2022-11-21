@@ -14,5 +14,3 @@ let
         (true -> false)
         (false -> true);
 tel
-
-

@@ -30,7 +30,7 @@ and i_expr_desc =
   | IE_app of Ident.t * Ident.t * i_expr list
   | IE_prim of Ident.t * i_expr list
   | IE_tuple of i_expr list
-  | IE_case of Ident.t * (i_expr * i_expr) list
+  | IE_case of i_expr * (i_expr * i_expr) list
 
 type i_equation = {
   ieq_patt: cvar list;
@@ -42,10 +42,11 @@ type i_node = {
   in_input_step: cvar list;
   in_output_step: cvar list;
   in_local: cvar list;
+  in_init_local: (cvar * const) list;
   in_mem: mem;
   in_init: init;
   in_compute: i_equation list;
   in_update: (Ident.t * atom) list;
 }
 
-type i_file = i_node list
+type i_file = { i_nodes: i_node list; i_types: adt_type list }

@@ -55,27 +55,27 @@ let mk_mem_node_fields globals mem_comp node_mem =
   mem_comp.cfields <- fields@(mem_comp.cfields);
   mem_comp
 
-let compile_mem_comp globals node =
+let compile_mem_comp types globals node =
   let mem = node.in_mem in
-  let mem_fby_only = mk_struct (node.in_name.name^"_mem") mem.fby_mem in
+  let mem_fby_only = mk_struct types (node.in_name.name^"_mem") mem.fby_mem in
   let mem_comp = mk_mem_node_fields globals mem_fby_only mem.node_mem in
   mem_comp
 
-let compile_return_type file node =
+let compile_return_type types file node =
   let ret_vars = node.in_output_step in
   match ret_vars with
   | [] -> file, TVoid ([])
-  | [_, ty, _] -> file, translate_type ty
+  | [_, ty, _] -> file, translate_type types ty
   | l ->
     let ret_name = (node.in_name.name^"_ret") in
-    let ret_comp = mk_struct ret_name l in
+    let ret_comp = mk_struct types ret_name l in
     file.globals <- (GCompTag (ret_comp, locUnknown))::file.globals;
     file, TComp (ret_comp, [])
 
-let compile_func_type file node return_type mem_comp =
+let compile_func_type types file node return_type mem_comp =
   let params = List.map (fun (id, ty, _) ->
       let name = clean_name id.name in
-      let typ = translate_type ty in
+      let typ = translate_type types ty in
       (name, typ, []))
       node.in_input_step
   in
@@ -89,18 +89,28 @@ let compile_func_type file node return_type mem_comp =
   | [] -> file, TFun (return_type, None, false, [])
   | l -> file, TFun (return_type, Some l, false, [])
 
-let compile_locals file fundec =
+let compile_locals types file fundec =
   List.fold_left (fun (fundec, locals) ({name; _}, ty, _) ->
-      let loc = makeLocalVar fundec (clean_name name) (translate_type ty) in
+      let loc = makeLocalVar fundec (clean_name name) (translate_type types ty) in
       fundec, loc::locals)
     (fundec, [])
 
-let compile_fundec file node mem_comp =
-  let file, return_type = compile_return_type file node in
-  let file, func_type = compile_func_type file node return_type mem_comp in
+let compile_init_locals locals types file fundec =
+  (* assert false; (* init n'apparait pas *) *)
+  List.fold_left (fun (fundec, locals) (({name; _}, ty, _), init_value) ->
+      Format.printf "-------------------------------------------------------------------%s@." name;
+      let init = SingleInit (Const (translate_const types init_value)) in
+      let loc = makeLocalVar ~init fundec (clean_name name) (translate_type types ty) in
+      fundec, loc::locals)
+    (fundec, locals)
+
+let compile_fundec types file node mem_comp =
+  let file, return_type = compile_return_type types file node in
+  let file, func_type = compile_func_type types file node return_type mem_comp in
   let func_var = makeGlobalVar (node.in_name.name) func_type in
   let fundec = mk_fundec func_var in
-  let fundec, locals = compile_locals file fundec node.in_local in
+  let fundec, locals = compile_locals types file fundec node.in_local in
+  let fundec, init_locals = compile_init_locals locals types file fundec node.in_init_local in
   (* let fundec, locals = compile_locals file fundec node.in_output_step in (* INFO: Maybe do this another way *) *)
   begin
     match return_type with
@@ -112,7 +122,7 @@ let compile_fundec file node mem_comp =
   end;
   file, fundec
 
-let compile_init file node mem_comp =
+let compile_init types file node mem_comp =
   let name = node.in_name.name in
   let fun_ty = TFun (TVoid [], Some ["mem", TPtr (TComp (mem_comp, []), []), []], false, []) in
   let fun_var = makeGlobalVar (name^"_init") fun_ty in
@@ -121,10 +131,10 @@ let compile_init file node mem_comp =
   let init_fby =
     List.map (fun (id, atom) ->
         match atom with
-        | Ident _ -> failwith "Not implemented yet"
+        | Ident _ -> failwith "Not implemented 5"
         | Const c ->
           let field = find_field_list (id.name) mem_comp.cfields in
-          let c = translate_const c in
+          let c = translate_const types c in
           let field_lval = (Mem (Lval (Var mem_var, NoOffset)), Field (field, NoOffset)) in
           let set_instr = Set(field_lval, Const c, locUnknown, locUnknown) in
           mkStmtOneInstr set_instr)
@@ -146,24 +156,25 @@ let compile_init file node mem_comp =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file, fundec
 
-let compile_eq_type file patt =
+let compile_eq_type types file patt =
   match patt with
-  | [_, ty, _] -> file, translate_type ty
+  | [_, ty, _] -> file, translate_type types ty
   | l ->
     let name = gen_eq_ty_name () in
-    let compinfo = mk_struct name l in
+    let compinfo = mk_struct types name l in
     file.globals <- (GCompTag (compinfo, locUnknown))::file.globals;
     file, TComp (compinfo, [])
 
-let rec compile_expr file node fundec expr =
+let rec compile_expr types file node fundec expr =
   match expr.iexpr_desc with
   | IE_const c ->
-    file, GoblintCil.Const (translate_const c),
+    file, GoblintCil.Const (translate_const types c),
     begin
       match c with
       | Cbool _ -> bool_t
       | Cint _ -> int_t
       | Creal _ -> real_t
+      | Cadt (s, _) -> adt_t types s
     end
   | IE_ident id ->
     let lval, ty =
@@ -195,112 +206,112 @@ let rec compile_expr file node fundec expr =
     begin
       match op, el with
       | Op_eq, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Eq, e1', e2', ty), bool_t
       | Op_neq, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Ne, e1', e2', ty), bool_t
       | Op_lt, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Lt, e1', e2', ty), bool_t
       | Op_le, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Le, e1', e2', ty), bool_t
       | Op_gt, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Gt, e1', e2', ty), bool_t
       | Op_ge, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Ge, e1', e2', ty), bool_t
       | Op_add, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (PlusA, e1', e2', ty), int_t
       | Op_sub, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (MinusA, e1', e2', ty), int_t
       | Op_mul, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Mult, e1', e2', ty), int_t
       | Op_div, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Div, e1', e2', ty), int_t
       | Op_mod, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Mod, e1', e2', ty), int_t
       | Op_add_f, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (PlusA, e1', e2', ty), real_t
       | Op_sub_f, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (MinusA, e1', e2', ty), real_t
       | Op_mul_f, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Mult, e1', e2', ty), real_t
       | Op_div_f, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (Div, e1', e2', ty), real_t
       | Op_not, [e1] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, UnOp (LNot, e1', ty), bool_t
       | Op_sub, [e1] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, UnOp (Neg, e1', ty), int_t
       | Op_sub_f, [e1] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, UnOp (Neg, e1', ty), real_t
       | Op_and, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (LAnd, e1', e2', ty), bool_t
       | Op_or, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (LOr, e1', e2', ty), bool_t
       | Op_impl, [e1; e2] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let ty = translate_type @@ List.hd e1.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let ty = translate_type types @@ List.hd e1.iexpr_type in
         file, BinOp (LOr, UnOp (LNot, e1', ty), e2', ty), bool_t
       | Op_if, [e1; e2; e3] ->
-        let file, e1', _ = compile_expr file node fundec e1 in
-        let file, e2', _ = compile_expr file node fundec e2 in
-        let file, e3', _ = compile_expr file node fundec e3 in
-        let ty = translate_type @@ List.hd e2.iexpr_type in
+        let file, e1', _ = compile_expr types file node fundec e1 in
+        let file, e2', _ = compile_expr types file node fundec e2 in
+        let file, e3', _ = compile_expr types file node fundec e3 in
+        let ty = translate_type types @@ List.hd e2.iexpr_type in
         file, Question (e1', e2', e3', ty), ty
       | _ -> assert false;
     end
@@ -310,12 +321,12 @@ let rec compile_expr file node fundec expr =
       |> List.flatten
       |> List.map (fun ty ->  Ident.make (gen_tuple_field_name ()) Stream, ty, ())
     in
-    let tuple_comp = mk_struct (gen_tuple_ty_name ()) tuple_ty in
+    let tuple_comp = mk_struct types (gen_tuple_ty_name ()) tuple_ty in
     file.globals <- (GCompTag (tuple_comp, locUnknown))::file.globals;
     let tuple_var = makeLocalVar fundec (tuple_comp.cname^"__") (TComp (tuple_comp, [])) in
     let file, el' =
       List.fold_left_map (fun file e ->
-          let file, e', _ = compile_expr file node fundec e in
+          let file, e', _ = compile_expr types file node fundec e in
           file, e')
         file
         el
@@ -331,7 +342,7 @@ let rec compile_expr file node fundec expr =
   | IE_app (n_name, mem_field, args) ->
     let file, args' =
       List.fold_left_map (fun file e ->
-          let file, arg, _ = compile_expr file node fundec e in
+          let file, arg, _ = compile_expr types file node fundec e in
           file, arg)
         file
         args
@@ -357,15 +368,15 @@ let rec compile_expr file node fundec expr =
     let call_stmt = mkStmtOneInstr call_instr in
     fundec.sbody <- append_stmt call_stmt fundec.sbody;
     file, Lval res_lval, ret_ty
-  | IE_case (id, cases) ->
+  | IE_case ({iexpr_desc = IE_ident id; _}, cases) ->
     let res_ty =
       let hd, _ = List.hd cases in
       let ty = hd.iexpr_type in
       match ty with
-      | [ty] -> translate_type ty
+      | [ty] -> translate_type types ty
       | tl ->
         let field_ty = List.map (fun ty -> Ident.make (gen_tuple_field_name ()) Stream, ty, ()) tl in
-        let compinfo = mk_struct (gen_tuple_ty_name ()) field_ty in
+        let compinfo = mk_struct types (gen_tuple_ty_name ()) field_ty in
         file.globals <- (GCompTag (compinfo, locUnknown))::file.globals;
         TComp (compinfo, [])
     in
@@ -373,8 +384,8 @@ let rec compile_expr file node fundec expr =
     let switch_lval = Var switch_res, NoOffset in
     let file, switch_stmts =
       List.fold_left (fun (file, stmts) (case, e) ->
-          let file, case', _ = compile_expr file node fundec case in
-          let file, e', _ = compile_expr file node fundec e in
+          let file, case', _ = compile_expr types file node fundec case in
+          let file, e', _ = compile_expr types file node fundec e in
           let set_instr = Set (switch_lval, e', locUnknown, locUnknown) in
           let stmt = mkStmtOneInstr set_instr in
           stmt.labels <- (Case (case', locUnknown, locUnknown))::stmt.labels;
@@ -402,19 +413,22 @@ let rec compile_expr file node fundec expr =
     let switch_stmt = mkStmt (Switch (lval, switch_block, switch_stmts, locUnknown, locUnknown)) in
     fundec.sbody <- append_stmt switch_stmt fundec.sbody;
     file, Lval (Var switch_res, NoOffset), res_ty
+
+  | IE_case _ -> failwith "not implemented 4"
+
   | IE_prim (n, el) ->
     match n.name, el with
     | "int_of_real", [e] ->
-      let file, e', _ = compile_expr file node fundec e in
+      let file, e', _ = compile_expr types file node fundec e in
       file, CastE (int_t, e'), int_t
     | "real_of_int", [e] ->
-      let file, e', _ = compile_expr file node fundec e in
+      let file, e', _ = compile_expr types file node fundec e in
       file, CastE (real_t, e'), real_t
     | _ -> assert false
 
 
-let compile_equation file node fundec ({ieq_patt = patt; ieq_expr = expr}) =
-  let file, expr, expr_ty = compile_expr file node fundec expr in
+let compile_equation types file node fundec ({ieq_patt = patt; ieq_expr = expr}) =
+  let file, expr, expr_ty = compile_expr types file node fundec expr in
   begin
     match patt with
     | [] -> assert false
@@ -456,19 +470,19 @@ let compile_equation file node fundec ({ieq_patt = patt; ieq_expr = expr}) =
   file
 
 
-let compile_compute file node fundec =
+let compile_compute types file node fundec =
   let block = fundec.sbody in
   let file =
     List.fold_left (fun file eq ->
-        compile_equation file node fundec eq)
+        compile_equation types file node fundec eq)
       file
       node.in_compute
   in
   fundec.sbody <- block;
   file, fundec
 
-let compile_atom file node fundec = function
-  | Const c -> GoblintCil.Const (translate_const c)
+let compile_atom types file node fundec = function
+  | Const c -> GoblintCil.Const (translate_const types c)
   | Ident id ->
     try
       let var = find_formal fundec (id.name) in
@@ -483,12 +497,12 @@ let compile_atom file node fundec = function
           Lval (Var ret_v, Field (field, NoOffset))
       end
 
-let compile_update file node fundec =
+let compile_update types file node fundec =
   if node.in_update <> [] then
     let mem_comp = find_gcomp (node.in_name.name^"_mem") file.globals in
     let mem_var = find_formal fundec "mem" in
     List.iter (fun (id, atom) ->
-        let e = compile_atom file node fundec atom in
+        let e = compile_atom types file node fundec atom in
         let mem_field = find_field_list (id.name) mem_comp.cfields in
         let set_lval = Mem (Lval (Var mem_var, NoOffset)), Field (mem_field, NoOffset) in
         let set_instr = Set (set_lval, e, locUnknown, locUnknown) in
@@ -511,17 +525,17 @@ let compile_return file node fundec =
   fundec.sbody <- append_stmt ret_stmt fundec.sbody;
   file, fundec
 
-let compile_node file node =
-  let mem_comp = compile_mem_comp file.globals node in
+let compile_node types file node =
+  let mem_comp = compile_mem_comp types file.globals node in
   let file =
     if mem_comp.cfields <> [] then
       file.globals <- (GCompTag (mem_comp, locUnknown))::file.globals;
-    let file, init_fundec = compile_init file node mem_comp in
+    let file, init_fundec = compile_init types file node mem_comp in
     file
   in
-  let file, fundec = compile_fundec file node mem_comp in
-  let file, fundec = compile_compute file node fundec in
-  let file, fundec = compile_update file node fundec in
+  let file, fundec = compile_fundec types file node mem_comp in
+  let file, fundec = compile_compute types file node fundec in
+  let file, fundec = compile_update types file node fundec in
   let file, fundec = compile_return file node fundec in
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
@@ -553,6 +567,11 @@ let compile_main file ast main_node =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
+let compile_enums types =
+  List.map (fun Asttypes.{name; constr} ->
+    let typeinfo = { tname = name; ttype = mk_enum types name; treferenced = false} in
+    GType (typeinfo, locUnknown)) types
+
 let compile ast main_node file_name =
   let file = {
     fileName = file_name;
@@ -560,9 +579,10 @@ let compile ast main_node file_name =
     globinit = None;
     globinitcalled = false;
   } in
-  let file = List.fold_left compile_node file ast in
+  let file = List.fold_left (compile_node ast.i_types) file ast.i_nodes in
   (*TODO: make main*)
   let file = compile_main file ast main_node in
   file.globals <- List.rev file.globals;
+  file.globals <- compile_enums ast.i_types @ file.globals;
   file
 

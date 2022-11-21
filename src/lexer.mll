@@ -37,6 +37,15 @@
         "reset", RESET;
         "when", WHEN;
         "whenot", WHENOT;
+
+        "automaton", AUTOMATON;
+        "unless", UNLESS;
+        "until", UNTIL;
+        "type", TYPE;
+        "init", INIT;
+        "continue", CONTINUE;
+        "done", DONE;
+        "local", LOCAL;
       ];
     fun s ->
       try Hashtbl.find h s with Not_found -> IDENT s
@@ -64,6 +73,8 @@ rule token = parse
       { newline lexbuf; token lexbuf }
   | "/*"
       { comment lexbuf; token lexbuf }
+  | "(*"
+      { comment2 lexbuf; token lexbuf }
   | ident
       { id_or_keyword (lexeme lexbuf) }
   | digit+
@@ -102,6 +113,8 @@ rule token = parse
       { SEMICOL }
   | "="
       { EQUAL }
+  | "|"
+      { BAR }
   | ","
       { COMMA }
   | _
@@ -113,4 +126,10 @@ and comment = parse
   | "*/" { () }
   | '\n' { newline lexbuf; comment lexbuf }
   | _    { comment lexbuf }
+  | eof  { raise (Lexical_error "unterminated comment") }
+
+and comment2 = parse
+  | "*)" { () }
+  | '\n' { newline lexbuf; comment2 lexbuf }
+  | _    { comment2 lexbuf }
   | eof  { raise (Lexical_error "unterminated comment") }

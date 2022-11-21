@@ -1,5 +1,9 @@
-* Faire un `imp_ast` (cf. [Imp_ast](https://github.com/emilienlemaire/MiniLustreLLVM/blob/main/src/target/imp.ml)) 
-    pour pouvoir avoir la mémoire des nœuds
-* Faire la normalisation avant le `imp_ast`
-* Faire les clocks
-* Ajouter merge int et float.
+<!-- * Ajouter merge int et float. -->
+<!-- * Ajouter merge ADT simple -->
+
+* ajouter `reset`
+* donner à main-node argc argv
+* main-node accepte n'importe quel type de variable
+* automate :
+  - "Automate d'automate" : cf. ex006.lus
+  - sortes automates : `until-then`, `until-continue`, `unless-then`

@@ -44,7 +44,7 @@ let rec compile_base_expr e =
     | CE_const c -> IE_const c
     | CE_ident x -> IE_ident x
     | CE_op (op, el) ->
-      IE_op(op, List.map compile_base_expr el)
+        IE_op(op, List.map compile_base_expr el)
     | CE_tuple el -> IE_tuple (List.map compile_base_expr el)
     | CE_fby _ -> assert false (* impossible car en forme normale *)
     | CE_app _ -> assert false (* impossible car en forme normale *)
@@ -52,18 +52,28 @@ let rec compile_base_expr e =
     | CE_prim(f, el) ->
         IE_prim(f, List.map compile_base_expr el)
     | CE_when (e, _, _) ->
-      let e' = compile_base_expr e in
-      e'.iexpr_desc
-    | CE_merge (id, e_t, e_f) ->
-      let e_t' = compile_base_expr e_t in
-      let e_f' = compile_base_expr e_f in
-      let case_t = {iexpr_desc = IE_const (Cbool true);
-                    iexpr_type = [Tbool];}
-      in
-      let case_f = {iexpr_desc = IE_const (Cbool false);
-                    iexpr_type = [Tbool];}
-      in
-      IE_case (id, [case_t, e_t'; case_f, e_f'])
+        let e' = compile_base_expr e in
+        e'.iexpr_desc
+    | CE_merge (id, ["True", e_t; "False", e_f]) ->
+        let ide = compile_base_expr id in
+        let e_t' = compile_base_expr e_t in
+        let e_f' = compile_base_expr e_f in
+        let case_t = {iexpr_desc = IE_const (Cbool true);
+                      iexpr_type = [Tbool];}
+        in
+        let case_f = {iexpr_desc = IE_const (Cbool false);
+                      iexpr_type = [Tbool];}
+        in
+        IE_case (ide, [case_t, e_t'; case_f, e_f'])
+    | CE_merge (id, l) ->
+        let ty = id.cexpr_type in
+        let ide = compile_base_expr id in
+        let l = List.map (fun (name, e) ->
+          let lty = match ty with [Tadt s] -> s | _ -> assert false in
+          let case = { iexpr_desc = IE_const (Cadt (lty, Some name)); iexpr_type = ty } in
+          case, compile_base_expr e
+          ) l in
+        IE_case (ide, l)
   in
   { iexpr_desc = desc; iexpr_type = e.cexpr_type; }
 
@@ -150,12 +160,13 @@ let compile_node n =
     in_input_step = input_step;
     in_output_step = output_step;
     in_local = n.cn_local;
+    in_init_local = n.cn_init_local;
     in_mem = mem;
     in_init = init;
     in_compute = compute;
     in_update = update }
 
-let compile = List.map compile_node
+let compile f = { i_nodes = List.map compile_node f.c_nodes; i_types = f.c_types }
 
 let gen_node_id =
   let cpt = ref 0 in

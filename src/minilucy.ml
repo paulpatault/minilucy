@@ -10,6 +10,7 @@ open Parse_ast
 let usage = "usage: "^Sys.argv.(0)^" [options] file.lus [main]"
 
 let parse_only = ref false
+let automaton_only = ref false
 let type_only = ref false
 let clock_only = ref false
 let norm_only = ref false
@@ -22,6 +23,7 @@ let verbose = ref false
 
 let spec =
   ["-parse-only", Arg.Set parse_only, "  stops after parsing";
+   "-automaton-only", Arg.Set automaton_only, "  stops after compile automaton";
    "-type-only",  Arg.Set type_only,  "  stops after typing";
    "-clock-only",  Arg.Set clock_only,  "  stops after clocking";
    "-norm-only",  Arg.Set norm_only,  "  stops after normalization";
@@ -66,14 +68,26 @@ let () =
   let lb = Lexing.from_channel c in
   try
     let f = Parser.file Lexer.token lb in
+    let inductive_bool = Asttypes.{name = "inductive_bool"; constr = ["True"; "False"]} in
+    let f = Parse_ast.{ f with p_types = inductive_bool :: f.p_types } in
     close_in c;
     if !parse_only then exit 0;
-    let ft = Typing.type_file f main_node in
+
+    let fa = Compile_automaton.compile f in
+    if !verbose then begin
+      Format.printf "\n/**************************************/@.";
+      Format.printf "/* Compile_automaton ast              */@.";
+      Format.printf "/**************************************/@.";
+      Parsed_ast_printer.print_file_std fa
+    end;
+    if !automaton_only then exit 0;
+
+    let ft = Typing.type_file fa main_node in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Typed ast                          */@.";
       Format.printf "/**************************************/@.";
-      Typed_ast_printer.print_node_list_std ft
+      Typed_ast_printer.print_file_std ft
     end;
     if !type_only then exit 0;
 
@@ -133,19 +147,20 @@ let () =
   with
     | Lexical_error s ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
-        eprintf "lexical error: %s\n@." s;
+        eprintf "%s%sLexical error: %s%s\n@." "\027[31m" "\027[1m" "\027[0m" s;
         exit 1
     | Parser.Error ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
-        eprintf "syntax error\n@.";
+        eprintf "%s%sSyntax error%s\n@." "\027[31m" "\027[1m" "\027[0m";
         exit 1
     | Typing.Error(l,e) ->
         report_loc l;
-        eprintf "%a\n@." Typing.report e;
+        eprintf "%s%sTyping error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Typing.report e;
         exit 1
     | Clocking.Error (l, e) ->
       report_loc l;
-      eprintf  "%a\n@." Clocking.report e;
+      eprintf "%s%sClocking error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Clocking.report e;
     | e ->
-        eprintf "Anomaly: %s\n@." (Printexc.to_string e);
+        let _ = Fmt.comma in
+        eprintf "%s%sAnomaly:%s %s\n@." "\027[31m" "\027[1m" "\027[0m" (Printexc.to_string e);
         exit 2

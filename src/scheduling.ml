@@ -31,19 +31,20 @@ let rec add_vars_of_exp s {cexpr_desc=e} =
   | CE_app (_,l) -> List.fold_left add_vars_of_exp s l
   | CE_prim (_,l) -> List.fold_left add_vars_of_exp s l
   | CE_tuple l -> List.fold_left add_vars_of_exp s l
-  | CE_merge (id, e1, e2) -> S.add id (add_vars_of_exp (add_vars_of_exp s e1) e2)
+  | CE_merge (cid, le) -> List.fold_left (fun acc (_, e) -> add_vars_of_exp acc e) s le
   | CE_fby _ -> s
   | CE_when (e, _, _) -> add_vars_of_exp s e
 
 
 let schedule_equs inputs equs =
   (* Construction du graphe de dépendance entre les variables. *)
+  let equs = List.filter_map (function e -> Some e) equs in
   let g =
     List.fold_left
       (fun g eq ->
-         let vp = add_vars_of_patt S.empty eq.ceq_patt in
-         let ve = add_vars_of_exp S.empty eq.ceq_expr in
-         S.fold (fun x g -> Graph.add (x,ve,eq) g) vp g)
+        let vp = add_vars_of_patt S.empty eq.ceq_patt in
+        let ve = add_vars_of_exp S.empty eq.ceq_expr in
+        S.fold (fun x g -> Graph.add (x, ve, eq) g) vp g)
       Graph.empty equs
   in
   (* Suppression des dépendances aux entrées. *)
@@ -83,8 +84,8 @@ let schedule_node n =
   let equs = schedule_equs n.cn_input n.cn_equs in
   { n with cn_equs = equs; }
 
-let schedule =
-  List.map schedule_node
+let schedule f =
+  { f with c_nodes = List.map schedule_node f.c_nodes }
 
 (* let rec left_expr s = function
   | CE_const _ -> s
