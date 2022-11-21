@@ -3,6 +3,11 @@ open Asttypes
 open Typed_ast
 open Ident
 
+let rec list_get_idx x = function
+  | [] -> raise Not_found
+  | e::_ when e = x -> 0
+  | _::k -> 1 + list_get_idx x k
+
 let comp_num = ref 0
 
 let get_next_comp_name () =
@@ -10,17 +15,7 @@ let get_next_comp_name () =
   incr comp_num;
   name
 
-let translate_type types = function
-  | Tbool -> TInt (IInt, [])
-  | Tint -> TInt (IInt, [])
-  | Treal -> TFloat (FFloat, [])
-  | Tadt s ->
-      let _ = List.find (fun {tt_name; tt_constr} -> tt_name = s) types in
-      let enuminfo = assert false in (* TODO *)
-      let attributes = assert false in (* TODO *)
-      TEnum (enuminfo, attributes)
-
-let translate_const = function
+let rec translate_const types = function
   | Cbool b ->
       let cilint = mkCilint IInt (if b then 1L else 0L) in
       CInt (cilint, IInt, None)
@@ -31,20 +26,46 @@ let translate_const = function
       CReal (f, FFloat, None)
 
   | Cadt (s, Some e) ->
-      let exp = failwith "todo" in
-      let string = failwith "todo" in
-      let enuminfo = failwith "todo" in
-      CEnum (exp, string, enuminfo)
+      let enuminfo = match mk_enum types s with
+        | TEnum (enuminfo, attribute) -> enuminfo
+        | _ -> assert false in
+      let e_uppercase = Bytes.of_string e |> Bytes.uppercase_ascii |> Bytes.to_string in
+      let _, exp, _ = List.find (fun (name, exp, loc) ->
+        name = e_uppercase) enuminfo.eitems in
+      CEnum (exp, enuminfo.ename, enuminfo)
 
   | Cadt (s, None) -> (* get_default s *)
       assert false
+
+and mk_enum =
+  let h = Hashtbl.create 20 in
+  fun types ename ->
+    if Hashtbl.mem h ename then Hashtbl.find h ename
+    else
+      let enum =
+        let ts = List.find (fun {tt_name; tt_constr} -> tt_name = ename) types in
+        let eitems = List.mapi (fun i c ->
+          let ename = Bytes.of_string c |> Bytes.uppercase_ascii |> Bytes.to_string in
+          let exp = Const (translate_const types (Cint i)) in
+          ename, exp, locUnknown) ts.tt_constr in
+        let enuminfo = { ename; eitems; ekind = IInt; eattr = []; ereferenced = false; } in
+        let attributes = [] in
+        TEnum (enuminfo, attributes) in
+      Hashtbl.add h ename enum;
+      enum
+
+and translate_type types = function
+  | Tbool -> TInt (IInt, [])
+  | Tint -> TInt (IInt, [])
+  | Treal -> TFloat (FFloat, [])
+  | Tadt s -> mk_enum types s
 
 let true_const = integer 1
 let false_const = integer 0
 let bool_t = TInt (IInt, [])
 let int_t = TInt (IInt, [])
 let real_t = TFloat (FFloat, [])
-let adt_t s = failwith "todo"
+let adt_t types s = translate_type types (Tadt s)
 
 let clean_name name =
   let str = Str.regexp {|'|} in

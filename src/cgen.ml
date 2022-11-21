@@ -112,7 +112,7 @@ let compile_fundec types file node mem_comp =
   end;
   file, fundec
 
-let compile_init file node mem_comp =
+let compile_init types file node mem_comp =
   let name = node.in_name.name in
   let fun_ty = TFun (TVoid [], Some ["mem", TPtr (TComp (mem_comp, []), []), []], false, []) in
   let fun_var = makeGlobalVar (name^"_init") fun_ty in
@@ -124,7 +124,7 @@ let compile_init file node mem_comp =
         | Ident _ -> failwith "Not implemented 5"
         | Const c ->
           let field = find_field_list (id.name) mem_comp.cfields in
-          let c = translate_const c in
+          let c = translate_const types c in
           let field_lval = (Mem (Lval (Var mem_var, NoOffset)), Field (field, NoOffset)) in
           let set_instr = Set(field_lval, Const c, locUnknown, locUnknown) in
           mkStmtOneInstr set_instr)
@@ -158,13 +158,13 @@ let compile_eq_type types file patt =
 let rec compile_expr types file node fundec expr =
   match expr.iexpr_desc with
   | IE_const c ->
-    file, GoblintCil.Const (translate_const c),
+    file, GoblintCil.Const (translate_const types c),
     begin
       match c with
       | Cbool _ -> bool_t
       | Cint _ -> int_t
       | Creal _ -> real_t
-      | Cadt (s, _) -> adt_t s
+      | Cadt (s, _) -> adt_t types s
     end
   | IE_ident id ->
     let lval, ty =
@@ -471,8 +471,8 @@ let compile_compute types file node fundec =
   fundec.sbody <- block;
   file, fundec
 
-let compile_atom file node fundec = function
-  | Const c -> GoblintCil.Const (translate_const c)
+let compile_atom types file node fundec = function
+  | Const c -> GoblintCil.Const (translate_const types c)
   | Ident id ->
     try
       let var = find_formal fundec (id.name) in
@@ -487,12 +487,12 @@ let compile_atom file node fundec = function
           Lval (Var ret_v, Field (field, NoOffset))
       end
 
-let compile_update file node fundec =
+let compile_update types file node fundec =
   if node.in_update <> [] then
     let mem_comp = find_gcomp (node.in_name.name^"_mem") file.globals in
     let mem_var = find_formal fundec "mem" in
     List.iter (fun (id, atom) ->
-        let e = compile_atom file node fundec atom in
+        let e = compile_atom types file node fundec atom in
         let mem_field = find_field_list (id.name) mem_comp.cfields in
         let set_lval = Mem (Lval (Var mem_var, NoOffset)), Field (mem_field, NoOffset) in
         let set_instr = Set (set_lval, e, locUnknown, locUnknown) in
@@ -520,12 +520,12 @@ let compile_node types file node =
   let file =
     if mem_comp.cfields <> [] then
       file.globals <- (GCompTag (mem_comp, locUnknown))::file.globals;
-    let file, init_fundec = compile_init file node mem_comp in
+    let file, init_fundec = compile_init types file node mem_comp in
     file
   in
   let file, fundec = compile_fundec types file node mem_comp in
   let file, fundec = compile_compute types file node fundec in
-  let file, fundec = compile_update file node fundec in
+  let file, fundec = compile_update types file node fundec in
   let file, fundec = compile_return file node fundec in
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file

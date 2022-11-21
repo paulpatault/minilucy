@@ -53,10 +53,6 @@ let print_eq fmt = function
       fprintf fmt "@[automaton ...@]" (* TODO *)
   | PE_match _ ->
       fprintf fmt "@[match ...@]" (* TODO *)
-        (* (print_list Ident.print ",") eq.teq_patt.tpatt_desc *)
-        (* print_exp eq.teq_expr *)
-
-(* let print_type = print_list print_cbase_type "*" *)
 
 let print_var_dec fmt (name, ty) =
   fprintf fmt "%s : %a" name print_base_type ty
