@@ -62,7 +62,7 @@ où `OPTIONS` :
 
 Exemple :
 ```
-$ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main
+$ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main1
 ```
 
 ## Travail réalisé
