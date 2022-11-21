@@ -61,3 +61,12 @@ let print_type fmt = function
     List.iter (fun t -> fprintf fmt " * %a" print_base_type t) tl;
     fprintf fmt ")"
 
+let print_adttype_list_std fmt tl =
+  fprintf fmt "%a"
+    (print_list_nl
+      (fun fmt {name; constr} ->
+        fprintf fmt "type %s =@\n  @[%a@]"
+          name
+          (print_list_nl (fun fmt e -> fprintf fmt "| %s" e))
+          constr))
+    tl

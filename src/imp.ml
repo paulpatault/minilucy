@@ -160,12 +160,13 @@ let compile_node n =
     in_input_step = input_step;
     in_output_step = output_step;
     in_local = n.cn_local;
+    in_init_local = n.cn_init_local;
     in_mem = mem;
     in_init = init;
     in_compute = compute;
     in_update = update }
 
-let compile = List.map compile_node
+let compile f = { i_nodes = List.map compile_node f.c_nodes; i_types = f.c_types }
 
 let gen_node_id =
   let cpt = ref 0 in

@@ -97,7 +97,7 @@ node_decs:
 
 ptype:
 | TYPE tname=IDENT EQUAL BAR? l=separated_list(BAR, IDENT)
-  { {pt_name = tname; pt_constr = l} }
+  { {name = tname; constr = l} }
 ;
 
 node:

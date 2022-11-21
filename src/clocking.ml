@@ -162,10 +162,10 @@ let full_clock_list types cl =
         | Ck (Con (ck, ctor, _)) -> ck, ctor
         | _ -> assert false
       in
-      let pt = match List.find_opt (fun {tt_constr; _} -> List.mem ctor tt_constr) types with
+      let pt = match List.find_opt (fun {constr; _} -> List.mem ctor constr) types with
         | None -> assert false
         | Some e -> e in
-      aux (ck) pt.tt_constr cl;
+      aux (ck) pt.constr cl;
       ck
 
 let rec clock_expr env types e =
@@ -341,4 +341,4 @@ let clock_node types n =
 
 let clock_file f main =
   let fc = List.map (clock_node f.t_types) f.t_nodes in
-  fc
+  { c_nodes = fc; c_types = f.t_types }

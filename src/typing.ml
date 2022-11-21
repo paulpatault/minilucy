@@ -134,7 +134,7 @@ module Gamma = struct
 
 end
 
-type env = { vars : (Ident.t * base_ty * io) M.t; types : p_type list}
+type env = { vars : (Ident.t * base_ty * io) M.t; types : adt_type list}
 
 
 let base_ty_of_ty loc t =
@@ -208,10 +208,10 @@ let rec type_expr env e =
 
 and type_expr_desc env loc = function
   | PE_constr c ->
-      let pt = match List.find_opt (fun {pt_constr; _} -> List.mem c pt_constr) env.types with
+      let pt = match List.find_opt (fun {constr; _} -> List.mem c constr) env.types with
         | None -> assert false
         | Some e -> e in
-      TE_const (Cadt (pt.pt_name, Some c)), [Tadt pt.pt_name]
+      TE_const (Cadt (pt.name, Some c)), [Tadt pt.name]
 
   | PE_const c ->
     TE_const c , type_constant c
@@ -415,11 +415,11 @@ and type_expr_desc env loc = function
         | Tadt t -> t
         | _ -> error id_loc (ExpectedType ([ty], [Tadt "?t"]))
       in
-      let tl = match List.find_opt (fun {pt_name; _} -> pt_name = tname) env.types with
+      let tl = match List.find_opt (fun {name; _} -> name = tname) env.types with
         | None -> error id_loc (UnknownAdtType tname)
         | Some e -> e in
       let sl = List.map fst l |> List.sort compare in
-      let stl = List.sort compare tl.pt_constr in
+      let stl = List.sort compare tl.constr in
       if sl = stl then ()
       else error id_loc (NotExhaustiveMerge tname);
 
@@ -585,7 +585,8 @@ let type_node ptypes n =
     List.map
       (fun (x, ty, ival) ->
          let x', _, _ = Gamma.find n.pn_loc env.vars x in
-         (x', ty), ival
+         let ename = match ty with Tadt s -> s | _ -> assert false in
+         (x', ty), Cadt (ename, Some ival)
       ) n.pn_init_local
   in
   let node =
@@ -611,8 +612,7 @@ let check_main ft main =
     error n.tn_loc (BadMain (t_in, t_out))
   | _ -> errors dummy_loc "The main node cannot be a primitive function"
 
-let translate_types =
-  fun {pt_name;pt_constr} -> { tt_name = pt_name; tt_constr = pt_constr}
+let translate_types = Fun.id
 
 let type_file f main =
   let ft = List.map (type_node f.p_types) (f.p_nodes) in

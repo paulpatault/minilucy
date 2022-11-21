@@ -51,7 +51,7 @@ let print_var_dec fmt (name, ty) =
   fprintf fmt "%a : %a" Ident.print name print_base_type ty
 
 let print_var_init_dec fmt ((name, ty), init) =
-  fprintf fmt "%a: %a init %s" Ident.print name print_base_type ty init
+  fprintf fmt "%a: %a init %a" Ident.print name print_base_type ty print_const init
 
 let rec print_var_dec_list = print_list_sp print_var_dec ";"
 let rec print_var_init_dec_list = print_list_sp print_var_init_dec ";"
@@ -68,16 +68,6 @@ let print_node fmt nd =
 
 let print_node_list_std fmt ndl =
   List.iter (fun nd -> fprintf fmt "%a@\n@." print_node nd) ndl
-
-let print_adttype_list_std fmt tl =
-  fprintf fmt "%a"
-    (print_list_nl
-      (fun fmt {tt_name; tt_constr} ->
-        fprintf fmt "type %s =@\n  @[%a@]"
-          tt_name
-          (print_list_nl (fun fmt e -> fprintf fmt "| %s" e))
-          tt_constr))
-    tl
 
 let print_file_std {t_types; t_nodes} =
   Format.printf "%a@\n@\n%a"

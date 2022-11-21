@@ -8,6 +8,8 @@ type base_ty =
 
 type ty = base_ty list
 
+type adt_type = { name: string; constr: string list }
+
 type const =
   | Cbool of bool
   | Cint of int
@@ -21,5 +23,3 @@ type op =
   | Op_not
   | Op_and | Op_or | Op_impl
   | Op_if
-
-type constr = string

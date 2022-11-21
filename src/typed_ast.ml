@@ -36,12 +36,10 @@ type t_node =
       tn_input: typed_var list;
       tn_output: typed_var list;
       tn_local: typed_var list;
-      tn_init_local: (typed_var * constr) list;
+      tn_init_local: (typed_var * const) list;
       tn_equs: t_equation list;
       tn_loc: location; }
 
-type t_type = { tt_name: string; tt_constr: constr list }
-
 type t_file =
   { t_nodes: t_node list;
-    t_types: t_type list; }
+    t_types: adt_type list; }

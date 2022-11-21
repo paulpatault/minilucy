@@ -16,9 +16,9 @@ let trad {pautom_loc; pautom} =
   ) pautom in
 
   let eqs = List.map (fun {pn_case={pn_equation;_}; _} -> pn_equation) pautom in
-  let t = {pt_name = gen "typ" ; pt_constr = constrs} in
+  let t = Asttypes.{ name = gen "typ" ; constr = constrs } in
 
-  let (n, _, _) as state_init_local = gen "state", Asttypes.Tadt t.pt_name, List.hd constrs in
+  let (n, _, _) as state_init_local = gen "state", Asttypes.Tadt t.name, List.hd constrs in
 
   let vv = ref None in
   let eqs_var =
@@ -53,8 +53,8 @@ let trad {pautom_loc; pautom} =
     { pexpr_desc = PE_ident n;
       pexpr_loc = pautom_loc } in
 
-  let merge_var   = mk_merge var_var   over t.pt_constr eqs_var   pautom_loc in
-  let merge_state = mk_merge var_state over t.pt_constr eqs_state pautom_loc in
+  let merge_var   = mk_merge var_var   over t.constr eqs_var   pautom_loc in
+  let merge_state = mk_merge var_state over t.constr eqs_state pautom_loc in
 
   let set_conds = cond_locals in
 

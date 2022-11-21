@@ -38,7 +38,7 @@ let
           (Run -> (0) -> (sub(pre (x), 1)));
 tel *)
 
-node main () returns (o: bool);
+node main1 () returns (o: bool);
 var x, y: int;
 let
   x = aux (1, 3);

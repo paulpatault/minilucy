@@ -42,10 +42,11 @@ type i_node = {
   in_input_step: cvar list;
   in_output_step: cvar list;
   in_local: cvar list;
+  in_init_local: (cvar * const) list;
   in_mem: mem;
   in_init: init;
   in_compute: i_equation list;
   in_update: (Ident.t * atom) list;
 }
 
-type i_file = i_node list
+type i_file = { i_nodes: i_node list; i_types: adt_type list }

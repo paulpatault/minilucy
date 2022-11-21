@@ -21,7 +21,7 @@ and c_expr_desc =
   | CE_tuple of c_expr list
   | CE_merge of c_expr * (string * c_expr) list
   | CE_fby of c_expr * c_expr
-  | CE_when of c_expr * constr * c_expr
+  | CE_when of c_expr * string * c_expr
 
 type c_patt =
   { cpatt_desc: Ident.t list;
@@ -39,8 +39,10 @@ type c_node =
     cn_input: clocked_var list;
     cn_output: clocked_var list;
     cn_local: clocked_var list;
-    cn_init_local: (clocked_var * constr) list;
+    cn_init_local: (clocked_var * const) list;
     cn_equs: c_equation list;
     cn_loc: location; }
 
-type c_file = c_node list
+type c_file =
+  { c_nodes : c_node list;
+    c_types : adt_type list }

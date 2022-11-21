@@ -84,8 +84,8 @@ let schedule_node n =
   let equs = schedule_equs n.cn_input n.cn_equs in
   { n with cn_equs = equs; }
 
-let schedule =
-  List.map schedule_node
+let schedule f =
+  { f with c_nodes = List.map schedule_node f.c_nodes }
 
 (* let rec left_expr s = function
   | CE_const _ -> s

@@ -2,11 +2,7 @@ open GoblintCil.Cil
 open Asttypes
 open Typed_ast
 open Ident
-
-let rec list_get_idx x = function
-  | [] -> raise Not_found
-  | e::_ when e = x -> 0
-  | _::k -> 1 + list_get_idx x k
+open Utils
 
 let comp_num = ref 0
 
@@ -43,11 +39,11 @@ and mk_enum =
     if Hashtbl.mem h ename then Hashtbl.find h ename
     else
       let enum =
-        let ts = List.find (fun {tt_name; tt_constr} -> tt_name = ename) types in
+        let ts = List.find (fun {name; constr} -> name = ename) types in
         let eitems = List.mapi (fun i c ->
           let ename = Bytes.of_string c |> Bytes.uppercase_ascii |> Bytes.to_string in
           let exp = Const (translate_const types (Cint i)) in
-          ename, exp, locUnknown) ts.tt_constr in
+          ename, exp, locUnknown) ts.constr in
         let enuminfo = { ename; eitems; ekind = IInt; eattr = []; ereferenced = false; } in
         let attributes = [] in
         TEnum (enuminfo, attributes) in

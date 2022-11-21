@@ -95,12 +95,22 @@ let compile_locals types file fundec =
       fundec, loc::locals)
     (fundec, [])
 
+let compile_init_locals locals types file fundec =
+  (* assert false; (* init n'apparait pas *) *)
+  List.fold_left (fun (fundec, locals) (({name; _}, ty, _), init_value) ->
+      Format.printf "-------------------------------------------------------------------%s@." name;
+      let init = SingleInit (Const (translate_const types init_value)) in
+      let loc = makeLocalVar ~init fundec (clean_name name) (translate_type types ty) in
+      fundec, loc::locals)
+    (fundec, locals)
+
 let compile_fundec types file node mem_comp =
   let file, return_type = compile_return_type types file node in
   let file, func_type = compile_func_type types file node return_type mem_comp in
   let func_var = makeGlobalVar (node.in_name.name) func_type in
   let fundec = mk_fundec func_var in
   let fundec, locals = compile_locals types file fundec node.in_local in
+  let fundec, init_locals = compile_init_locals locals types file fundec node.in_init_local in
   (* let fundec, locals = compile_locals file fundec node.in_output_step in (* INFO: Maybe do this another way *) *)
   begin
     match return_type with
@@ -144,6 +154,12 @@ let compile_init types file node mem_comp =
   let fun_block = List.fold_left (fun block stmt -> append_stmt stmt block) fun_block init_node in
   fundec.sbody <- fun_block;
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
+
+  let enums_decl = List.map (fun Asttypes.{name; constr} ->
+    let typeinfo = { tname = name; ttype = mk_enum types name; treferenced = false} in
+    GType (typeinfo, locUnknown)) types in
+
+  file.globals <- enums_decl @ file.globals;
   file, fundec
 
 let compile_eq_type types file patt =
@@ -557,14 +573,14 @@ let compile_main file ast main_node =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
-let compile types ast main_node file_name =
+let compile ast main_node file_name =
   let file = {
     fileName = file_name;
     globals = [];
     globinit = None;
     globinitcalled = false;
   } in
-  let file = List.fold_left (compile_node types) file ast in
+  let file = List.fold_left (compile_node ast.i_types) file ast.i_nodes in
   (*TODO: make main*)
   let file = compile_main file ast main_node in
   file.globals <- List.rev file.globals;

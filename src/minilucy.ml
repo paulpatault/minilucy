@@ -68,7 +68,7 @@ let () =
   let lb = Lexing.from_channel c in
   try
     let f = Parser.file Lexer.token lb in
-    let inductive_bool = {pt_name = "inductive_bool"; pt_constr = ["True"; "False"]} in
+    let inductive_bool = Asttypes.{name = "inductive_bool"; constr = ["True"; "False"]} in
     let f = Parse_ast.{ f with p_types = inductive_bool :: f.p_types } in
     close_in c;
     if !parse_only then exit 0;
@@ -129,7 +129,7 @@ let () =
 
     let file_name = (Format.sprintf "%s.c" (Filename.remove_extension file)) in
 
-    let fc = Cgen.compile ft.t_types fi main_node file_name in
+    let fc = Cgen.compile fi main_node file_name in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* C file                             */@.";
