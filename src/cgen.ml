@@ -89,28 +89,25 @@ let compile_func_type types file node return_type mem_comp =
   | [] -> file, TFun (return_type, None, false, [])
   | l -> file, TFun (return_type, Some l, false, [])
 
-let compile_locals types file fundec =
-  List.fold_left (fun (fundec, locals) ({name; _}, ty, _) ->
-      let loc = makeLocalVar fundec (clean_name name) (translate_type types ty) in
-      fundec, loc::locals)
+let compile_init_locals types file fundec =
+  List.fold_left
+    (fun (fundec, locals) (({name; _}, ty, _), init_value) ->
+      match init_value with
+      | Some init_value ->
+        let init = SingleInit (Const (translate_const types init_value)) in
+        let loc = makeLocalVar ~init fundec (clean_name name) (translate_type types ty) in
+        fundec, loc::locals
+      | None ->
+        let loc = makeLocalVar fundec (clean_name name) (translate_type types ty) in
+        fundec, loc::locals)
     (fundec, [])
-
-let compile_init_locals locals types file fundec =
-  (* assert false; (* init n'apparait pas *) *)
-  List.fold_left (fun (fundec, locals) (({name; _}, ty, _), init_value) ->
-      Format.printf "-------------------------------------------------------------------%s@." name;
-      let init = SingleInit (Const (translate_const types init_value)) in
-      let loc = makeLocalVar ~init fundec (clean_name name) (translate_type types ty) in
-      fundec, loc::locals)
-    (fundec, locals)
 
 let compile_fundec types file node mem_comp =
   let file, return_type = compile_return_type types file node in
   let file, func_type = compile_func_type types file node return_type mem_comp in
   let func_var = makeGlobalVar (node.in_name.name) func_type in
   let fundec = mk_fundec func_var in
-  let fundec, locals = compile_locals types file fundec node.in_local in
-  let fundec, init_locals = compile_init_locals locals types file fundec node.in_init_local in
+  let fundec, locals = compile_init_locals types file fundec node.in_local in
   (* let fundec, locals = compile_locals file fundec node.in_output_step in (* INFO: Maybe do this another way *) *)
   begin
     match return_type with

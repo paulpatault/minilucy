@@ -38,8 +38,7 @@ type c_node =
   { cn_name: Ident.t;
     cn_input: clocked_var list;
     cn_output: clocked_var list;
-    cn_local: clocked_var list;
-    cn_init_local: (clocked_var * const) list;
+    cn_local: (clocked_var * const option) list;
     cn_equs: c_equation list;
     cn_loc: location; }
 

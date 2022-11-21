@@ -578,7 +578,7 @@ let type_node ptypes n =
   in
   let local =
     List.map
-      (fun (x, ty) -> let x', _, _ = Gamma.find n.pn_loc env.vars x in (x', ty))
+      (fun (x, ty) -> let x', _, _ = Gamma.find n.pn_loc env.vars x in (x', ty), None)
       n.pn_local
   in
   let init_local =
@@ -586,15 +586,14 @@ let type_node ptypes n =
       (fun (x, ty, ival) ->
          let x', _, _ = Gamma.find n.pn_loc env.vars x in
          let ename = match ty with Tadt s -> s | _ -> assert false in
-         (x', ty), Cadt (ename, Some ival)
+         (x', ty), Some (Cadt (ename, Some ival))
       ) n.pn_init_local
   in
   let node =
     { tn_name = name;
       tn_input = input;
       tn_output = output;
-      tn_local = local;
-      tn_init_local = init_local;
+      tn_local = local @ init_local;
       tn_equs = equs;
       tn_loc = n.pn_loc; }
   in

@@ -41,8 +41,7 @@ type i_node = {
   in_name: Ident.t;
   in_input_step: cvar list;
   in_output_step: cvar list;
-  in_local: cvar list;
-  in_init_local: (cvar * const) list;
+  in_local: (cvar * const option) list;
   in_mem: mem;
   in_init: init;
   in_compute: i_equation list;

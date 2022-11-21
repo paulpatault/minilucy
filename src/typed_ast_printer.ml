@@ -45,25 +45,24 @@ let print_eq fmt eq =
     (print_list_sp Ident.print ",") eq.teq_patt.tpatt_desc
     print_exp eq.teq_expr
 
-(* let print_type = print_list print_cbase_type "*" *)
-
 let print_var_dec fmt (name, ty) =
   fprintf fmt "%a : %a" Ident.print name print_base_type ty
 
 let print_var_init_dec fmt ((name, ty), init) =
-  fprintf fmt "%a: %a init %a" Ident.print name print_base_type ty print_const init
+  match init with
+  | None -> fprintf fmt "%a: %a" Ident.print name print_base_type ty
+  | Some o -> fprintf fmt "%a: %a init %a" Ident.print name print_base_type ty print_const o
 
 let rec print_var_dec_list = print_list_sp print_var_dec ";"
 let rec print_var_init_dec_list = print_list_sp print_var_init_dec ";"
 
 let print_node fmt nd =
   fprintf fmt
-    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n local @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     Ident.print nd.tn_name
     print_var_dec_list nd.tn_input
     print_var_dec_list nd.tn_output
-    print_var_dec_list nd.tn_local
-    print_var_init_dec_list nd.tn_init_local
+    print_var_init_dec_list nd.tn_local
     (print_list_eol print_eq ";") nd.tn_equs
 
 let print_node_list_std fmt ndl =

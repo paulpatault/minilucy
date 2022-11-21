@@ -293,11 +293,8 @@ let check_causality loc inputs equs =
 
 
 let clock_node types n =
-  let env0 = Gamma.adds n.tn_loc Vlocal Gamma.empty n.tn_local in
+  let env0 = Gamma.adds n.tn_loc Vlocal Gamma.empty (List.map fst n.tn_local) in
   let env0 = Gamma.adds n.tn_loc Vinput env0 n.tn_input in
-
-  let l = List.map fst n.tn_init_local in
-  let env0 = Gamma.adds n.tn_loc Vlocal env0 l in
 
   let env = Gamma.adds n.tn_loc Voutput env0 n.tn_output in
   let equs = List.map (clock_equation env types) n.tn_equs in
@@ -319,20 +316,15 @@ let clock_node types n =
     id, ty, Gamma.find n.tn_loc env id)
       n.tn_output
   in
-  let local = List.map (fun (id, ty) ->
-    id, ty, Gamma.find n.tn_loc env id)
-      n.tn_local
-  in
-  let init_local = List.map (fun ((id, ty), v) ->
+  let local = List.map (fun ((id, ty), v) ->
     (id, ty, Gamma.find n.tn_loc env id), v)
-      n.tn_init_local
+      n.tn_local
   in
   let node =
     { cn_name = name;
       cn_input = input;
       cn_output = output;
       cn_local = local;
-      cn_init_local = init_local;
       cn_equs = equs;
       cn_loc = n.tn_loc; }
   in

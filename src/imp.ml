@@ -129,12 +129,11 @@ let compile_equation
       let node_init = [mem_id, n] in
       let compute =
         let expr =
-          { iexpr_desc =
-              IE_app (n, mem_id,
-                      List.map compile_base_expr step_in);
+          { iexpr_desc = IE_app (n, mem_id, List.map compile_base_expr step_in);
             iexpr_type =
               List.map
-                (function { cexpr_type = [t] ; _} -> t
+                (function
+                  | { cexpr_type = [t] ; _} -> t
                   | _ -> assert false)
                 step_in; }
         in
@@ -160,7 +159,6 @@ let compile_node n =
     in_input_step = input_step;
     in_output_step = output_step;
     in_local = n.cn_local;
-    in_init_local = n.cn_init_local;
     in_mem = mem;
     in_init = init;
     in_compute = compute;

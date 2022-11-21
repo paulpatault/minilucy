@@ -109,6 +109,7 @@ and normalize_list ctx el =
 
 let normalize_eq node eq =
   let (new_eqs, locals), e' = normalize ([], []) eq.ceq_expr in
+  let locals = List.map (fun e -> e, None) locals in
   {node with
    cn_local = locals@node.cn_local;
    cn_equs = {eq with ceq_expr = e'}::(List.rev new_eqs) @ node.cn_equs}
