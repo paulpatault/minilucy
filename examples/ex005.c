@@ -1,5 +1,13 @@
-enum inductive_bool{TRUE, FALSE};
-enum typ__1{CHAUD, FROID};
+enum inductive_bool {
+  TRUE,
+  FALSE
+};
+
+enum typ__1 {
+  CHAUD,
+  FROID
+};
+
 struct oscillateur_mem {
 
   int aux__2_next6;

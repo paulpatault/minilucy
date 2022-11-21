@@ -239,12 +239,15 @@ let pp_fundec fmt fundec =
     (fun fmt () -> if fundec.slocals <> [] then fprintf fmt "@;@;") ()
     (pp_block false) fundec.sbody
 
+
+let pp_comma_cut fmt () = fprintf fmt ",@;"
+
 let pp_typeinfo fmt typeinfo =
   match typeinfo.ttype with
   | TEnum (enuminfo, _) ->
-      fprintf fmt "enum %s{%a};"
+      fprintf fmt "enum %s {@;<2 2>@[<v>%a@]@\n};@\n"
         typeinfo.tname
-        (pp_print_list ~pp_sep:pp_comma (fun fmt (e, _, _) -> pp_print_string fmt e)) enuminfo.eitems
+        (pp_print_list ~pp_sep:pp_comma_cut (fun fmt (e, _, _) -> pp_print_string fmt e)) enuminfo.eitems
   | _ -> assert false
 
 let pp_global fmt = function
