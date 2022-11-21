@@ -7,3 +7,4 @@
 * automate :
   - "Automate d'automate" : cf. ex006.lus
   - sortes automates : `until-then`, `until-continue`, `unless-then`
+  - ajouter les enum(init) dans la mémoire du noeud
