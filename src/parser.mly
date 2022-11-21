@@ -290,6 +290,7 @@ typ:
 | BOOL   { Tbool }
 | INT    { Tint }
 | REAL   { Treal }
+| IDENT  { Tadt $1 }
 ;
 
 semi_opt:
