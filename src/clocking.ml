@@ -259,7 +259,7 @@ and clock_expr_desc env types loc = function
           error loc (ExpectedBaseClock ct)
       end
 
-  | TE_when (e, b, {texpr_desc = _; _}) -> failwith "not implemented 6"
+  | TE_when (e, b, {texpr_desc = _; _}) -> failwith "ne devrait pas arriver non plus"
   | TE_pre _
   | TE_prim _
   | TE_arrow _ -> error loc Unreachable

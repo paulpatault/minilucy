@@ -1,3 +1,5 @@
+enum inductive_bool{TRUE, FALSE};
+enum typ__1{AWAIT, RUN};
 struct aux_mem {
   int aux__2_next4;
   int aux__4_next3;
@@ -15,8 +17,6 @@ void aux_init (struct aux_mem* mem) {
   mem->aux__8_next1 = 0;
 }
 
-enum typ__1{AWAIT, RUN};
-enum inductive_bool{TRUE, FALSE};
 int aux (struct aux_mem* mem, int lo, int hi) {
   int aux__8;
   int aux__7;
@@ -28,7 +28,7 @@ int aux (struct aux_mem* mem, int lo, int hi) {
   int aux__1;
   int cond__4;
   int cond__3;
-  enum typ__1 state__2;
+  enum typ__1 state__2 = AWAIT;
   int x;
   enum typ__1 switch_1;
   int switch_2;
@@ -125,8 +125,6 @@ void main1_init (struct main1_mem* mem) {
   aux_init(&(mem->aux_next1));
 }
 
-enum typ__1{AWAIT, RUN};
-enum inductive_bool{TRUE, FALSE};
 int main1 (struct main1_mem* mem) {
   int aux__10;
   int aux__9;

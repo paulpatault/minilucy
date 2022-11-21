@@ -24,6 +24,7 @@
 - features avancées
   - [ ] reset
   - [ ] merge : WIP
+  - [x] automaton
 
 ## Usage
 
@@ -66,4 +67,5 @@ $ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main
 
 ## Travail réalisé
 
-- TODO
+- Automates (non imbriqués)
+- TODO Suite

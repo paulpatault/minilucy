@@ -154,12 +154,6 @@ let compile_init types file node mem_comp =
   let fun_block = List.fold_left (fun block stmt -> append_stmt stmt block) fun_block init_node in
   fundec.sbody <- fun_block;
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
-
-  let enums_decl = List.map (fun Asttypes.{name; constr} ->
-    let typeinfo = { tname = name; ttype = mk_enum types name; treferenced = false} in
-    GType (typeinfo, locUnknown)) types in
-
-  file.globals <- enums_decl @ file.globals;
   file, fundec
 
 let compile_eq_type types file patt =
@@ -573,6 +567,11 @@ let compile_main file ast main_node =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
+let compile_enums types =
+  List.map (fun Asttypes.{name; constr} ->
+    let typeinfo = { tname = name; ttype = mk_enum types name; treferenced = false} in
+    GType (typeinfo, locUnknown)) types
+
 let compile ast main_node file_name =
   let file = {
     fileName = file_name;
@@ -584,5 +583,6 @@ let compile ast main_node file_name =
   (*TODO: make main*)
   let file = compile_main file ast main_node in
   file.globals <- List.rev file.globals;
+  file.globals <- compile_enums ast.i_types @ file.globals;
   file
 

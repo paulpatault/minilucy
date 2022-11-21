@@ -137,6 +137,11 @@ let pp_args fmt = function
 
 let pp_local fmt local =
   let ty, name = local.vtype, local.vname in
+  let init =
+    match local.vinit.init with
+    | Some (SingleInit exp) -> asprintf " = %a" pp_exp exp
+    | _ -> ""
+  in
   match ty with
   | TArray (t, size, _) ->
     fprintf fmt "%a %s[%a];"
@@ -146,9 +151,10 @@ let pp_local fmt local =
          | Some s -> pp_exp fmt s
          | None -> ()) size
   | _ ->
-    fprintf fmt "%a %s;"
+    fprintf fmt "%a %s%s;"
       pp_type ty
       name
+      init
 
 let pp_locals fmt locals =
   fprintf fmt "%a" (pp_print_list ~pp_sep:pp_print_cut pp_local) locals
