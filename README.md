@@ -19,11 +19,11 @@
 - check [https://github.com/paulpatault/minilucy/blob/automaton/TODO.md]
 
 - base
-  - [ ] compile simple : WIP
+  - [x] compile simple : `pre`, `->`, `fby`
 
 - features avancées
-  - [ ] reset
-  - [ ] merge : WIP
+  - [ ] `reset`
+  - [ ] `merge` : WIP PR #7
   - [x] automaton
 
 ## Usage
