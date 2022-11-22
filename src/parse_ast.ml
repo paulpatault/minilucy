@@ -18,6 +18,7 @@ and p_expr_desc =
   | PE_tuple of p_expr list
   | PE_merge of p_expr * (bool * p_expr) * (bool * p_expr)
   | PE_merge_adt of p_expr * (string * p_expr) list
+  | PE_when of p_expr * string * p_expr
 
 type p_patt =
   { ppatt_desc: p_patt_desc;

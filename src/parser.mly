@@ -6,6 +6,12 @@
   let mk_expr e l = { pexpr_desc = e; pexpr_loc = l }
   let mk_patt p l = { ppatt_desc = p; ppatt_loc = l }
 
+  (* let get_typ =
+    let h = Hashtbl.create 10 in
+    fun s ->
+      try Hashtbl.find h s 
+ *)
+
 %}
 
 %token AND
@@ -60,6 +66,9 @@
 %token TYPE
 %token INIT
 %token LOCAL
+%token FBY
+%token <string> CONSTR
+%token <string * string> TCONSTR
 
 %nonassoc THEN
 %nonassoc ELSE
@@ -96,7 +105,7 @@ node_decs:
 ;
 
 ptype:
-| TYPE tname=IDENT EQUAL BAR? l=separated_list(BAR, IDENT)
+| TYPE tname=IDENT EQUAL BAR? l=separated_list(BAR, constr)
   { {name = tname; constr = l} }
 ;
 
@@ -116,7 +125,7 @@ node:
 ;
 
 local_params_init:
-| LOCAL id=IDENT COLON t=IDENT INIT vo=IDENT
+| LOCAL id=IDENT COLON t=IDENT INIT vo=constr
     { (id, Tadt t, vo) }
 ;
 
@@ -179,16 +188,16 @@ eq:
 ;
 
 case_autom:
-| pn_case=case UNTIL pn_cond=expr CONTINUE pn_out=IDENT
+| pn_case=case UNTIL pn_cond=expr CONTINUE pn_out=constr
   { {pn_case; pn_cond; pn_out; pn_weak=true}  }
-| pn_case=case UNLESS pn_cond=expr THEN pn_out=IDENT
+| pn_case=case UNLESS pn_cond=expr THEN pn_out=constr
   { {pn_case; pn_cond; pn_out; pn_weak=false}  }
 /* | pn_case=case
   { {pn_case; pn_cond = mk_expr (PE_const (Cbool false)) $sloc; pn_out = "todo"; pn_weak=false}  } */
 ;
 
 case:
-| BAR pn_constr=IDENT ARROW pn_equation=eq
+| BAR pn_constr=constr ARROW pn_equation=eq
   { {pn_constr; pn_equation; pn_loc = $sloc} }
 ;
 
@@ -237,6 +246,8 @@ expr:
     { mk_expr (PE_op (Op_impl, [$1; $3]))  $sloc}
 | expr ARROW expr
     { mk_expr (PE_arrow ($1, $3))  $sloc}
+| expr FBY expr
+    { mk_expr (PE_arrow ($1, mk_expr (PE_pre ($3)) $sloc))  $sloc}
 | MINUS expr /* %prec uminus */
     { mk_expr (PE_op (Op_sub, [$2]))  $sloc}
 | NOT expr
@@ -247,17 +258,26 @@ expr:
     { mk_expr (PE_tuple ($2::$4))  $sloc}
 | MERGE IDENT merge_branche(CONST_BOOL) merge_branche(CONST_BOOL)
     { let ident = mk_expr (PE_ident $2) $loc($2) in
-    mk_expr (PE_merge (ident, $3, $4)) $sloc }
-
-| MERGE IDENT list(merge_branche(IDENT))
+      mk_expr (PE_merge (ident, $3, $4)) $sloc }
+| MERGE IDENT list(merge_branche(constr))
     { let ident = mk_expr (PE_ident $2) $loc($2) in
-    mk_expr (PE_merge_adt (ident, $3)) $sloc }
-/* | expr WHEN expr       { mk_expr (PE_when ($2, $3)) } */
+      mk_expr (PE_merge_adt (ident, $3)) $sloc }
+| e1=expr WHEN c=constr LPAREN e2=expr RPAREN
+    { mk_expr (PE_when (e1, c, e2)) $sloc }
+| e1=expr WHEN e2=expr
+    { mk_expr (PE_when (e1, "True", e2)) $sloc }
+| e1=expr WHENOT e2=expr
+    { mk_expr (PE_when (e1, "False", e2)) $sloc }
 /* | expr WHENOT expr     { mk_expr (PE_whenot ($2, $3)) } */
 ;
 
 merge_branche(X):
  LPAREN X ARROW expr RPAREN { ($2, $4) }
+;
+
+constr:
+| CONSTR { $1 }
+| TCONSTR { fst $1 }
 ;
 
 const:
@@ -267,6 +287,9 @@ const:
     { Cint $1 }
 | CONST_REAL
     { Creal $1 }
+| TCONSTR
+    { let c, t = $1 in
+      Cadt (t, Some c) }
 ;
 
 ident_comma_list:

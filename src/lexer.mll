@@ -39,6 +39,7 @@
         "whenot", WHENOT;
 
         "automaton", AUTOMATON;
+        "fby", FBY;
         "unless", UNLESS;
         "until", UNTIL;
         "type", TYPE;
@@ -56,13 +57,18 @@
       { pos with pos_lnum = pos.pos_lnum + 1; pos_bol = pos.pos_cnum }
 }
 
-let alpha = ['a'-'z' 'A'-'Z']
+let lalpha = ['a'-'z']
+let ualpha = [ 'A'-'Z']
+let alpha = lalpha | ualpha
 let digit = ['0'-'9']
 let exponent = ('e' | 'E') ('+' | '-')? digit+
 let float = digit+ '.' digit* exponent?
           | digit* '.'digit+ exponent?
       | digit+ exponent
-let ident = alpha (alpha | '_' | digit)*
+
+let ident = lalpha (alpha | '_' | digit)*
+let constr = ualpha (alpha | '_' | digit)*
+let tconstr = ualpha (alpha | '_' | digit)* "'" ident
 
 rule token = parse
   | '\n'
@@ -77,6 +83,13 @@ rule token = parse
       { comment2 lexbuf; token lexbuf }
   | ident
       { id_or_keyword (lexeme lexbuf) }
+  | constr
+      { CONSTR (lexeme lexbuf) }
+  | tconstr
+      { let a = String.split_on_char '\'' (lexeme lexbuf) in
+        match a with
+        | [constr;ty] -> TCONSTR (constr, ty)
+        | _ -> assert false }
   | digit+
       { CONST_INT (int_of_string (lexeme lexbuf)) }
   | float

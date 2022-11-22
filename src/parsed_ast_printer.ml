@@ -23,6 +23,9 @@ let rec print_exp fmt e = match e.pexpr_desc with
   | PE_merge_adt (name, l) ->
     fprintf fmt "@[merge %a @\n  @[%a@]@]" print_exp name
     (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%s -> %a)" id print_exp exp)) l
+  | PE_when (e1, c, e2) ->
+    fprintf fmt "@[%a when %s(%a)@]" print_exp e1 c print_exp e2
+
 
 and print_arg_list fmt e_list = match e_list with
   | [] -> ()
