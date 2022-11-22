@@ -258,6 +258,7 @@ and clock_expr_desc env types loc = function
         Typed_ast_printer.print_exp e b
         Typed_ast_printer.print_exp e2;
       failwith "todo"
+      (* dune exec src/minilucy.exe -- examples/ex007.lus -v main1 *)
   | TE_pre _
   | TE_prim _
   | TE_arrow _ -> error loc Unreachable
