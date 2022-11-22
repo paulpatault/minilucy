@@ -1,4 +1,4 @@
-(* code d'Adrien Guatto *)
+(* code d'Adrien Guatto étendu *)
 
 open Format
 open Asttypes
