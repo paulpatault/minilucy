@@ -364,6 +364,17 @@ and type_expr_desc env loc = function
     let nil = {texpr_desc = nil (List.hd te.texpr_type); texpr_type = ty; texpr_loc = te.texpr_loc} in
     TE_fby (nil, te), ty
 
+  | PE_when (e1, c, e2) ->
+    let te1 = type_expr env e1 in
+    let ty1 = te1.texpr_type in
+    let te2 = type_expr env e2 in
+    let ty2 = te2.texpr_type in
+    begin
+      match List.find_opt (fun {name; constr} -> List.mem c constr) env.types with
+      | Some e when [Tadt e.name] = ty2 -> TE_when (te1, c, te2), ty1
+      | _ -> error te2.texpr_loc (ExpectedType (ty2, ty1))
+    end
+
   | PE_tuple el as n ->
     not_a_nested_tuple n loc;
     let tel = List.map (type_expr env) el in
