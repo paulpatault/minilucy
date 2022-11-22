@@ -7,7 +7,6 @@ open Print_base
 
 let rec print_exp fmt e = match e.pexpr_desc with
   | PE_const c -> print_const fmt c
-  | PE_constr x
   | PE_ident x -> fprintf fmt "%s" x
   | PE_op (op, el) -> fprintf fmt "%a(%a)" print_op op print_arg_list el
   | PE_app (name, e_list) ->
