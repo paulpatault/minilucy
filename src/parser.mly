@@ -76,11 +76,13 @@
 %left IMPL
 %left OR
 %left AND
+%right WHEN WHENOT
 %left COMP EQUAL NEQ                          /* < <= > >= <> = <> */
 %left PLUS MINUS                              /* + -  */
 %left STAR SLASH DIV MOD                      /* * /  mod */
 %nonassoc uminus                              /* - */
 %nonassoc NOT PRE                             /* not pre */
+%right FBY
 %left DOT
 
 /* Point d'entrée */
