@@ -372,7 +372,7 @@ and type_expr_desc env loc = function
     begin
       match List.find_opt (fun {name; constr} -> List.mem c constr) env.types with
       | Some e when [Tadt e.name] = ty2 -> TE_when (te1, c, te2), ty1
-      | _ -> error te2.texpr_loc (ExpectedType (ty2, ty1))
+      | _ -> error te2.texpr_loc (ExpectedType (ty2, ty1)) (* probleme ici pour when classique, voir ex/neg001 *)
     end
 
   | PE_tuple el as n ->

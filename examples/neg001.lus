@@ -1,0 +1,14 @@
+(* node not (i : bool) returns (o: bool);
+let
+  o = if i then false else true;
+tel; *)
+
+node check (x: int) returns (o: bool);
+var half : bool; n : int;
+let
+  (* n1 = 0 -> pre n1 when half ();
+  n1 = 0 -> (pre (n1 + 1) when (half ())); *)
+  half = (true) -> (not (pre half));
+  n = x + (x when half);
+  o = true;
+tel
