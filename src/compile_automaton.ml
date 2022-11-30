@@ -17,7 +17,7 @@ let mk_fby_merge init var over t eqs loc =
   let fby = {pexpr_desc = fby; pexpr_loc = loc } in
   PE_eq ({peq_patt = var; peq_expr = fby})
 
-let mk_constr_expr name loc = { pexpr_desc = PE_constr name; pexpr_loc = loc }
+let mk_constr_expr t name loc = { pexpr_desc = PE_const (Asttypes.Cadt (t, Some name)); pexpr_loc = loc }
 
 let trad {pautom_loc; pautom} =
   let constrs = List.map (function
@@ -48,8 +48,8 @@ let trad {pautom_loc; pautom} =
   let (cond_locals, vars), eqs_state =
     List.fold_left_map
     (fun (cond_loc_acc, vars_acc) {pn_cond; pn_out; pn_case={pn_constr; pn_loc; _}} ->
-      let c1 = mk_constr_expr pn_out pautom_loc in
-      let c2 = mk_constr_expr pn_constr pautom_loc in
+      let c1 = mk_constr_expr t.name pn_out pautom_loc in
+      let c2 = mk_constr_expr t.name pn_constr pautom_loc in
       let name = gen "cond" in
       let var_cond = { pexpr_desc = PE_ident name; pexpr_loc = pn_loc} in
       let peq_patt =

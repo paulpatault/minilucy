@@ -206,12 +206,6 @@ let rec type_expr env e =
   { texpr_desc = desc; texpr_type = t; texpr_loc = e.pexpr_loc; }
 
 and type_expr_desc env loc = function
-  | PE_constr c ->
-      let pt = match List.find_opt (fun {constr; _} -> List.mem c constr) env.types with
-        | None -> assert false
-        | Some e -> e in
-      TE_const (Cadt (pt.name, Some c)), [Tadt pt.name]
-
   | PE_const c ->
     TE_const c , type_constant c
 
