@@ -1,36 +1,33 @@
-open Clocks
-open Clocked_ast
+open Typed_ast
 
 let new_local =
   let cpt = ref 0 in fun () -> incr cpt;
     Ident.make ("aux'"^(string_of_int !cpt)) Ident.Stream
 
-let new_patt ({cexpr_type = ty; cexpr_loc = loc; cexpr_clock = ct; _} as e) =
-  match ty, ct with
-  | [t], Ck ck ->
+let new_patt ({texpr_type = ty; texpr_loc = loc; _} as e) =
+  match ty with
+  | [t] ->
     let x = new_local () in
-    let decl = [x, t, ck] in
-    let patt = { cpatt_desc = [x]; cpatt_type = [t]; cpatt_clock = Ck ck; cpatt_loc = loc; } in
-    let expr = {e with cexpr_desc = CE_ident x; } in
+    let decl = [x, t] in
+    let patt = { tpatt_desc = [x]; tpatt_type = [t];tpatt_loc = loc; } in
+    let expr = {e with texpr_desc = TE_ident x; } in
     decl, patt, expr
-  | tl, Cprod cl ->
+  | tl ->
     let xl = List.map (fun _ -> new_local ()) tl in
-    let ckl = List.map (function Ck ck -> ck | _ -> failwith "Not good clock") cl in
-    let decl = Utils.combine3 xl tl ckl in
-    let patt = {cpatt_desc = xl; cpatt_type = tl; cpatt_clock = Cprod cl; cpatt_loc = loc} in
+    let decl = List.combine xl tl in
+    let patt = {tpatt_desc = xl; tpatt_type = tl; tpatt_loc = loc} in
     let le =
-      List.map (fun (id,ty,cl) ->
-          {cexpr_desc = CE_ident id; cexpr_type = [ty]; cexpr_clock = Ck cl; cexpr_loc = loc;})
+      List.map (fun (id,ty) ->
+          {texpr_desc = TE_ident id; texpr_type = [ty]; texpr_loc = loc;})
         decl
     in
-    decl, patt, {e with cexpr_desc = CE_tuple le;}
-  | _ -> failwith "Check later"
+    decl, patt, {e with texpr_desc = TE_tuple le;}
 
 let rec normalize ctx e =
-  match e.cexpr_desc with
-  | CE_const _ | CE_ident _ ->
+  match e.texpr_desc with
+  | TE_const _ | TE_ident _ ->
       ctx, e
-  | CE_op (op, el) ->
+  | TE_op (op, el) ->
       let ctx, el' =
         match op, el with
         | (Op_not | Op_sub | Op_sub_f), [e] ->
@@ -50,51 +47,57 @@ let rec normalize ctx e =
           ctx, [e1'; e2'; e3']
         | _ -> failwith "Unreachable"
       in
-      ctx, {e with cexpr_desc = CE_op (op, el');}
-  | CE_app (f, el) ->
+      ctx, {e with texpr_desc = TE_op (op, el');}
+  | TE_app (f, el) ->
       let (new_equs, new_vars), el' = normalize_list ctx el in
       let x_decl, x_patt, x_expr = new_patt e in
-      let x_eq = {ceq_patt = x_patt;
-                  ceq_expr = {e with cexpr_desc = CE_app (f, el')}}
+      let x_eq = {teq_patt = x_patt;
+                  teq_expr = {e with texpr_desc = TE_app (f, el')}}
       in
       (x_eq::new_equs, x_decl@new_vars), x_expr
-  | CE_prim (f, el) ->
+  | TE_prim (f, el) ->
       let (new_equs, new_vars), el' = normalize_list ctx el in
       let x_decl, x_patt, x_expr = new_patt e in
-      let x_eq = {ceq_patt = x_patt;
-                  ceq_expr = {e with cexpr_desc = CE_prim (f, el')}}
+      let x_eq = {teq_patt = x_patt;
+                  teq_expr = {e with texpr_desc = TE_prim (f, el')}}
       in
       (x_eq::new_equs, x_decl@new_vars), x_expr
-  | CE_tuple l ->
+  | TE_tuple l ->
       let ctx, l' = normalize_list ctx l in
-      ctx, {e with cexpr_desc = CE_tuple l'}
-  | CE_fby (e1, e2) ->
+      ctx, {e with texpr_desc = TE_tuple l'}
+  | TE_fby (e1, e2) ->
       let ctx, e1' = normalize ctx e1 in
       let (new_eqs, new_vars), e2' = normalize ctx e2 in
       let y_decl, y_patt, y_expr = new_patt e2' in
-      let y_eq = {ceq_patt = y_patt; ceq_expr = e2'} in
+      let y_eq = {teq_patt = y_patt; teq_expr = e2'} in
       let x_decl, x_patt, x_expr = new_patt e in
-      let x_eq = {ceq_patt = x_patt;
-                  ceq_expr = {e with cexpr_desc = CE_fby (e1', y_expr)}}
+      let x_eq = {teq_patt = x_patt;
+                  teq_expr = {e with texpr_desc = TE_fby (e1', y_expr)}}
       in
       (x_eq::y_eq::new_eqs, x_decl@y_decl@new_vars), x_expr
-  | CE_merge (id, ["True", e_true; "False", e_false]) ->
-      let ctx, e_true' = normalize ctx e_true in
-      let ctx, e_false' = normalize ctx e_false in
-      ctx, {e with cexpr_desc = CE_merge (id, ["True", e_true'; "False", e_false'])}
-  | CE_merge (id, el) -> 
+  | TE_merge (id, el) -> 
     let ctx, el' = List.fold_left_map (fun ctx (ctor, e) ->
         let ctx, e' = normalize ctx e in
         ctx, (ctor, e'))
         ctx
         el
     in
-    ctx, {e with cexpr_desc = CE_merge (id, el')}
-  | CE_when (e1, b, id) ->
+    ctx, {e with texpr_desc = TE_merge (id, el')}
+  | TE_when (e1, b, e2) ->
       let ctx, e1' = normalize ctx e1 in
-      ctx, {e with cexpr_desc = CE_when (e1', b, id)}
-  | CE_pre _
-  | CE_arrow _ -> failwith "Unreachable"
+      let ctx, e2' = normalize ctx e2 in
+      begin
+        match e2'.texpr_desc with
+        | TE_ident _ ->
+          ctx, {e with texpr_desc = TE_when (e1', b, e2')}
+        | _ ->
+          let (new_eqs, new_vars) = ctx in
+          let y_decl, y_patt, y_expr = new_patt e2' in
+          let y_eq = {teq_patt = y_patt; teq_expr = e2'} in
+          (y_eq::new_eqs, y_decl@new_vars), {e with texpr_desc = TE_when (e1', b, y_expr)}
+      end
+  | TE_pre _
+  | TE_arrow _ -> failwith "Unreachable"
 
 
 and normalize_list ctx el =
@@ -108,14 +111,14 @@ and normalize_list ctx el =
   ctx, List.rev el
 
 let normalize_eq node eq =
-  let (new_eqs, locals), e' = normalize ([], []) eq.ceq_expr in
+  let (new_eqs, locals), e' = normalize ([], []) eq.teq_expr in
   let locals = List.map (fun e -> e, None) locals in
   {node with
-   cn_local = locals@node.cn_local;
-   cn_equs = {eq with ceq_expr = e'}::(List.rev new_eqs) @ node.cn_equs}
+   tn_local = locals@node.tn_local;
+   tn_equs = {eq with teq_expr = e'}::(List.rev new_eqs) @ node.tn_equs}
 
 let file f =
   { f with
-      c_nodes = List.map (fun node ->
-        let node = List.fold_left normalize_eq {node with cn_equs = []} node.cn_equs in
-        {node with cn_equs = List.rev node.cn_equs}) f.c_nodes }
+      t_nodes = List.map (fun node ->
+        let node = List.fold_left normalize_eq {node with tn_equs = []} node.tn_equs in
+        {node with tn_equs = List.rev node.tn_equs}) f.t_nodes }

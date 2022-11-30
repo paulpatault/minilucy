@@ -91,7 +91,16 @@ let () =
     end;
     if !type_only then exit 0;
 
-    let fc = Clocking.clock_file ft main_node in
+    let fn = Normalize.file ft in (** TODO *)
+    if !verbose then begin
+      Format.printf "/**************************************/@.";
+      Format.printf "/* Normalized ast                     */@.";
+      Format.printf "/**************************************/@.";
+      Typed_ast_printer.print_file_std fn
+    end;
+    if !norm_only then exit 0;
+
+    let fc = Clocking.clock_file fn main_node in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Clocked ast                          */@.";
@@ -100,16 +109,7 @@ let () =
     end;
     if !clock_only then exit 0;
 
-    let fn = Normalize.file fc in (** TODO *)
-    if !verbose then begin
-      Format.printf "/**************************************/@.";
-      Format.printf "/* Normalized ast                     */@.";
-      Format.printf "/**************************************/@.";
-      Clocked_ast_printer.pp std_formatter fn
-    end;
-    if !norm_only then exit 0;
-
-    let fs = Scheduling.schedule fn in
+    let fs = Scheduling.schedule fc in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* Scheduled ast                      */@.";

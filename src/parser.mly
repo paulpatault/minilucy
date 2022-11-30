@@ -258,12 +258,9 @@ expr:
     { mk_expr (PE_pre ($2))  $sloc}
 | LPAREN expr COMMA expr_comma_list RPAREN
     { mk_expr (PE_tuple ($2::$4))  $sloc}
-| MERGE IDENT merge_branche(CONST_BOOL) merge_branche(CONST_BOOL)
+| MERGE IDENT list(merge_branche)
     { let ident = mk_expr (PE_ident $2) $loc($2) in
-      mk_expr (PE_merge (ident, $3, $4)) $sloc }
-| MERGE IDENT list(merge_branche(constr))
-    { let ident = mk_expr (PE_ident $2) $loc($2) in
-      mk_expr (PE_merge_adt (ident, $3)) $sloc }
+      mk_expr (PE_merge (ident, $3)) $sloc }
 | e1=expr WHEN c=constr LPAREN e2=expr RPAREN
     { mk_expr (PE_when (e1, c, e2)) $sloc }
 | e1=expr WHEN e2=expr
@@ -273,8 +270,8 @@ expr:
 /* | expr WHENOT expr     { mk_expr (PE_whenot ($2, $3)) } */
 ;
 
-merge_branche(X):
- LPAREN X ARROW expr RPAREN { ($2, $4) }
+merge_branche:
+ LPAREN const ARROW expr RPAREN { (mk_expr (PE_const $2) $loc($2), $4) }
 ;
 
 constr:

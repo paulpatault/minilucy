@@ -19,7 +19,7 @@ let rec print_exp fmt e = match e.texpr_desc with
       fprintf fmt "(@[%a@])" print_tuple_arg_list e_list
   | TE_merge (e, l) ->
     fprintf fmt "@[merge %a @\n  @[%a@]@]" print_exp e
-    (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%s -> %a)" id print_exp exp)) l
+    (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%a -> %a)" print_exp id print_exp exp)) l
   | TE_fby (e1, e2) ->
     fprintf fmt "@[%a fby %a@]" print_exp e1 print_exp e2
   | TE_when (e1, s, e2) ->

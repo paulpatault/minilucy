@@ -9,8 +9,8 @@ let
               (Froid't -> if (x <= lo) then (Chaud't) else (Froid't)));
 
   x = merge state
-            (Chaud -> 0 fby x + 1 when Chaud(state))
-            (Froid -> 0 fby x + 1 when Froid(state));
+            (Chaud't -> 0 fby x + 1 when Chaud(state))
+            (Froid't -> 0 fby x + 1 when Froid(state));
 tel
 
 node main1 () returns (o: bool);

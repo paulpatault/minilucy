@@ -17,12 +17,9 @@ let rec print_exp fmt e = match e.pexpr_desc with
       fprintf fmt "pre (@[%a@])" print_exp e
   | PE_tuple e_list ->
       fprintf fmt "(@[%a@])" print_tuple_arg_list e_list
-  | PE_merge (name, e1, e2) ->
-    fprintf fmt "@[merge %a %a@]" print_exp name
-    (print_list_sp (fun fmt (b, exp) -> fprintf fmt "@\n(%b -> %a)" b print_exp exp) "") [e1;e2]
-  | PE_merge_adt (name, l) ->
+  | PE_merge (name, l) ->
     fprintf fmt "@[merge %a @\n  @[%a@]@]" print_exp name
-    (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%s -> %a)" id print_exp exp)) l
+    (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%a -> %a)" print_exp id print_exp exp)) l
   | PE_when (e1, c, e2) ->
     fprintf fmt "@[%a when %s(%a)@]" print_exp e1 c print_exp e2
 

@@ -71,7 +71,7 @@ let rec pp_exp fmt e = match e.cexpr_desc with
       fprintf fmt "(@[%a@])" pp_tuple_arg_list e_list
   | CE_merge (m, l) ->
       fprintf fmt "@[merge %a @\n  @[%a@]@]" pp_exp m
-        (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%s -> %a)" id pp_exp exp)) l
+        (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%a -> %a)" pp_exp id pp_exp exp)) l
   | CE_fby (e1, e2) ->
     fprintf fmt "@[%a fby %a@]" pp_exp e1 pp_exp e2
   | CE_when (e1, s, eid) ->

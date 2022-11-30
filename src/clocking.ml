@@ -229,7 +229,7 @@ and clock_expr_desc env types loc = function
       Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
   | TE_merge (id, tes) ->
       let cid = clock_expr env types id in
-      let ces = List.map (fun (l, r) -> l, clock_expr env types r) tes in
+      let ces = List.map (fun (l, r) -> clock_expr env types l, clock_expr env types r) tes in
       let c = full_clock_list types (List.map (fun (_, {cexpr_clock; _}) -> cexpr_clock) ces) in
       CE_merge (cid, ces), Ck c
   | TE_fby (e1, e2) ->
@@ -252,13 +252,9 @@ and clock_expr_desc env types loc = function
         | _ as ct ->
           error loc (ExpectedBaseClock ct)
       end
-
-  | TE_when (e, b, ({texpr_desc = _; _} as e2)) ->
-      Format.printf "%a when %s(%a)"
-        Typed_ast_printer.print_exp e b
-        Typed_ast_printer.print_exp e2;
-      failwith "todo"
-      (* dune exec src/minilucy.exe -- examples/ex007.lus -v main1 *)
+  | TE_when _ as e->
+    Typed_ast_printer.print_exp Format.std_formatter {texpr_desc = e; texpr_loc = Lexing.dummy_pos, Lexing.dummy_pos; texpr_type = []};
+    failwith "Not normalized"
   | TE_pre _
   | TE_prim _
   | TE_arrow _ -> error loc Unreachable

@@ -1,16 +1,27 @@
 open Parse_ast
+open Asttypes
 
 let gen = let r = ref 0 in fun s -> incr r; Printf.sprintf "%s__%d" s !r
 
 let mk_merge var over t eqs loc =
-  let merge = PE_merge_adt (over, (List.map2 (fun tt eq -> tt, eq) t eqs)) in
+  let merge = PE_merge (over, (List.map2 (fun tt eq -> tt, eq) t eqs)) in
   {pexpr_desc = merge; pexpr_loc = loc}
 
-let mk_merge_eq var over t eqs loc =
-   let peq_expr = mk_merge var over t eqs loc in
-   PE_eq ({peq_patt = var; peq_expr})
+let mk_merge_eq var over {constr; name} eqs loc =
+  let t = List.map (fun id ->
+      { pexpr_desc = PE_const (Cadt (name, Some id));
+        pexpr_loc = loc })
+      constr
+  in
+  let peq_expr = mk_merge var over t eqs loc in
+  PE_eq ({peq_patt = var; peq_expr})
 
-let mk_fby_merge init var over t eqs loc =
+let mk_fby_merge init var over {constr; name} eqs loc =
+  let t = List.map (fun id ->
+      { pexpr_desc = PE_const (Cadt (name, Some id));
+        pexpr_loc = loc })
+      constr
+  in
   let expr_merge = mk_merge var over t eqs loc in
   let pre = {pexpr_desc = PE_pre expr_merge; pexpr_loc = loc} in
   let fby = PE_arrow (init, pre) in
@@ -63,13 +74,13 @@ let trad {pautom_loc; pautom} =
     { pexpr_desc = PE_ident n;
       pexpr_loc = pautom_loc } in
 
-  let merge_var = mk_merge_eq var_var over t.constr eqs_var pautom_loc in
+  let merge_var = mk_merge_eq var_var over t eqs_var pautom_loc in
 
   let init =
     { pexpr_desc = PE_const (Cadt (t.name, Some (List.hd constrs)));
       pexpr_loc = pautom_loc } in
 
-  let merge_state = mk_fby_merge init var_state over t.constr eqs_state pautom_loc in
+  let merge_state = mk_fby_merge init var_state over t eqs_state pautom_loc in
 
   let set_conds = cond_locals in
 
