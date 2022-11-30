@@ -227,15 +227,9 @@ and clock_expr_desc env types loc = function
       let cel = List.map (clock_expr env types) el in
       CE_tuple cel,
       Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
-  (* | TE_merge (id, ["True", te1; "False", te2]) -> *)
-  (*     let cid = clock_expr env id in *)
-  (*     let ce1 = clock_expr env te1 in *)
-  (*     let ce2 = clock_expr env te2 in *)
-  (*     let c = full_clock ce1.cexpr_clock ce2.cexpr_clock in *)
-  (*     CE_merge (cid, ["True", ce1; "False", ce2]), Ck c *)
   | TE_merge (id, tes) ->
       let cid = clock_expr env types id in
-      let ces = List.map (fun (l, r) -> l, clock_expr env types r) tes in
+      let ces = List.map (fun (l, r) -> clock_expr env types l, clock_expr env types r) tes in
       let c = full_clock_list types (List.map (fun (_, {cexpr_clock; _}) -> cexpr_clock) ces) in
       CE_merge (cid, ces), Ck c
   | TE_fby (e1, e2) ->
@@ -258,8 +252,9 @@ and clock_expr_desc env types loc = function
         | _ as ct ->
           error loc (ExpectedBaseClock ct)
       end
-
-  | TE_when (e, b, {texpr_desc = _; _}) -> failwith "ne devrait pas arriver non plus"
+  | TE_when _ as e->
+    Typed_ast_printer.print_exp Format.std_formatter {texpr_desc = e; texpr_loc = Lexing.dummy_pos, Lexing.dummy_pos; texpr_type = []};
+    failwith "Not normalized"
   | TE_pre _
   | TE_prim _
   | TE_arrow _ -> error loc Unreachable

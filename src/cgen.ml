@@ -365,7 +365,8 @@ let rec compile_expr types file node fundec expr =
     let call_stmt = mkStmtOneInstr call_instr in
     fundec.sbody <- append_stmt call_stmt fundec.sbody;
     file, Lval res_lval, ret_ty
-  | IE_case ({iexpr_desc = IE_ident id; _}, cases) ->
+
+  | IE_case (e, cases) ->
     let res_ty =
       let hd, _ = List.hd cases in
       let ty = hd.iexpr_type in
@@ -393,7 +394,29 @@ let rec compile_expr types file node fundec expr =
     in
     let switch_stmts = List.rev switch_stmts in
     let switch_block = mkBlock switch_stmts in
-    let lval =
+
+    let file, e =
+        match e with
+        | {iexpr_desc = IE_ident id; _} ->
+          file, begin try
+            let var = find_formal fundec (id.name) in
+            Lval (Var var, NoOffset)
+          with Not_found ->
+            begin try
+                let var = find_local fundec (id.name) in
+                Lval (Var var, NoOffset)
+              with Not_found ->
+                let ret_v = find_local fundec "ret_" in
+                let fieldinfo = find_field_globals (node.in_name.name^"_ret") id.name file.globals in
+                Lval (Var ret_v, Field (fieldinfo, NoOffset))
+            end
+        end
+        | _ ->
+          let file, e, _ = compile_expr types file node fundec e in
+          file, e
+      in
+
+    (* let lval =
       try
         let var = find_formal fundec (id.name) in
         Lval (Var var, NoOffset)
@@ -406,12 +429,11 @@ let rec compile_expr types file node fundec expr =
             let fieldinfo = find_field_globals (node.in_name.name^"_ret") id.name file.globals in
             Lval (Var ret_v, Field (fieldinfo, NoOffset))
         end
-    in
-    let switch_stmt = mkStmt (Switch (lval, switch_block, switch_stmts, locUnknown, locUnknown)) in
+    in *)
+
+    let switch_stmt = mkStmt (Switch (e, switch_block, switch_stmts, locUnknown, locUnknown)) in
     fundec.sbody <- append_stmt switch_stmt fundec.sbody;
     file, Lval (Var switch_res, NoOffset), res_ty
-
-  | IE_case _ -> failwith "not implemented 4"
 
   | IE_prim (n, el) ->
     match n.name, el with
@@ -554,11 +576,24 @@ let compile_main file ast main_node =
   let mem_init_call = Call (None, mem_init_expr, [AddrOf (mem_lval)], locUnknown, locUnknown) in
   let mem_init_stmt = mkStmtOneInstr mem_init_call in
   fundec.sbody <- append_stmt mem_init_stmt fundec.sbody;
+
   let step_fun = find_fun main_node file.globals in
   let step_lval = Lval (Var step_fun.svar, NoOffset) in
-  let step_call = Call (None, step_lval, [AddrOf (mem_lval)], locUnknown, locUnknown) in
+
+  let res_typ = match step_fun.svar.vtype with TFun (v, _, _, _) -> v | _ -> assert false in
+  let res_lval = Var (makeLocalVar fundec "res" res_typ), NoOffset in
+
+  let step_call = Call (Some res_lval, step_lval, [AddrOf (mem_lval)], locUnknown, locUnknown) in
+
+  let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, [])) in
+  let printf_lval = Lval (Var printf_info, NoOffset) in
+  let str_fmt = GoblintCil.Const (CStr ("%d", No_encoding)) in
+  let call_printf = Call (None, printf_lval, [str_fmt; Lval res_lval], locUnknown, locUnknown) in
+
+  let printf_stmt = mkStmtOneInstr call_printf in
+
   let step_stmt = mkStmtOneInstr step_call in
-  let while_block = mkBlock [step_stmt] in
+  let while_block = mkBlock [step_stmt; printf_stmt] in
   let while_stmt = mkStmt (Loop (while_block, locUnknown, locUnknown, None, None)) in
   fundec.sbody <- append_stmt while_stmt fundec.sbody;
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
@@ -581,5 +616,5 @@ let compile ast main_node file_name =
   let file = compile_main file ast main_node in
   file.globals <- List.rev file.globals;
   file.globals <- compile_enums ast.i_types @ file.globals;
+  file.globals <- GText "#include <printf.h>" :: file.globals;
   file
-

@@ -18,7 +18,7 @@ and t_expr_desc =
   | TE_arrow of t_expr * t_expr
   | TE_pre of t_expr
   | TE_tuple of t_expr list
-  | TE_merge of t_expr * (string * t_expr) list
+  | TE_merge of t_expr * (t_expr * t_expr) list
   | TE_fby of t_expr * t_expr
   | TE_when of t_expr * string * t_expr
 

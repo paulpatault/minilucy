@@ -54,23 +54,17 @@ let rec compile_base_expr e =
     | CE_when (e, _, _) ->
         let e' = compile_base_expr e in
         e'.iexpr_desc
-    | CE_merge (id, ["True", e_t; "False", e_f]) ->
-        let ide = compile_base_expr id in
-        let e_t' = compile_base_expr e_t in
-        let e_f' = compile_base_expr e_f in
-        let case_t = {iexpr_desc = IE_const (Cbool true);
-                      iexpr_type = [Tbool];}
-        in
-        let case_f = {iexpr_desc = IE_const (Cbool false);
-                      iexpr_type = [Tbool];}
-        in
-        IE_case (ide, [case_t, e_t'; case_f, e_f'])
     | CE_merge (id, l) ->
-        let ty = id.cexpr_type in
         let ide = compile_base_expr id in
-        let l = List.map (fun (name, e) ->
-          let lty = match ty with [Tadt s] -> s | _ -> assert false in
-          let case = { iexpr_desc = IE_const (Cadt (lty, Some name)); iexpr_type = ty } in
+        let l = List.map (fun (const, e) ->
+          let case = match const with
+            | {cexpr_desc = CE_const (Cadt (lty, Some name)); cexpr_type = ty} ->
+              { iexpr_desc = IE_const (Cadt (lty, Some name)); iexpr_type = ty }
+            | {cexpr_desc = CE_const (Cbool b); cexpr_type = ty} ->
+              let s = if b then "True" else "False" in
+              {iexpr_desc = IE_const (Cadt ("inductive_bool", Some s)); iexpr_type = [Tadt "inductive_bool"]}
+            | _ -> assert false
+          in
           case, compile_base_expr e
           ) l in
         IE_case (ide, l)

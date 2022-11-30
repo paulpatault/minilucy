@@ -1,0 +1,9 @@
+(* x when 1 mal typé, 1 devrait être de type bool *)
+
+node check (x: int) returns (o: bool);
+var half : bool; n : int;
+let
+  half = (true) -> (not (pre half));
+  n = x + (x when 1);
+  o = true;
+tel

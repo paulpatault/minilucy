@@ -5,7 +5,7 @@ enum inductive_bool {
   TRUE
 };
 
-enum typ__1 {
+enum t {
   CHAUD,
   FROID
 };
@@ -13,46 +13,48 @@ enum typ__1 {
 struct oscillateur_mem {
 
   int aux__2_next6;
-  enum typ__1 aux__4_next5;
-  int aux__6_next4;
-  int aux__8_next3;
-  int aux__10_next2;
-  int aux__12_next1;
+  enum t aux__8_next5;
+  int aux__10_next4;
+  int aux__12_next3;
+  int aux__14_next2;
+  int aux__16_next1;
 };
 
 void oscillateur_init (struct oscillateur_mem* mem) {
   mem->aux__2_next6 = 1;
   
-  mem->aux__4_next5 = CHAUD;
+  mem->aux__8_next5 = CHAUD;
   
-  mem->aux__6_next4 = 1;
+  mem->aux__10_next4 = 1;
   
-  mem->aux__8_next3 = 0;
+  mem->aux__12_next3 = 0;
   
-  mem->aux__10_next2 = 1;
+  mem->aux__14_next2 = 1;
   
-  mem->aux__12_next1 = 0;
+  mem->aux__16_next1 = 0;
 }
 
 int oscillateur (struct oscillateur_mem* mem, int lo, int hi) {
+  int aux__16;
+  int aux__15;
+  int aux__14;
+  int aux__13;
   int aux__12;
   int aux__11;
   int aux__10;
   int aux__9;
-  int aux__8;
-  int aux__7;
+  enum t aux__8;
+  enum t aux__7;
   int aux__6;
   int aux__5;
-  enum typ__1 aux__4;
-  enum typ__1 aux__3;
+  int aux__4;
+  int aux__3;
   int aux__2;
   int aux__1;
-  enum typ__1 state__2;
-  int cond__4;
-  int cond__3;
+  enum t state;
   int x;
-  enum typ__1 switch_1;
-  enum typ__1 switch_2;
+  enum t switch_1;
+  enum t switch_2;
   enum inductive_bool switch_3;
   enum inductive_bool switch_4;
   
@@ -60,44 +62,44 @@ int oscillateur (struct oscillateur_mem* mem, int lo, int hi) {
   
   aux__2 = mem->aux__2_next6;
   
-  aux__4 = mem->aux__4_next5;
-  
-  aux__5 = 0;
-  
-  aux__6 = mem->aux__6_next4;
-  
-  aux__8 = mem->aux__8_next3;
+  aux__8 = mem->aux__8_next5;
   
   aux__9 = 0;
   
-  aux__10 = mem->aux__10_next2;
+  aux__10 = mem->aux__10_next4;
   
-  aux__12 = mem->aux__12_next1;
+  aux__12 = mem->aux__12_next3;
   
-  state__2 = aux__2 ? CHAUD : aux__4;
+  aux__13 = 0;
   
-  switch (state__2) {
+  aux__14 = mem->aux__14_next2;
+  
+  aux__16 = mem->aux__16_next1;
+  
+  state = aux__2 ? CHAUD : aux__8;
+  
+  switch (state) {
     case CHAUD: {
-      switch_1 = aux__6 ? 0 : (aux__8 + 1);
+      switch_1 = (aux__10 ? 0 : aux__12 + 1);
       break;
     }
     case FROID: {
-      switch_1 = aux__10 ? 0 : (aux__12 - 1);
+      switch_1 = (aux__14 ? 0 : aux__16 - 1);
       break;
     }
   };
   
   x = switch_1;
   
-  cond__4 = (x <= lo);
+  aux__3 = (x >= hi);
   
-  cond__3 = (x >= hi);
+  aux__4 = (x >= hi);
   
-  aux__7 = x;
+  aux__5 = (x <= lo);
   
-  aux__11 = x;
+  aux__6 = (x <= lo);
   
-  switch (cond__3) {
+  switch ((x >= hi)) {
     case TRUE: {
       switch_3 = FROID;
       break;
@@ -108,7 +110,7 @@ int oscillateur (struct oscillateur_mem* mem, int lo, int hi) {
     }
   };
   
-  switch (cond__4) {
+  switch ((x <= lo)) {
     case TRUE: {
       switch_4 = CHAUD;
       break;
@@ -119,7 +121,7 @@ int oscillateur (struct oscillateur_mem* mem, int lo, int hi) {
     }
   };
   
-  switch (state__2) {
+  switch (state) {
     case CHAUD: {
       switch_2 = switch_3;
       break;
@@ -130,19 +132,23 @@ int oscillateur (struct oscillateur_mem* mem, int lo, int hi) {
     }
   };
   
-  aux__3 = switch_2;
+  aux__7 = switch_2;
+  
+  aux__11 = x;
+  
+  aux__15 = x;
   
   mem->aux__2_next6 = aux__1;
   
-  mem->aux__4_next5 = aux__3;
+  mem->aux__8_next5 = aux__7;
   
-  mem->aux__6_next4 = aux__5;
+  mem->aux__10_next4 = aux__9;
   
-  mem->aux__8_next3 = aux__7;
+  mem->aux__12_next3 = aux__11;
   
-  mem->aux__10_next2 = aux__9;
+  mem->aux__14_next2 = aux__13;
   
-  mem->aux__12_next1 = aux__11;
+  mem->aux__16_next1 = aux__15;
   
   return x;
 }
@@ -156,16 +162,16 @@ void main1_init (struct main1_mem* mem) {
 }
 
 int main1 (struct main1_mem* mem) {
-  int aux__13;
+  int aux__17;
   int x;
   int o;
   int call_1;
   
   call_1 = oscillateur(&(mem->oscillateur_next1), -(5), 5);
   
-  aux__13 = call_1;
+  aux__17 = call_1;
   
-  x = aux__13;
+  x = aux__17;
   
   o = (x > 0);
   
