@@ -1,3 +1,5 @@
+(* En gros c'est le même fichier que ex005.lus mais avec l'automate dé-sucré *)
+
 type t = Chaud | Froid
 
 node oscillateur (lo, hi : int) returns (x: int);
@@ -10,12 +12,12 @@ let
 
   x = merge state
             (Chaud't -> 0 fby x + 1 when Chaud(state))
-            (Froid't -> 0 fby x + 1 when Froid(state));
+            (Froid't -> 0 fby x - 1 when Froid(state));
 tel
 
 node main1 () returns (o: bool);
 var x: int;
 let
   x = oscillateur (-5, 5);
-  o = true;
+  o = x > 0;
 tel

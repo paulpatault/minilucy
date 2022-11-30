@@ -68,7 +68,7 @@ let () =
   let lb = Lexing.from_channel c in
   try
     let f = Parser.file Lexer.token lb in
-    let inductive_bool = Asttypes.{name = "inductive_bool"; constr = ["True"; "False"]} in
+    let inductive_bool = Asttypes.{name = "inductive_bool"; constr = ["False"; "True"]} in
     let f = Parse_ast.{ f with p_types = inductive_bool :: f.p_types } in
     close_in c;
     if !parse_only then exit 0;

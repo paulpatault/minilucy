@@ -48,6 +48,8 @@ let pp_const fmt = function
       let i = Z.to_int i in
       let e, _, _ = List.nth enuminfo.eitems i in
       fprintf fmt "%s" e
+  | CStr (s, _) ->
+      fprintf fmt "%S" s
   | _ -> assert false
 
 let pp_unop fmt = function
@@ -254,6 +256,7 @@ let pp_global fmt = function
   | GCompTag (compinfo, _) -> pp_comp_info fmt compinfo
   | GFun (fundec, _) -> pp_fundec fmt fundec
   | GType (typeinfo, _) -> pp_typeinfo fmt typeinfo
+  | GText s -> fprintf fmt "%s\n" s
   | _ -> assert false
 
 let pp fmt file =
