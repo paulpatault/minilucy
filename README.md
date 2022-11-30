@@ -23,7 +23,7 @@
 
 - features avancées
   - [ ] `reset`
-  - [ ] `merge` : WIP PR #7
+  - [x] `merge` : WIP PR #7
   - [x] automaton
 
 ## Usage
