@@ -568,7 +568,9 @@ let compile_main file ast main_node =
   let main_ty = TFun (TInt (IInt, []), Some args, false, []) in
   let fun_var = makeGlobalVar "main" main_ty in
   let fundec = mk_fundec fun_var in
+  Format.printf "%s@." (main_node^"_mem") ;
   let mem_comp = find_gcomp (main_node^"_mem") file.globals in
+  if true then assert false;
   let mem_local = makeLocalVar fundec "mem" (TComp (mem_comp, [])) in
   let mem_lval = Var mem_local, NoOffset in
   let mem_init_fundec = find_fun (main_node^"_init") file.globals in
@@ -588,26 +590,25 @@ let compile_main file ast main_node =
   let main_imp_type = main_node_imp.in_input_step in (* args du main dans lustre *)
   let len = List.length main_imp_type in
   let argc = Lval (Var (find_formal fundec "argc"), NoOffset) in
-  let const_len = mk_int_exp (len + 1) in
 
-  let if_condition = BinOp (Lt, argc, const_len, TInt (IInt, [])) in
+  let if_condition = BinOp (Lt, argc, mk_int_exp (len + 1), TInt (IInt, [])) in
   let str_fmt = GoblintCil.Const (CStr ("Error : %d needed arguments were not provided", No_encoding)) in
 
-  let call_printf = Call (None, printf_lval, [str_fmt; const_len], locUnknown, locUnknown) in
+  let call_printf = Call (None, printf_lval, [str_fmt; mk_int_exp len], locUnknown, locUnknown) in
   let print = mkStmtOneInstr call_printf in
   let exit = mkStmtOneInstr (Call (None, exit_lval, [mk_int_exp 1], locUnknown, locUnknown)) in
   let verif_inputs_stmt = mkStmt (If (if_condition, mkBlock [print;exit], mkBlock [], locUnknown, locUnknown)) in
   fundec.sbody <- append_stmt verif_inputs_stmt fundec.sbody;
 
-  let atoied_vars_lvals = List.init len (fun i -> Lval (Var (makeLocalVar fundec (Format.sprintf "_argv_%d" i) (TInt (IInt, []))), NoOffset)) in
+  let atoied_vars_lvals = List.init len (fun i -> Lval (Var (makeLocalVar fundec (Format.sprintf "argv_%d" i) (TInt (IInt, []))), NoOffset)) in
   let call_atoi_argv ret argv_i = Call (Some ret, atoi_lval, [argv_i], locUnknown, locUnknown) in
 
   let argv = find_formal fundec "argv" in
   let atois = List.mapi (fun i -> function
-      Lval e ->
-      let i_c = mk_int_exp (i+1) in
-      let argv_i = Lval (Var argv, Index (i_c, NoOffset)) in (* argv[i+1] : array.get (argv, i) *)
-      call_atoi_argv e argv_i
+        Lval e ->
+          let i_c = mk_int_exp (i+1) in
+          let argv_i = Lval (Var argv, Index (i_c, NoOffset)) in (* argv[i+1] : array.get (argv, i) *)
+          call_atoi_argv e argv_i
       | _ -> assert false)
       atoied_vars_lvals in
 

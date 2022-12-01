@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <printf.h>
 
 enum inductive_bool {
@@ -183,6 +185,12 @@ int main (int argc, char* argv[]) {
   int res;
   
   main1_init(&(mem));
+  
+  if ((argc < 1)) {
+    printf("Error : %d needed arguments were not provided", 1);
+    
+    exit(1);
+  };
   
   while (1) {
     res = main1(&(mem));
