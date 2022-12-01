@@ -385,7 +385,7 @@ and type_expr_desc env loc = function
     (List.map (fun e -> base_ty_of_ty e.texpr_loc e.texpr_type) tel)
 
   | PE_merge (x, l) ->
-      let id = (match x.pexpr_desc with PE_ident id -> id) [@warning "-8"] in
+      let id = (match x.pexpr_desc with PE_ident id -> id | _ -> assert false) in
       let mergebody = List.map (fun (l, r) -> type_expr env l, type_expr env r) l in
       let t_match, t_expr = ref None, ref None in
       List.iter (fun ({texpr_type = t1; texpr_loc = l1; _}, {texpr_type = t2; texpr_loc = l2; _}) ->
@@ -422,16 +422,19 @@ and verif_mergebody env tname l id_loc =
   let tl = match List.find_opt (fun {name; _} -> name = tname) env.types with
     | None -> error id_loc (UnknownAdtType tname)
     | Some e -> e in
-  let f
-      {texpr_desc = TE_const (Cadt (_, Some id1)); _}
-      {texpr_desc = TE_const (Cadt (_, Some id2)); _} =
-    compare id1 id2 [@warning "-8"] in
-  let sl = List.map fst l |> List.sort f in
+  let compare_f a b = match a, b with
+    | {texpr_desc = TE_const (Cadt (_, Some id1)); _},
+      {texpr_desc = TE_const (Cadt (_, Some id2)); _} -> compare id1 id2
+    | _ -> assert false
+  in
+  let sl = List.map fst l |> List.sort compare_f in
   let stl = List.sort compare tl.constr in
 
   if not @@ List.for_all2
-      (fun {texpr_desc = TE_const (Cadt (_, Some id1)); _} id -> id1 = id)
-      sl stl [@warning "-8"]
+      (fun a b -> match a, b with
+        | {texpr_desc = TE_const (Cadt (_, Some id1)); _}, id -> id1 = id
+        | _ -> assert false)
+      sl stl
   then
     error id_loc (NotExhaustiveMerge tname)
 

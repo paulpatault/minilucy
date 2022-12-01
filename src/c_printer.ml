@@ -85,7 +85,8 @@ let rec pp_offset is_mem fmt = function
       field.fname
       (pp_offset is_mem) offset
   | Index (idx, offset) ->
-    fprintf fmt "[idx]%a"
+    fprintf fmt "[%a]%a"
+      pp_exp idx
       (pp_offset is_mem) offset
 
 and pp_exp fmt = function
@@ -217,6 +218,15 @@ and pp_stmt fmt stmt =
   | Loop (b, _, _, _, _) ->
     fprintf fmt "while (1) {@;<2 2>@[<v>%a@]@;}"
       (pp_block false) b
+  | If (cond, b1, b2, _, _) when b2.bstmts = [] ->
+    fprintf fmt "if (%a) {@;<2 2>@[<v>%a@]@;}"
+      pp_exp cond
+      (pp_block false) b1
+  | If (cond, b1, b2, _, _) ->
+    fprintf fmt "if (%a) {@;<2 2>@[<v>%a@]@;} else {@;<2 2>@[<v>%a@]@;}"
+      pp_exp cond
+      (pp_block false) b1
+      (pp_block false) b2
   | _ -> assert false
 
 and pp_block brackets fmt block =

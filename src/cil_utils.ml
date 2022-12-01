@@ -11,6 +11,10 @@ let get_next_comp_name () =
   incr comp_num;
   name
 
+let mk_int_exp i =
+    let cilint = mkCilint IInt (Int64.of_int i) in
+    Const (CInt (cilint, IInt, None))
+
 let rec translate_const types = function
   | Cbool b ->
       let cilint = mkCilint IInt (if b then 1L else 0L) in
@@ -139,6 +143,10 @@ let find_formal fundec name =
 
 let append_stmt stmt block =
   block.bstmts <- block.bstmts@[stmt];
+  block
+
+let append_stmts stmts block =
+  block.bstmts <- block.bstmts @ stmts;
   block
 
 let rec find_fun name = function
