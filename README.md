@@ -8,14 +8,13 @@
 ## TODO
 
 - pseudo-rapport du travial réalisé dans le README
-  - expliquer le schéma de compilation
-  - parler des features
-     - clocks
-     - reset
-     - merge
-     - automaton (niveau 1 pour l'instant)
-     - ..
-
+  + expliquer le schéma de compilation
+  + parler des features :
+    - clocks
+    - reset
+    - merge
+    - automaton (niveau 1 pour l'instant)
+    - ..
 - check [https://github.com/paulpatault/minilucy/blob/automaton/TODO.md]
 
 - base
@@ -68,4 +67,27 @@ $ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main1
 ## Travail réalisé
 
 - Automates (non imbriqués)
+
+- Phases de compilation
+  + `Parsed` -> `Parsed`:
+    - dé-sucrage des automates
+  + `Parsed` -> `Typed`:
+    - TODO
+  + `Typed` -> `Normalised`:
+    - toutes les expressions sont "dé-inlinées" dans des variables locales aux noeuds
+    - ...
+  + `Normalised` -> `Clocked`:
+    - vérifications des horloges (analyse à la typage (cf. article du sujet))
+    - ...
+  + `Clocked` -> `Scheduled`:
+    - mise en ordre des équations dans le noeud en fonction des liens de dépendances
+    - ...
+  + `Scheduled` -> `Imp`:
+    - traduction intermédiaire vers un AST de langage impératif avant la truduction en C
+    - ...
+  + `Imp` -> `C`:
+    - le retour de la fonction `main` du code lustre initial est affiché à chaque tour du `while (1)`
+    - nous utilisons un l'ast C de la bibliothèque Goblint.Cil
+    - ...
+
 - TODO Suite
