@@ -57,6 +57,13 @@ and translate_type types = function
   | Treal -> TFloat (FFloat, [])
   | Tadt s -> mk_enum types s
 
+let rec typ_to_format_string = function
+  | TInt   _ -> "%d"
+  | TFloat _ -> "%f"
+  | t ->
+      (* failwith ou "%d" par défaut ? *)
+      failwith (Format.asprintf "not implemented : typ_to_format_string [%a]" C_printer.pp_type t)
+
 let true_const = integer 1
 let false_const = integer 0
 let bool_t = TInt (IInt, [])

@@ -587,7 +587,7 @@ let compile_main file ast main_node =
 
   let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, [])) in
   let printf_lval = Lval (Var printf_info, NoOffset) in
-  let str_fmt = GoblintCil.Const (CStr ("%d", No_encoding)) in
+  let str_fmt = GoblintCil.Const (CStr (typ_to_format_string res_typ, No_encoding)) in
   let call_printf = Call (None, printf_lval, [str_fmt; Lval res_lval], locUnknown, locUnknown) in
 
   let printf_stmt = mkStmtOneInstr call_printf in
