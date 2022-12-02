@@ -15,15 +15,18 @@
     - merge
     - automaton (niveau 1 pour l'instant)
     - ..
-- check [https://github.com/paulpatault/minilucy/blob/automaton/TODO.md]
+- check [https://github.com/paulpatault/minilucy/TODO.md]
 
 - base
   - [x] compile simple : `pre`, `->`, `fby`
+  - [ ] meilleur `imp` printer
 
 - features avancées
   - [ ] `reset`
   - [x] `merge` : WIP PR #7
   - [x] automaton
+  - [ ] option : lecture input main non constant ? (ne pas utiliser argc/v de C mais un fichier ?)
+  - [ ] ajouter des exemples négatifs stylés
 
 ## Usage
 
@@ -58,10 +61,18 @@ où `OPTIONS` :
 - `-sched-only` : arrêt après le scheduling
 - `-imp-only` : arrêt après la traduction vers `imp`
 - `-c-only` : arrêt après la traduction vers `C`
+- `-no-sleep` : n'ajoute pas la fonction `sleep(1)` dans le main du fichier `C`
 
 Exemple :
 ```
 $ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main1
+```
+
+Sinon, `make` fabriquera un exécutable dans le répertoire principal, utilisable ensuite avec :
+```
+$ make
+$ cd examples
+$ ../minilucy.exe [file].lus -v [main-node] [options...]
 ```
 
 ## Travail réalisé
@@ -88,6 +99,7 @@ $ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main1
   + `Imp` -> `C`:
     - le retour de la fonction `main` du code lustre initial est affiché à chaque tour du `while (1)`
     - nous utilisons un l'ast C de la bibliothèque Goblint.Cil
+    - si le main n'a pas besoin de mémoire interne, pas besoin d'en fabriquer une pour rien (cf ex008)
     - ...
 
 - TODO Suite

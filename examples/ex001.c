@@ -1,3 +1,14 @@
+#include <stdlib.h>
+
+#include <printf.h>
+
+#include <unistd.h>
+
+enum inductive_bool {
+  FALSE,
+  TRUE
+};
+
 struct counting_mem {
   int aux__2_next2;
   int aux__4_next1;
@@ -14,22 +25,22 @@ struct counting_ret {
   int y;
 };
 
-struct counting_ret counting (struct counting_mem* mem, int tick, int top) {
+struct counting_ret counting (struct counting_mem* mem, int tic, int toc) {
   int aux__4;
   int aux__3;
   int aux__2;
   int aux__1;
   int v;
   struct counting_ret ret_;
-  int switch_1;
-  int switch_2;
+  enum inductive_bool switch_1;
+  enum inductive_bool switch_2;
   
-  switch (top) {
-    case 1: {
+  switch (toc) {
+    case TRUE: {
       switch_1 = 1;
       break;
     }
-    case 0: {
+    case FALSE: {
       switch_1 = 0;
       break;
     }
@@ -43,12 +54,12 @@ struct counting_ret counting (struct counting_mem* mem, int tick, int top) {
   
   aux__4 = mem->aux__4_next1;
   
-  switch (tick) {
-    case 1: {
+  switch (tic) {
+    case TRUE: {
       switch_2 = v;
       break;
     }
-    case 0: {
+    case FALSE: {
       switch_2 = aux__2 ? 0 : (aux__4 + v);
       break;
     }
@@ -60,9 +71,9 @@ struct counting_ret counting (struct counting_mem* mem, int tick, int top) {
   
   aux__3 = ret_.o;
   
-  mem->aux__2_next2 = 0;
+  mem->aux__2_next2 = aux__1;
   
-  mem->aux__4_next1 = ret_.o;
+  mem->aux__4_next1 = aux__3;
   
   return ret_;
 }
@@ -85,23 +96,23 @@ int check (struct check_mem* mem, int x) {
   int aux__6;
   int y;
   int z;
-  int OK;
-  int switch_3;
+  int o;
+  enum inductive_bool switch_3;
   struct counting_ret call_1;
   struct tuple_ty_1 tuple_ty_1__;
   
   switch (x) {
-    case 1: {
+    case TRUE: {
       switch_3 = 0;
       break;
     }
-    case 0: {
+    case FALSE: {
       switch_3 = 1;
       break;
     }
   };
   
-  OK = switch_3;
+  o = switch_3;
   
   call_1 = counting(&(mem->counting_next1), x, x);
   
@@ -117,15 +128,31 @@ int check (struct check_mem* mem, int x) {
   
   z = tuple_ty_1__.tuple_field_2;
   
-  return OK;
+  return o;
 }
 
 int main (int argc, char* argv[]) {
   struct check_mem mem;
+  int argv_0;
+  int res;
   
   check_init(&(mem));
   
+  if ((argc < 2)) {
+    printf("Error : %d needed arguments were not provided", 1);
+    
+    exit(1);
+  };
+  
+  argv_0 = atoi(argv[1]);
+  
   while (1) {
-    check(&(mem));
+    res = check(&(mem), argv_0);
+    
+    printf("%d", res);
+    
+    fflush(0);
+    
+    sleep(1);
   };
 }

@@ -6,3 +6,4 @@
 * automate :
   - "Automate d'automate" : cf. ex006.lus
   - sortes automates : `until-then`, `unless-continue`, `unless-then`
+* meilleur imp printer

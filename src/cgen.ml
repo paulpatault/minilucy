@@ -559,7 +559,8 @@ let compile_node types file node =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
-let compile_main file ast main_node =
+let compile_main file ast main_node no_sleep =
+  let main_node_imp = List.find (fun {in_name;_}-> in_name.name = main_node) ast.i_nodes in
   let args = [
     "argc", TInt (IInt, []), [];
     "argv", TArray (TPtr (TInt (IChar, []), []), None, []), []
@@ -568,14 +569,61 @@ let compile_main file ast main_node =
   let main_ty = TFun (TInt (IInt, []), Some args, false, []) in
   let fun_var = makeGlobalVar "main" main_ty in
   let fundec = mk_fundec fun_var in
-  let mem_comp = find_gcomp (main_node^"_mem") file.globals in
-  let mem_local = makeLocalVar fundec "mem" (TComp (mem_comp, [])) in
-  let mem_lval = Var mem_local, NoOffset in
-  let mem_init_fundec = find_fun (main_node^"_init") file.globals in
-  let mem_init_expr = Lval (Var mem_init_fundec.svar, NoOffset) in
-  let mem_init_call = Call (None, mem_init_expr, [AddrOf (mem_lval)], locUnknown, locUnknown) in
-  let mem_init_stmt = mkStmtOneInstr mem_init_call in
-  fundec.sbody <- append_stmt mem_init_stmt fundec.sbody;
+
+  let addr_mem_lval, fundec =
+    if main_node_imp.need_mem then
+      let mem_comp = find_gcomp (main_node^"_mem") file.globals in
+      let mem_local = makeLocalVar fundec "mem" (TComp (mem_comp, [])) in
+      let mem_lval = Var mem_local, NoOffset in
+      let mem_init_fundec = find_fun (main_node^"_init") file.globals in
+      let mem_init_expr = Lval (Var mem_init_fundec.svar, NoOffset) in
+      let mem_init_call = Call (None, mem_init_expr, [AddrOf (mem_lval)], locUnknown, locUnknown) in
+      let mem_init_stmt = mkStmtOneInstr mem_init_call in
+      fundec.sbody <- append_stmt mem_init_stmt fundec.sbody;
+      [AddrOf mem_lval], fundec
+    else
+      (* let _ = assert false in *)
+      [], fundec
+  in
+
+  let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, [])) in
+  let sleep_info  = makeGlobalVar "sleep"  (TFun (TInt (IInt, []), Some ["seconds", TInt (IInt, []), []], true, [])) in
+  let atoi_info   = makeGlobalVar "atoi"   (TFun (TInt (IInt, []), Some ["str",    charConstPtrType, []], true, [])) in
+  let exit_info   = makeGlobalVar "exit"   (TFun (TVoid [],        Some ["status",  TInt (IInt, []), []], true, [])) in
+  let fflush_info   = makeGlobalVar "fflush" (TFun (TInt (IInt, []), Some ["status",  TInt (IInt, []), []], true, [])) in
+  let printf_lval = Lval (Var printf_info, NoOffset) in
+  let sleep_lval  = Lval (Var sleep_info, NoOffset) in
+  let fflush_lval = Lval (Var fflush_info, NoOffset) in
+  let atoi_lval   = Lval (Var atoi_info,   NoOffset) in
+  let exit_lval   = Lval (Var exit_info,   NoOffset) in
+
+  let main_imp_type = main_node_imp.in_input_step in (* args du main dans lustre *)
+  let len = List.length main_imp_type in
+  let argc = Lval (Var (find_formal fundec "argc"), NoOffset) in
+
+  let if_condition = BinOp (Lt, argc, mk_int_exp (len + 1), TInt (IInt, [])) in
+  let str_fmt = GoblintCil.Const (CStr ("Error : %d needed arguments were not provided", No_encoding)) in
+
+  let call_printf = Call (None, printf_lval, [str_fmt; mk_int_exp len], locUnknown, locUnknown) in
+  let print = mkStmtOneInstr call_printf in
+  let exit = mkStmtOneInstr (Call (None, exit_lval, [mk_int_exp 1], locUnknown, locUnknown)) in
+  let verif_inputs_stmt = mkStmt (If (if_condition, mkBlock [print;exit], mkBlock [], locUnknown, locUnknown)) in
+  fundec.sbody <- append_stmt verif_inputs_stmt fundec.sbody;
+
+  let atoied_vars_lvals = List.init len (fun i -> Lval (Var (makeLocalVar fundec (Format.sprintf "argv_%d" i) (TInt (IInt, []))), NoOffset)) in
+  let call_atoi_argv ret argv_i = Call (Some ret, atoi_lval, [argv_i], locUnknown, locUnknown) in
+
+  let argv = find_formal fundec "argv" in
+  let atois = List.mapi (fun i -> function
+        Lval e ->
+          let i_c = mk_int_exp (i+1) in
+          let argv_i = Lval (Var argv, Index (i_c, NoOffset)) in
+          call_atoi_argv e argv_i
+      | _ -> assert false)
+      atoied_vars_lvals in
+
+  let atoi_block = List.map mkStmtOneInstr atois in
+  fundec.sbody <- append_stmts atoi_block fundec.sbody;
 
   let step_fun = find_fun main_node file.globals in
   let step_lval = Lval (Var step_fun.svar, NoOffset) in
@@ -583,18 +631,22 @@ let compile_main file ast main_node =
   let res_typ = match step_fun.svar.vtype with TFun (v, _, _, _) -> v | _ -> assert false in
   let res_lval = Var (makeLocalVar fundec "res" res_typ), NoOffset in
 
-  let step_call = Call (Some res_lval, step_lval, [AddrOf (mem_lval)], locUnknown, locUnknown) in
+  let step_call_params = addr_mem_lval @ atoied_vars_lvals in
+  let step_call = Call (Some res_lval, step_lval, step_call_params, locUnknown, locUnknown) in
 
-  let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, [])) in
-  let printf_lval = Lval (Var printf_info, NoOffset) in
   let str_fmt = GoblintCil.Const (CStr (typ_to_format_string res_typ, No_encoding)) in
   let call_printf = Call (None, printf_lval, [str_fmt; Lval res_lval], locUnknown, locUnknown) in
+  let sleep1_stmt = mkStmtOneInstr (Call (None, sleep_lval, [mk_int_exp 1], locUnknown, locUnknown)) in
+  let fflush0_stmt = mkStmtOneInstr (Call (None, fflush_lval, [mk_int_exp 0], locUnknown, locUnknown)) in
 
   let printf_stmt = mkStmtOneInstr call_printf in
 
   let step_stmt = mkStmtOneInstr step_call in
-  let while_block = mkBlock [step_stmt; printf_stmt] in
+  let while_block =
+    if no_sleep then mkBlock [step_stmt; printf_stmt; fflush0_stmt]
+    else mkBlock [step_stmt; printf_stmt; fflush0_stmt; sleep1_stmt] in
   let while_stmt = mkStmt (Loop (while_block, locUnknown, locUnknown, None, None)) in
+
   fundec.sbody <- append_stmt while_stmt fundec.sbody;
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
@@ -604,7 +656,7 @@ let compile_enums types =
     let typeinfo = { tname = name; ttype = mk_enum types name; treferenced = false} in
     GType (typeinfo, locUnknown)) types
 
-let compile ast main_node file_name =
+let compile ast main_node file_name no_sleep =
   let file = {
     fileName = file_name;
     globals = [];
@@ -612,9 +664,13 @@ let compile ast main_node file_name =
     globinitcalled = false;
   } in
   let file = List.fold_left (compile_node ast.i_types) file ast.i_nodes in
-  (*TODO: make main*)
-  let file = compile_main file ast main_node in
+  (* Format.printf "\n--GLOB-- @."; *)
+  (* List.iter (fun e -> Format.printf "-- %a @." C_printer.pp_global e) file.globals; *)
+  let file = compile_main file ast main_node no_sleep in
   file.globals <- List.rev file.globals;
   file.globals <- compile_enums ast.i_types @ file.globals;
-  file.globals <- GText "#include <printf.h>" :: file.globals;
+  file.globals <-    GText "#include <stdlib.h>"
+                  :: GText "#include <printf.h>"
+                  :: GText "#include <unistd.h>"
+                  :: file.globals;
   file

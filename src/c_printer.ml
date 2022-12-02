@@ -1,6 +1,7 @@
 open GoblintCil.Cil
 open GoblintCil
 open Format
+open Print_base
 
 let rec pp_type fmt = function
   | TInt (ity, _) ->
@@ -28,15 +29,6 @@ let pp_comp_info fmt compinfo =
   fprintf fmt "struct %s {@\n@;<2 2>@[<v>%a@]@;};@\n"
     compinfo.cname
     (pp_print_list ~pp_sep:pp_print_cut pp_fieldinfo) compinfo.cfields
-
-let pp_comma fmt () =
-  fprintf fmt ", "
-
-let pp_eol_semi fmt () =
-  fprintf fmt ";@\n"
-
-let pp_2eol_semi fmt () =
-  fprintf fmt ";@;@;"
 
 let pp_access fmt is_mem =
   fprintf fmt (if is_mem then "->" else ".")
@@ -85,7 +77,8 @@ let rec pp_offset is_mem fmt = function
       field.fname
       (pp_offset is_mem) offset
   | Index (idx, offset) ->
-    fprintf fmt "[idx]%a"
+    fprintf fmt "[%a]%a"
+      pp_exp idx
       (pp_offset is_mem) offset
 
 and pp_exp fmt = function
@@ -217,6 +210,15 @@ and pp_stmt fmt stmt =
   | Loop (b, _, _, _, _) ->
     fprintf fmt "while (1) {@;<2 2>@[<v>%a@]@;}"
       (pp_block false) b
+  | If (cond, b1, b2, _, _) when b2.bstmts = [] ->
+    fprintf fmt "if (%a) {@;<2 2>@[<v>%a@]@;}"
+      pp_exp cond
+      (pp_block false) b1
+  | If (cond, b1, b2, _, _) ->
+    fprintf fmt "if (%a) {@;<2 2>@[<v>%a@]@;} else {@;<2 2>@[<v>%a@]@;}"
+      pp_exp cond
+      (pp_block false) b1
+      (pp_block false) b2
   | _ -> assert false
 
 and pp_block brackets fmt block =

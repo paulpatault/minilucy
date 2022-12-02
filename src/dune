@@ -9,4 +9,5 @@
 (executable
   (name minilucy)
   (libraries unix goblint-cil fmt)
+  (promote (until-clean))
   (flags (-w -33)))

@@ -25,38 +25,6 @@ let rec pp_ct fmt = function
     fprintf fmt "(%a)"
       (pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt " * ") pp_ct) cl
 
-let pp_comma fmt () =
-  fprintf fmt " ,"
-
-let pp_const fmt c = match c with
-  | Cbool b -> fprintf fmt "%b" b
-  | Cint i -> fprintf fmt "%d" i
-  | Creal f -> fprintf fmt "%f" f
-  | Cadt (s, None) -> fprintf fmt "default(%s)" s
-  | Cadt (s, Some v) -> fprintf fmt "%s(%s)" s v
-
-let pp_op fmt op = match op with
-  | Op_eq -> fprintf fmt "eq"
-  | Op_neq -> fprintf fmt "neq"
-  | Op_lt -> fprintf fmt "lt"
-  | Op_le -> fprintf fmt "le"
-  | Op_gt -> fprintf fmt "gt"
-  | Op_ge -> fprintf fmt "ge"
-  | Op_add -> fprintf fmt "add"
-  | Op_sub -> fprintf fmt "sub"
-  | Op_mul -> fprintf fmt "mul"
-  | Op_div -> fprintf fmt "div"
-  | Op_mod -> fprintf fmt "mod"
-  | Op_add_f -> fprintf fmt "add_f"
-  | Op_sub_f -> fprintf fmt "sub_f"
-  | Op_mul_f -> fprintf fmt "mul_f"
-  | Op_div_f -> fprintf fmt "div_f"
-  | Op_not -> fprintf fmt "not"
-  | Op_and -> fprintf fmt "and"
-  | Op_or -> fprintf fmt "or"
-  | Op_impl -> fprintf fmt "impl"
-  | Op_if -> fprintf fmt "ite"
-
 let rec pp_exp fmt e = match e.cexpr_desc with
   | CE_const c -> pp_const fmt c
   | CE_ident x -> fprintf fmt "%a" Ident.print x
@@ -100,18 +68,19 @@ let pp_eq fmt eq =
 (* let pp_type = pp_list pp_cbase_type "*" *)
 
 let pp_var fmt (name, ty, ck) =
-  fprintf fmt "%a : %a (%a)"
+  fprintf fmt "@[<v>%a : %a :: %a@]"
     Ident.print name
     print_base_type ty
     pp_ck ck
 
 let pp_var_init fmt ((name, ty, ck), v) =
-  let init_opt_str = 
+  let init_opt_str =
   match v with
     | Some v -> asprintf "init %a" pp_const v
     | None -> ""
   in
-  fprintf fmt "%a : %a (%a)%s"
+  fprintf fmt "@[%a : %a :: %a%s@]"
+  (* fprintf fmt "%a : %a (%a)%s" *)
     Ident.print name
     print_base_type ty
     pp_ck ck
@@ -123,12 +92,9 @@ let pp_var_list fmt =
 let pp_var_init_list fmt =
   pp_print_list ~pp_sep:pp_comma pp_var_init fmt
 
-let pp_eol fmt () =
-  fprintf fmt ";@\n"
-
 let pp_node fmt nd =
   fprintf fmt
-    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %a(@[%a@])@\n  returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     Ident.print nd.cn_name
     pp_var_list nd.cn_input
     pp_var_list nd.cn_output

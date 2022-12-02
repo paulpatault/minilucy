@@ -6,9 +6,9 @@ open Typed_ast
 open Print_base
 
 let rec print_exp fmt e = match e.texpr_desc with
-  | TE_const c -> print_const fmt c
+  | TE_const c -> pp_const fmt c
   | TE_ident x -> fprintf fmt "%a" Ident.print x
-  | TE_op (op, el) -> fprintf fmt "%a(%a)" print_op op print_arg_list el
+  | TE_op (op, el) -> fprintf fmt "%a(%a)" pp_op op print_arg_list el
   | TE_app (name, e_list) | TE_prim (name, e_list) ->
       fprintf fmt "%a(@[%a@])" Ident.print name print_arg_list e_list
   | TE_arrow (l, r) ->
@@ -37,8 +37,8 @@ and print_tuple_arg_list fmt e_list = match e_list with
 
 and print_const_exp fmt ce_list = match ce_list with
   | [] -> assert false
-  | [c] -> fprintf fmt "%a" print_const c
-  | h :: t -> fprintf fmt "%a,@ %a" print_const h print_const_exp t
+  | [c] -> fprintf fmt "%a" pp_const c
+  | h :: t -> fprintf fmt "%a,@ %a" pp_const h print_const_exp t
 
 let print_eq fmt eq =
   fprintf fmt "@[(%a) = @[%a@]@]"
@@ -51,7 +51,7 @@ let print_var_dec fmt (name, ty) =
 let print_var_init_dec fmt ((name, ty), init) =
   match init with
   | None -> fprintf fmt "%a: %a" Ident.print name print_base_type ty
-  | Some o -> fprintf fmt "%a: %a init %a" Ident.print name print_base_type ty print_const o
+  | Some o -> fprintf fmt "%a: %a init %a" Ident.print name print_base_type ty pp_const o
 
 let rec print_var_dec_list = print_list_sp print_var_dec ";"
 let rec print_var_init_dec_list = print_list_sp print_var_init_dec ";"

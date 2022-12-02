@@ -1,4 +1,8 @@
+#include <stdlib.h>
+
 #include <printf.h>
+
+#include <unistd.h>
 
 enum inductive_bool {
   FALSE,
@@ -153,17 +157,16 @@ int oscillateur (struct oscillateur_mem* mem, int lo, int hi) {
   return x;
 }
 
-struct main1_mem {
+struct check_mem {
   struct oscillateur_mem oscillateur_next1;
 };
 
-void main1_init (struct main1_mem* mem) {
+void check_init (struct check_mem* mem) {
   oscillateur_init(&(mem->oscillateur_next1));
 }
 
-int main1 (struct main1_mem* mem) {
+int check (struct check_mem* mem) {
   int aux__17;
-  int x;
   int o;
   int call_1;
   
@@ -171,22 +174,28 @@ int main1 (struct main1_mem* mem) {
   
   aux__17 = call_1;
   
-  x = aux__17;
-  
-  o = (x > 0);
+  o = aux__17;
   
   return o;
 }
 
 int main (int argc, char* argv[]) {
-  struct main1_mem mem;
+  struct check_mem mem;
   int res;
   
-  main1_init(&(mem));
+  check_init(&(mem));
+  
+  if ((argc < 1)) {
+    printf("Error : %d needed arguments were not provided", 0);
+    
+    exit(1);
+  };
   
   while (1) {
-    res = main1(&(mem));
+    res = check(&(mem));
     
     printf("%d", res);
+    
+    fflush(0);
   };
 }

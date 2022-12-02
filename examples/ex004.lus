@@ -1,11 +1,11 @@
-node counting (tick, top: bool) returns (o: int);
-var v: int;
+node incr (tic: bool) returns (cpt: int);
 let
-    v = if top then 1 else 0;
-    o = if tick then v else 0 -> pre o + v;
+  cpt = (0 fby cpt) + if tic then 1 else 0;
 tel
 
-node check(x: bool) returns (y: bool);
+node check (x: bool) returns (ok: bool);
+var cpt : int;
 let
-  y = counting(x, x) < 2;
+  cpt = incr(x);
+  ok = (0 fby cpt) <= cpt;
 tel

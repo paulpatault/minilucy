@@ -1,9 +1,4 @@
-node check (x: bool) returns (OK: bool);
-var n1, n2: int;
+node check (x: int) returns (o: int);
 let
-  n1 = 0 -> pre n1 + 1;
-  n2 = 0 -> (1 -> pre (n2 + 1));
-  OK = n1 = n2;
+  o = x fby (o + 1);
 tel
-
-

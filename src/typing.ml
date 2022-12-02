@@ -385,11 +385,8 @@ and type_expr_desc env loc = function
     (List.map (fun e -> base_ty_of_ty e.texpr_loc e.texpr_type) tel)
 
   | PE_merge (x, l) ->
-      let id = match x.pexpr_desc with
-        | PE_ident id -> id
-        | _ -> assert false
-      in
-      let l = List.map (fun (l, r) -> type_expr env l, type_expr env r) l in
+      let id = (match x.pexpr_desc with PE_ident id -> id | _ -> assert false) in
+      let mergebody = List.map (fun (l, r) -> type_expr env l, type_expr env r) l in
       let t_match, t_expr = ref None, ref None in
       List.iter (fun ({texpr_type = t1; texpr_loc = l1; _}, {texpr_type = t2; texpr_loc = l2; _}) ->
         match !t_match, !t_expr with
@@ -404,42 +401,42 @@ and type_expr_desc env loc = function
             else
               error l1 (ExpectedType (t1', t1))
           | _ -> assert false)
-        l;
+        mergebody;
       let id_loc = x.pexpr_loc in
       let x, ty, _ = Gamma.find id_loc env.vars id in
-      let tname = match ty with
-        | Tadt t -> t
+      begin match ty with
+        | Tbool -> ()
+        | Tadt tname ->
+            verif_mergebody env tname mergebody id_loc
         | _ -> error id_loc (ExpectedType ([ty], [Tadt "?t"]))
-      in
-      let tl = match List.find_opt (fun {name; _} -> name = tname) env.types with
-        | None -> error id_loc (UnknownAdtType tname)
-        | Some e -> e in
-      let sl =
-        List.map fst l
-        |> List.sort (fun
-                       {texpr_desc = TE_const (Cadt (_, Some id1)); _}
-                       {texpr_desc = TE_const (Cadt (_, Some id2)); _} ->
-                       compare id1 id2) [@warning "-8"]
-      in
-      let stl = List.sort compare tl.constr in
-      if
-        List.for_all2
-          (fun {texpr_desc = TE_const (Cadt (_, Some id1)); _} id ->
-             id1 = id)
-          sl
-          stl [@warning "-8"]
-      then
-        ()
-      else error id_loc (NotExhaustiveMerge tname);
-
-      let typ = (snd @@ List.hd l).texpr_type in
+      end;
+      let typ = (snd @@ List.hd mergebody).texpr_type in
       let exr =
         { texpr_desc = TE_ident x;
           texpr_type = [ty];
           texpr_loc  = id_loc }
-        in
+      in
+      TE_merge (exr, mergebody), typ
 
-      TE_merge (exr, l), typ
+and verif_mergebody env tname l id_loc =
+  let tl = match List.find_opt (fun {name; _} -> name = tname) env.types with
+    | None -> error id_loc (UnknownAdtType tname)
+    | Some e -> e in
+  let compare_f a b = match a, b with
+    | {texpr_desc = TE_const (Cadt (_, Some id1)); _},
+      {texpr_desc = TE_const (Cadt (_, Some id2)); _} -> compare id1 id2
+    | _ -> assert false
+  in
+  let sl = List.map fst l |> List.sort compare_f in
+  let stl = List.sort compare tl.constr in
+
+  if not @@ List.for_all2
+      (fun a b -> match a, b with
+        | {texpr_desc = TE_const (Cadt (_, Some id1)); _}, id -> id1 = id
+        | _ -> assert false)
+      sl stl
+  then
+    error id_loc (NotExhaustiveMerge tname)
 
 and type_args env loc params_ty el =
   let tel = List.map (type_expr env) el in
@@ -583,12 +580,13 @@ let check_main ft main =
   let (_, ty), is_prim =
     try Delta.find main with Not_found -> error dummy_loc (UnboundNode main)
   in
-  match ty, is_prim with
+  if is_prim then errors dummy_loc "The main node cannot be a primitive function"
+  (* match ty, is_prim with
   | (_, [Tbool]), false -> ()
   | (t_in, t_out), false ->
     let n = List.find (fun n -> n.tn_name.Ident.name = main) (List.rev ft) in
     error n.tn_loc (BadMain (t_in, t_out))
-  | _ -> errors dummy_loc "The main node cannot be a primitive function"
+  | _ -> errors dummy_loc "The main node cannot be a primitive function" *)
 
 let translate_types = Fun.id
 
