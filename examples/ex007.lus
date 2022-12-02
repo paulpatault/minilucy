@@ -15,9 +15,7 @@ let
             (Froid't -> 0 fby x - 1 when Froid(state));
 tel
 
-node check () returns (o: bool);
-var x: int;
+node check () returns (o : int);
 let
-  x = oscillateur (-5, 5);
-  o = x > 0;
+  o = oscillateur (-5, 5);
 tel

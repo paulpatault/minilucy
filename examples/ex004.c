@@ -20,7 +20,7 @@ void counting_init (struct counting_mem* mem) {
   mem->aux__4_next1 = 0;
 }
 
-int counting (struct counting_mem* mem, int tick, int top) {
+int counting (struct counting_mem* mem, int tic, int toc) {
   int aux__4;
   int aux__3;
   int aux__2;
@@ -30,7 +30,7 @@ int counting (struct counting_mem* mem, int tick, int top) {
   enum inductive_bool switch_1;
   enum inductive_bool switch_2;
   
-  switch (top) {
+  switch (toc) {
     case TRUE: {
       switch_1 = 1;
       break;
@@ -49,7 +49,7 @@ int counting (struct counting_mem* mem, int tick, int top) {
   
   aux__4 = mem->aux__4_next1;
   
-  switch (tick) {
+  switch (tic) {
     case TRUE: {
       switch_2 = v;
       break;
@@ -88,7 +88,7 @@ int check (struct check_mem* mem, int x) {
   
   aux__5 = call_1;
   
-  y = (aux__5 < 2);
+  y = aux__5;
   
   return y;
 }

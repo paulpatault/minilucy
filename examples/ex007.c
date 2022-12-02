@@ -167,7 +167,6 @@ void check_init (struct check_mem* mem) {
 
 int check (struct check_mem* mem) {
   int aux__17;
-  int x;
   int o;
   int call_1;
   
@@ -175,9 +174,7 @@ int check (struct check_mem* mem) {
   
   aux__17 = call_1;
   
-  x = aux__17;
-  
-  o = (x > 0);
+  o = aux__17;
   
   return o;
 }
@@ -200,7 +197,5 @@ int main (int argc, char* argv[]) {
     printf("%d", res);
     
     fflush(0);
-    
-    sleep(1);
   };
 }

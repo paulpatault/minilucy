@@ -26,6 +26,7 @@
   - [x] `merge` : WIP PR #7
   - [x] automaton
   - [ ] option : lecture input main non constant ? (ne pas utiliser argc/v de C mais un fichier ?)
+  - [ ] ajouter des exemples négatifs stylés
 
 ## Usage
 
