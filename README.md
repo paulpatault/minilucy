@@ -68,6 +68,13 @@ Exemple :
 $ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main1
 ```
 
+Sinon, `make` fabriquera un exécutable dans le répertoire principal, utilisable ensuite avec :
+```
+$ make
+$ cd examples
+$ ../minilucy.exe [file].lus -v [main-node] [options...]
+```
+
 ## Travail réalisé
 
 - Automates (non imbriqués)
