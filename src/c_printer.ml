@@ -1,6 +1,7 @@
 open GoblintCil.Cil
 open GoblintCil
 open Format
+open Print_base
 
 let rec pp_type fmt = function
   | TInt (ity, _) ->
@@ -28,15 +29,6 @@ let pp_comp_info fmt compinfo =
   fprintf fmt "struct %s {@\n@;<2 2>@[<v>%a@]@;};@\n"
     compinfo.cname
     (pp_print_list ~pp_sep:pp_print_cut pp_fieldinfo) compinfo.cfields
-
-let pp_comma fmt () =
-  fprintf fmt ", "
-
-let pp_eol_semi fmt () =
-  fprintf fmt ";@\n"
-
-let pp_2eol_semi fmt () =
-  fprintf fmt ";@;@;"
 
 let pp_access fmt is_mem =
   fprintf fmt (if is_mem then "->" else ".")

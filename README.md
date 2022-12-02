@@ -15,10 +15,11 @@
     - merge
     - automaton (niveau 1 pour l'instant)
     - ..
-- check [https://github.com/paulpatault/minilucy/blob/automaton/TODO.md]
+- check [https://github.com/paulpatault/minilucy/TODO.md]
 
 - base
   - [x] compile simple : `pre`, `->`, `fby`
+  - [ ] meilleur `imp` printer
 
 - features avancées
   - [ ] `reset`

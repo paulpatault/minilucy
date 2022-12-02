@@ -6,9 +6,9 @@ open Parse_ast
 open Print_base
 
 let rec print_exp fmt e = match e.pexpr_desc with
-  | PE_const c -> print_const fmt c
+  | PE_const c -> pp_const fmt c
   | PE_ident x -> fprintf fmt "%s" x
-  | PE_op (op, el) -> fprintf fmt "%a(%a)" print_op op print_arg_list el
+  | PE_op (op, el) -> fprintf fmt "%a(%a)" pp_op op print_arg_list el
   | PE_app (name, e_list) ->
       fprintf fmt "%s(@[%a@])" name print_arg_list e_list
   | PE_arrow (l, r) ->
@@ -36,8 +36,8 @@ and print_tuple_arg_list fmt e_list = match e_list with
 
 and print_const_exp fmt ce_list = match ce_list with
   | [] -> assert false
-  | [c] -> fprintf fmt "%a" print_const c
-  | h :: t -> fprintf fmt "%a,@ %a" print_const h print_const_exp t
+  | [c] -> fprintf fmt "%a" pp_const c
+  | h :: t -> fprintf fmt "%a,@ %a" pp_const h print_const_exp t
 
 let print_ident fmt = function
   | PP_ident s -> fprintf fmt "%s" s

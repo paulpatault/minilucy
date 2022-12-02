@@ -17,14 +17,14 @@ let rec print_list_eol f sep fmt l = match l with
   | [x] -> fprintf fmt "%a%s" f x sep
   | h :: t -> fprintf fmt "%a%s@\n%a" f h sep (print_list_eol f sep) t
 
-let print_const fmt c = match c with
+let pp_const fmt c = match c with
   | Cbool b -> fprintf fmt "%b" b
   | Cint i -> fprintf fmt "%d" i
   | Creal f -> fprintf fmt "%f" f
   | Cadt (s, None) -> fprintf fmt "default(%s)" s
   | Cadt (s, Some v) -> fprintf fmt "%s(%s)" s v
 
-let print_op fmt op = match op with
+let pp_op fmt = function
   | Op_eq -> fprintf fmt "eq"
   | Op_neq -> fprintf fmt "neq"
   | Op_lt -> fprintf fmt "lt"
@@ -52,6 +52,9 @@ let print_base_type fmt bty = match bty with
   | Treal -> fprintf fmt "real"
   | Tadt s -> fprintf fmt "adt(%s)" s
 
+let pp_comma fmt () =
+  fprintf fmt ", "
+
 let print_type fmt = function
   | ([]) -> fprintf fmt "empty tuple"
   | [t] -> print_base_type fmt t
@@ -70,3 +73,11 @@ let print_adttype_list_std fmt tl =
           (print_list_nl (fun fmt e -> fprintf fmt "| %s" e))
           constr))
     tl
+
+let pp_2eol_semi fmt () = fprintf fmt ";@;@;"
+
+let pp_eol_semi fmt () = fprintf fmt ";@;"
+
+let pp_eol fmt () = fprintf fmt ";@\n"
+
+

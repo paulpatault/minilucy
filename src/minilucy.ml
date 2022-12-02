@@ -123,7 +123,7 @@ let () =
       Format.printf "/**************************************/@.";
       Format.printf "/* Imp ast                            */@.";
       Format.printf "/**************************************/@.";
-      Format.printf "TODO\n";
+      Imp_ast_printer.pp std_formatter fi;
     end;
     if !imp_only then exit 0;
 
