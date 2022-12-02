@@ -26,7 +26,7 @@ let rec pp_ct fmt = function
       (pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt " * ") pp_ct) cl
 
 let pp_comma fmt () =
-  fprintf fmt " ,"
+  fprintf fmt ", "
 
 let pp_const fmt c = match c with
   | Cbool b -> fprintf fmt "%b" b
@@ -100,18 +100,19 @@ let pp_eq fmt eq =
 (* let pp_type = pp_list pp_cbase_type "*" *)
 
 let pp_var fmt (name, ty, ck) =
-  fprintf fmt "%a : %a (%a)"
+  fprintf fmt "@[<v>%a : %a :: %a@]"
     Ident.print name
     print_base_type ty
     pp_ck ck
 
 let pp_var_init fmt ((name, ty, ck), v) =
-  let init_opt_str = 
+  let init_opt_str =
   match v with
     | Some v -> asprintf "init %a" pp_const v
     | None -> ""
   in
-  fprintf fmt "%a : %a (%a)%s"
+  fprintf fmt "@[%a : %a :: %a%s@]"
+  (* fprintf fmt "%a : %a (%a)%s" *)
     Ident.print name
     print_base_type ty
     pp_ck ck
@@ -128,7 +129,7 @@ let pp_eol fmt () =
 
 let pp_node fmt nd =
   fprintf fmt
-    "@[node %a(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %a(@[%a@])@\n  returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     Ident.print nd.cn_name
     pp_var_list nd.cn_input
     pp_var_list nd.cn_output
