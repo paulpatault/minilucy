@@ -25,6 +25,7 @@
   - [ ] `reset`
   - [x] `merge` : WIP PR #7
   - [x] automaton
+  - [ ] option : lecture input main non constant ? (ne pas utiliser argc/v de C mais un fichier ?)
 
 ## Usage
 
@@ -59,6 +60,7 @@ où `OPTIONS` :
 - `-sched-only` : arrêt après le scheduling
 - `-imp-only` : arrêt après la traduction vers `imp`
 - `-c-only` : arrêt après la traduction vers `C`
+- `-no-sleep` : n'ajoute pas la fonction `sleep(1)` dans le main du fichier `C`
 
 Exemple :
 ```

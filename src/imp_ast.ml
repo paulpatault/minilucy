@@ -46,6 +46,7 @@ type i_node = {
   in_init: init;
   in_compute: i_equation list;
   in_update: (Ident.t * atom) list;
+  need_mem: bool;
 }
 
 type i_file = { i_nodes: i_node list; i_types: adt_type list }

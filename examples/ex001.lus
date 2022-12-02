@@ -1,4 +1,4 @@
-node counting (tic, toc:bool) returns (o, y:int);
+node counting (tic, toc: bool) returns (o, y: int);
 var v: int;
 let
     o = if tic then v else 0 -> pre o + v;
@@ -11,6 +11,6 @@ var y, z: int;
 let
     (y,z) = counting (x, x);
     o = merge x
-        (true -> false)
-        (false -> true);
+          (true -> false when True(x))
+          (false -> true when False(x));
 tel

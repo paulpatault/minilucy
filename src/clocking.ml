@@ -126,47 +126,33 @@ let full_clock c1 c2 env =
       with Unify ->
         error dummy_loc (ExpectedClock (Ck ck1, Ck ck2))
     end
-  | _ -> error dummy_loc (Other "Cannot merge clocks")
+  | _ -> error dummy_loc (Other "Cannot merge clocks (1)")
 
 let full_clock_list types cl =
   let rec aux ck' ctors = function
-    | [] -> ()
-    | Ck (Con (ck, b, i))::k -> begin
+    | Ck (Con (ck, b, _)) :: k ->
         unify_ck ck ck';
         if List.mem b ctors then
           aux ck (List.filter ((<>) b) ctors) k
-        else
-          error dummy_loc (Other "Cannot merge clocks")
-      end
+        else error dummy_loc (Other "Cannot merge clocks (2)")
+    | [] -> ()
     | _ -> assert false
   in
-  let is_base = List.for_all (function
-      | Ck Cbase -> true
-      | _ -> false)
-    cl
-  in
-  if is_base then
+  if List.for_all (function Ck Cbase -> true | _ -> false) cl
+  then
     Cbase
+  else if List.exists (function Ck (Con _) -> false | _ -> true) cl
+  then
+    error dummy_loc (Other "Cannot merge clocks (3)")
   else
-    if
-      not @@ List.for_all (function
-            Ck (Con (ck, b, i)) ->
-            true
-          | _ -> false)
-        cl
-    then
-      error dummy_loc (Other "Cannot merge clocks")
-    else
-      let (ck, ctor)  =
-        match List.hd cl with
-        | Ck (Con (ck, ctor, _)) -> ck, ctor
-        | _ -> assert false
-      in
-      let pt = match List.find_opt (fun {constr; _} -> List.mem ctor constr) types with
-        | None -> assert false
-        | Some e -> e in
-      aux (ck) pt.constr cl;
-      ck
+    let (ck, ctor)  =
+      match List.hd cl with
+      | Ck (Con (ck, ctor, _)) -> ck, ctor
+      | _ -> assert false
+    in
+    let pt = List.find (fun {constr; _} -> List.mem ctor constr) types in
+    aux ck pt.constr cl;
+    ck
 
 let rec clock_expr env types e =
   let desc, cl = clock_expr_desc env types e.texpr_loc e.texpr_desc in
@@ -230,8 +216,14 @@ and clock_expr_desc env types loc = function
   | TE_merge (id, tes) ->
       let cid = clock_expr env types id in
       let ces = List.map (fun (l, r) -> clock_expr env types l, clock_expr env types r) tes in
-      let c = full_clock_list types (List.map (fun (_, {cexpr_clock; _}) -> cexpr_clock) ces) in
-      CE_merge (cid, ces), Ck c
+      begin try
+          let l = List.map (fun (_, {cexpr_clock; _}) -> cexpr_clock) ces in
+          let c = full_clock_list types l in
+          CE_merge (cid, ces), Ck c
+      with e ->
+        Format.printf "%a@." Typed_ast_printer.print_exp id;
+        raise e
+      end
   | TE_fby (e1, e2) ->
       let ce1 = clock_expr env types e1 in
       let ce2 = clock_expr env types e2 in

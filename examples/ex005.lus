@@ -14,7 +14,7 @@ let
   end
 tel
 
-node main1 () returns (o: bool);
+node check () returns (o: bool);
 var x: int;
 let
   x = oscillateur (-5, 5);

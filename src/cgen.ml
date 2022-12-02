@@ -559,7 +559,7 @@ let compile_node types file node =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
-let compile_main file ast main_node =
+let compile_main file ast main_node no_sleep =
   let main_node_imp = List.find (fun {in_name;_}-> in_name.name = main_node) ast.i_nodes in
   let args = [
     "argc", TInt (IInt, []), [];
@@ -571,7 +571,7 @@ let compile_main file ast main_node =
   let fundec = mk_fundec fun_var in
 
   let addr_mem_lval, fundec =
-    if main_node_imp.in_update <> [] then
+    if main_node_imp.need_mem then
       let mem_comp = find_gcomp (main_node^"_mem") file.globals in
       let mem_local = makeLocalVar fundec "mem" (TComp (mem_comp, [])) in
       let mem_lval = Var mem_local, NoOffset in
@@ -582,6 +582,7 @@ let compile_main file ast main_node =
       fundec.sbody <- append_stmt mem_init_stmt fundec.sbody;
       [AddrOf mem_lval], fundec
     else
+      (* let _ = assert false in *)
       [], fundec
   in
 
@@ -641,7 +642,9 @@ let compile_main file ast main_node =
   let printf_stmt = mkStmtOneInstr call_printf in
 
   let step_stmt = mkStmtOneInstr step_call in
-  let while_block = mkBlock [step_stmt; printf_stmt; fflush0_stmt; sleep1_stmt] in
+  let while_block =
+    if no_sleep then mkBlock [step_stmt; printf_stmt; fflush0_stmt]
+    else mkBlock [step_stmt; printf_stmt; fflush0_stmt; sleep1_stmt] in
   let while_stmt = mkStmt (Loop (while_block, locUnknown, locUnknown, None, None)) in
 
   fundec.sbody <- append_stmt while_stmt fundec.sbody;
@@ -653,7 +656,7 @@ let compile_enums types =
     let typeinfo = { tname = name; ttype = mk_enum types name; treferenced = false} in
     GType (typeinfo, locUnknown)) types
 
-let compile ast main_node file_name =
+let compile ast main_node file_name no_sleep =
   let file = {
     fileName = file_name;
     globals = [];
@@ -661,13 +664,12 @@ let compile ast main_node file_name =
     globinitcalled = false;
   } in
   let file = List.fold_left (compile_node ast.i_types) file ast.i_nodes in
-  (*TODO: make main*)
-  Format.printf "\n--GLOB-- @.";
-  List.iter (fun e -> Format.printf "-- %a @." C_printer.pp_global e) file.globals;
-  let file = compile_main file ast main_node in
+  (* Format.printf "\n--GLOB-- @."; *)
+  (* List.iter (fun e -> Format.printf "-- %a @." C_printer.pp_global e) file.globals; *)
+  let file = compile_main file ast main_node no_sleep in
   file.globals <- List.rev file.globals;
   file.globals <- compile_enums ast.i_types @ file.globals;
-  file.globals <- GText "#include <stdlib.h>"
+  file.globals <-    GText "#include <stdlib.h>"
                   :: GText "#include <printf.h>"
                   :: GText "#include <unistd.h>"
                   :: file.globals;

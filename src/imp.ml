@@ -143,12 +143,12 @@ let compile_equation
 
 
 let compile_equations l =
-  List.fold_right compile_equation l (empty_mem,empty_init,[],[])
+  List.fold_right compile_equation l (empty_mem,empty_init, [], [])
 
 let compile_node n =
   let input_step = n.cn_input in
   let output_step = n.cn_output in
-  let (mem , init , compute , update) = compile_equations n.cn_equs in
+  let mem, init, compute, update = compile_equations n.cn_equs in
   { in_name = n.cn_name;
     in_input_step = input_step;
     in_output_step = output_step;
@@ -156,7 +156,9 @@ let compile_node n =
     in_mem = mem;
     in_init = init;
     in_compute = compute;
-    in_update = update }
+    in_update = update;
+    need_mem = mem <> empty_mem;
+  }
 
 let compile f = { i_nodes = List.map compile_node f.c_nodes; i_types = f.c_types }
 

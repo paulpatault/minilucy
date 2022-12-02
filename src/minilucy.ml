@@ -20,6 +20,7 @@ let c_only = ref false
 let lucy_printer = ref false
 let ocaml_printer = ref true
 let verbose = ref false
+let no_sleep = ref false
 
 let spec =
   ["-parse-only", Arg.Set parse_only, "  stops after parsing";
@@ -30,6 +31,7 @@ let spec =
    "-sched-only", Arg.Set sched_only, "  stops after scheduling";
    "-imp-only", Arg.Set imp_only, "  stops after imp translation";
    "-c-only", Arg.Set c_only, "  stops after imp translation";
+   "-no-sleep",    Arg.Set no_sleep,    "disable sleep call in C main file";
    "-verbose",    Arg.Set verbose,    "print intermediate transformations";
    "-v",          Arg.Set verbose,    "print intermediate transformations";
   ]
@@ -129,7 +131,7 @@ let () =
 
     let file_name = (Format.sprintf "%s.c" (Filename.remove_extension file)) in
 
-    let fc = Cgen.compile fi main_node file_name in
+    let fc = Cgen.compile fi main_node file_name !no_sleep in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* C file                             */@.";
