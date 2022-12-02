@@ -586,9 +586,13 @@ let compile_main file ast main_node =
   in
 
   let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, [])) in
+  let sleep_info  = makeGlobalVar "sleep"  (TFun (TInt (IInt, []), Some ["seconds", TInt (IInt, []), []], true, [])) in
   let atoi_info   = makeGlobalVar "atoi"   (TFun (TInt (IInt, []), Some ["str",    charConstPtrType, []], true, [])) in
   let exit_info   = makeGlobalVar "exit"   (TFun (TVoid [],        Some ["status",  TInt (IInt, []), []], true, [])) in
+  let fflush_info   = makeGlobalVar "fflush" (TFun (TInt (IInt, []), Some ["status",  TInt (IInt, []), []], true, [])) in
   let printf_lval = Lval (Var printf_info, NoOffset) in
+  let sleep_lval  = Lval (Var sleep_info, NoOffset) in
+  let fflush_lval = Lval (Var fflush_info, NoOffset) in
   let atoi_lval   = Lval (Var atoi_info,   NoOffset) in
   let exit_lval   = Lval (Var exit_info,   NoOffset) in
 
@@ -631,11 +635,13 @@ let compile_main file ast main_node =
 
   let str_fmt = GoblintCil.Const (CStr (typ_to_format_string res_typ, No_encoding)) in
   let call_printf = Call (None, printf_lval, [str_fmt; Lval res_lval], locUnknown, locUnknown) in
+  let sleep1_stmt = mkStmtOneInstr (Call (None, sleep_lval, [mk_int_exp 1], locUnknown, locUnknown)) in
+  let fflush0_stmt = mkStmtOneInstr (Call (None, fflush_lval, [mk_int_exp 0], locUnknown, locUnknown)) in
 
   let printf_stmt = mkStmtOneInstr call_printf in
 
   let step_stmt = mkStmtOneInstr step_call in
-  let while_block = mkBlock [step_stmt; printf_stmt] in
+  let while_block = mkBlock [step_stmt; printf_stmt; fflush0_stmt; sleep1_stmt] in
   let while_stmt = mkStmt (Loop (while_block, locUnknown, locUnknown, None, None)) in
 
   fundec.sbody <- append_stmt while_stmt fundec.sbody;
@@ -661,5 +667,8 @@ let compile ast main_node file_name =
   let file = compile_main file ast main_node in
   file.globals <- List.rev file.globals;
   file.globals <- compile_enums ast.i_types @ file.globals;
-  file.globals <- GText "#include <stdlib.h>" :: GText "#include <printf.h>" :: file.globals;
+  file.globals <- GText "#include <stdlib.h>"
+                  :: GText "#include <printf.h>"
+                  :: GText "#include <unistd.h>"
+                  :: file.globals;
   file

@@ -2,6 +2,8 @@
 
 #include <printf.h>
 
+#include <unistd.h>
+
 enum inductive_bool {
   FALSE,
   TRUE
@@ -38,5 +40,9 @@ int main (int argc, char* argv[]) {
     res = check(argv_0, argv_1);
     
     printf("%d", res);
+    
+    fflush(0);
+    
+    sleep(1);
   };
 }
