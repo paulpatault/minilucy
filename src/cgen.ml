@@ -616,7 +616,7 @@ let compile_main file ast main_node =
   let atois = List.mapi (fun i -> function
         Lval e ->
           let i_c = mk_int_exp (i+1) in
-          let argv_i = Lval (Var argv, Index (i_c, NoOffset)) in (* argv[i+1] : array.get (argv, i) *)
+          let argv_i = Lval (Var argv, Index (i_c, NoOffset)) in
           call_atoi_argv e argv_i
       | _ -> assert false)
       atoied_vars_lvals in
