@@ -89,6 +89,7 @@ $ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main1
   + `Imp` -> `C`:
     - le retour de la fonction `main` du code lustre initial est affiché à chaque tour du `while (1)`
     - nous utilisons un l'ast C de la bibliothèque Goblint.Cil
+    - si le main n'a pas besoin de mémoire interne, pas besoin d'en fabriquer une pour rien (cf ex008)
     - ...
 
 - TODO Suite
