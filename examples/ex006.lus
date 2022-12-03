@@ -1,4 +1,5 @@
-(* TODO *)
+(* TODO : automates imbriqués *)
+
 node aux (i : int) returns (o: int);
 var x : int;
 let
