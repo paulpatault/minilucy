@@ -5,35 +5,12 @@
 - Enseignants : T. Bourke et M. Pouzet
 - Sujet : [minilucy.pdf](./pdf/minilucy.pdf)
 
-## TODO
-
-- pseudo-rapport du travial réalisé dans le README
-  + expliquer le schéma de compilation
-  + parler des features :
-    - clocks
-    - reset
-    - merge
-    - automaton (niveau 1 pour l'instant)
-    - ..
-- check [https://github.com/paulpatault/minilucy/TODO.md]
-
-- base
-  - [x] compile simple : `pre`, `->`, `fby`
-  - [ ] meilleur `imp` printer
-
-- features avancées
-  - [ ] `reset`
-  - [x] `merge` : WIP PR #7
-  - [x] automaton
-  - [ ] option : lecture input main non constant ? (ne pas utiliser argc/v de C mais un fichier ?)
-  - [ ] ajouter des exemples négatifs stylés
-
 ## Usage
 
 ### Dépendances
 
 - opam (`bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"`)
-- bibliothèque Goblint : interface avec `C`
+- bibliothèque GoblintCil : arbre de syntaxe abstraite de `C`
 - système de build `dune` pour ocaml
 - générateur de parseur `menhir`
 
@@ -79,9 +56,11 @@ $ ../minilucy.exe [file].lus -v [main-node] [options...]
 
 - Automates (non imbriqués)
 
+- Print (types simples (pas ADT)) dans lustre
+
 - Phases de compilation
   + `Parsed` -> `Parsed`:
-    - dé-sucrage des automates
+    - dé-sucrage des automates et des `print`
   + `Parsed` -> `Typed`:
     - TODO
   + `Typed` -> `Normalised`:
