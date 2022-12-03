@@ -7,6 +7,7 @@ and kind =
   | Stream
   | Node
   | Prim
+  | Print
 
 let make =
   let cpt = ref 0 in

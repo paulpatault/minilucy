@@ -37,6 +37,7 @@ let rec add_vars_of_exp s {cexpr_desc=e} =
         (add_vars_of_exp s cid)
         le
   | CE_fby _ -> s
+  | CE_print e
   | CE_when (e, _, _) -> add_vars_of_exp s e
 
 

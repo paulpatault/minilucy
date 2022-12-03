@@ -24,6 +24,8 @@ let rec print_exp fmt e = match e.texpr_desc with
     fprintf fmt "@[%a fby %a@]" print_exp e1 print_exp e2
   | TE_when (e1, s, e2) ->
     fprintf fmt "@[%a when %s(%a)@]" print_exp e1 s print_exp e2
+  | TE_print e ->
+    fprintf fmt "@[print(%a)@]" print_exp e
 
 and print_arg_list fmt e_list = match e_list with
   | [] -> ()

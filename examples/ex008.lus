@@ -1,4 +1,5 @@
 node check (x: int; y: int) returns (o: bool);
 let
+  print(x);
   o = x = y;
 tel

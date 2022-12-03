@@ -61,9 +61,17 @@ and translate_type types = function
   | Treal -> TFloat (FFloat, [])
   | Tadt s -> mk_enum types s
 
+let rec base_ty_to_format_string = function
+  | Tbool
+  | Tint  -> "%d"
+  | Treal -> "%f"
+  | _ -> failwith "todo"
+(* failwith ou "%d" par défaut ? *)
+
 let rec typ_to_format_string = function
   | TInt   _ -> "%d"
   | TFloat _ -> "%f"
+  (* | TPtr (t, _) -> typ_to_format_string t *)
   | t ->
       (* failwith ou "%d" par défaut ? *)
       failwith (Format.asprintf "not implemented : typ_to_format_string [%a]" C_printer.pp_type t)
@@ -164,3 +172,15 @@ let find_local fundec name =
     | [] -> raise Not_found
   in
   aux name locals
+
+let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, []))
+let sleep_info  = makeGlobalVar "sleep"  (TFun (TInt (IInt, []), Some ["seconds", TInt (IInt, []), []], true, []))
+let atoi_info   = makeGlobalVar "atoi"   (TFun (TInt (IInt, []), Some ["str",    charConstPtrType, []], true, []))
+let exit_info   = makeGlobalVar "exit"   (TFun (TVoid [],        Some ["status",  TInt (IInt, []), []], true, []))
+let fflush_info = makeGlobalVar "fflush" (TFun (TInt (IInt, []), Some ["status",  TInt (IInt, []), []], true, []))
+let printf_lval = Lval (Var printf_info, NoOffset)
+let sleep_lval  = Lval (Var sleep_info, NoOffset)
+let fflush_lval = Lval (Var fflush_info, NoOffset)
+let atoi_lval   = Lval (Var atoi_info,   NoOffset)
+let exit_lval   = Lval (Var exit_info,   NoOffset)
+

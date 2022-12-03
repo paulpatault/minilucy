@@ -197,5 +197,7 @@ int main (int argc, char* argv[]) {
     printf("%d", res);
     
     fflush(0);
+    
+    sleep(1);
   };
 }

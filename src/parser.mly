@@ -69,6 +69,7 @@
 %token FBY
 %token <string> CONSTR
 %token <string * string> TCONSTR
+%token PRINT
 
 %nonassoc THEN
 %nonassoc ELSE
@@ -183,6 +184,8 @@ eq_list:
 ;
 
 eq:
+| PRINT expr SEMICOL
+    { PE_print $2 }
 | pattern EQUAL expr SEMICOL
     { PE_eq { peq_patt = $1; peq_expr = $3; } }
 | AUTOMATON pautom=list(case_autom) END semi_opt

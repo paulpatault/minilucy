@@ -68,6 +68,7 @@ let rec compile_base_expr e =
           case, compile_base_expr e
           ) l in
         IE_case (ide, l)
+    | CE_print e -> IE_print (compile_base_expr e)
   in
   { iexpr_desc = desc; iexpr_type = e.cexpr_type; }
 

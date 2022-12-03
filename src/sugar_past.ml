@@ -86,6 +86,7 @@ let trad {pautom_loc; pautom} =
 
   t, vars, state_init_local, set_conds @ [merge_state; merge_var]
 
+
 let map_eq l =
   let acc, l =
     List.fold_left_map (fun ((locals_non_init, typ_acc) as acc) e -> match e with
@@ -93,6 +94,15 @@ let map_eq l =
         let t, v, state, a = trad a in
         let v = List.map (fun e -> e, Asttypes.Tbool) v in
         (state :: v @ locals_non_init, t :: typ_acc), a
+    | PE_print e ->
+        let var = gen "print_var", Tint in
+        let peq_patt =
+          { ppatt_desc = PP_ident (fst var);
+            ppatt_loc  = e.pexpr_loc } in
+        let peq_expr = {pexpr_desc = PE_print e; pexpr_loc= e.pexpr_loc} in
+        let eq = PE_eq {peq_patt; peq_expr} in
+        let acc = var :: locals_non_init, typ_acc in
+        acc, [eq]
     | _ -> acc, [e]) ([], []) l
   in
   acc, List.flatten l
@@ -101,6 +111,6 @@ let apply node =
   let (locals, types), pn_equs = map_eq node.pn_equs in
   types, { node with pn_equs ; pn_local = locals @ node.pn_local}
 
-let compile { p_nodes; p_types } =
+let unsugar { p_nodes; p_types } =
   let acc, nodes = List.fold_left_map (fun acc e -> let types, trad = apply e in types @ acc, trad) [] p_nodes in
   { p_nodes = nodes; p_types = p_types @ acc }

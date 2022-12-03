@@ -89,18 +89,21 @@ let compile_func_type types file node return_type mem_comp =
   | [] -> file, TFun (return_type, None, false, [])
   | l -> file, TFun (return_type, Some l, false, [])
 
-let compile_init_locals types file fundec =
+let compile_init_locals types file fundec init_locals =
   List.fold_left
-    (fun (fundec, locals) (({name; _}, ty, _), init_value) ->
-      match init_value with
-      | Some init_value ->
-        let init = SingleInit (Const (translate_const types init_value)) in
-        let loc = makeLocalVar ~init fundec (clean_name name) (translate_type types ty) in
-        fundec, loc::locals
-      | None ->
-        let loc = makeLocalVar fundec (clean_name name) (translate_type types ty) in
-        fundec, loc::locals)
-    (fundec, [])
+    (fun (fundec, locals) (({name; kind; _}, ty, _), init_value) ->
+       match kind with
+       | Print -> (fundec, locals)
+       | _ ->
+           match init_value with
+           | Some init_value ->
+               let init = SingleInit (Const (translate_const types init_value)) in
+               let loc = makeLocalVar ~init fundec (clean_name name) (translate_type types ty) in
+               fundec, loc::locals
+           | None ->
+               let loc = makeLocalVar fundec (clean_name name) (translate_type types ty) in
+               fundec, loc::locals)
+    (fundec, []) init_locals
 
 let compile_fundec types file node mem_comp =
   let file, return_type = compile_return_type types file node in
@@ -415,28 +418,12 @@ let rec compile_expr types file node fundec expr =
           let file, e, _ = compile_expr types file node fundec e in
           file, e
       in
-
-    (* let lval =
-      try
-        let var = find_formal fundec (id.name) in
-        Lval (Var var, NoOffset)
-      with Not_found ->
-        begin try
-            let var = find_local fundec (id.name) in
-            Lval (Var var, NoOffset)
-          with Not_found ->
-            let ret_v = find_local fundec "ret_" in
-            let fieldinfo = find_field_globals (node.in_name.name^"_ret") id.name file.globals in
-            Lval (Var ret_v, Field (fieldinfo, NoOffset))
-        end
-    in *)
-
     let switch_stmt = mkStmt (Switch (e, switch_block, switch_stmts, locUnknown, locUnknown)) in
     fundec.sbody <- append_stmt switch_stmt fundec.sbody;
     file, Lval (Var switch_res, NoOffset), res_ty
 
   | IE_prim (n, el) ->
-    match n.name, el with
+      begin match n.name, el with
     | "int_of_real", [e] ->
       let file, e', _ = compile_expr types file node fundec e in
       file, CastE (int_t, e'), int_t
@@ -444,6 +431,30 @@ let rec compile_expr types file node fundec expr =
       let file, e', _ = compile_expr types file node fundec e in
       file, CastE (real_t, e'), real_t
     | _ -> assert false
+      end
+  | IE_print e ->
+      let arg0 =
+        match e.iexpr_type with
+        | [e] -> Cil_utils.base_ty_to_format_string e
+        | _ -> assert false in
+
+      let str_fmt = GoblintCil.Const (CStr (arg0, No_encoding)) in
+
+      let file, args' =
+        List.fold_left_map (fun file e ->
+            let file, arg, _ = compile_expr types file node fundec e in
+            file, arg)
+          file
+          [e]
+      in
+      let ret_ty = TInt (IInt, []) in
+      let res_var = makeLocalVar fundec (gen_call_name ()) ret_ty in
+      let res_lval = Var res_var, NoOffset in
+      let call_printf = Call (None, printf_lval, str_fmt :: args', locUnknown, locUnknown) in
+      let call_stmt = mkStmtOneInstr call_printf in
+      fundec.sbody <- append_stmt call_stmt fundec.sbody;
+      file, Lval res_lval, ret_ty
+
 
 
 let compile_equation types file node fundec ({ieq_patt = patt; ieq_expr = expr}) =
@@ -451,6 +462,7 @@ let compile_equation types file node fundec ({ieq_patt = patt; ieq_expr = expr})
   begin
     match patt with
     | [] -> assert false
+    | [{kind=Print;_}, ty, _] -> ()
     | [n, ty, _] ->
       let lval = try
           Var (find_local fundec (n.name)), NoOffset
@@ -586,16 +598,6 @@ let compile_main file ast main_node no_sleep =
       [], fundec
   in
 
-  let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, [])) in
-  let sleep_info  = makeGlobalVar "sleep"  (TFun (TInt (IInt, []), Some ["seconds", TInt (IInt, []), []], true, [])) in
-  let atoi_info   = makeGlobalVar "atoi"   (TFun (TInt (IInt, []), Some ["str",    charConstPtrType, []], true, [])) in
-  let exit_info   = makeGlobalVar "exit"   (TFun (TVoid [],        Some ["status",  TInt (IInt, []), []], true, [])) in
-  let fflush_info   = makeGlobalVar "fflush" (TFun (TInt (IInt, []), Some ["status",  TInt (IInt, []), []], true, [])) in
-  let printf_lval = Lval (Var printf_info, NoOffset) in
-  let sleep_lval  = Lval (Var sleep_info, NoOffset) in
-  let fflush_lval = Lval (Var fflush_info, NoOffset) in
-  let atoi_lval   = Lval (Var atoi_info,   NoOffset) in
-  let exit_lval   = Lval (Var exit_info,   NoOffset) in
 
   let main_imp_type = main_node_imp.in_input_step in (* args du main dans lustre *)
   let len = List.length main_imp_type in
@@ -664,8 +666,6 @@ let compile ast main_node file_name no_sleep =
     globinitcalled = false;
   } in
   let file = List.fold_left (compile_node ast.i_types) file ast.i_nodes in
-  (* Format.printf "\n--GLOB-- @."; *)
-  (* List.iter (fun e -> Format.printf "-- %a @." C_printer.pp_global e) file.globals; *)
   let file = compile_main file ast main_node no_sleep in
   file.globals <- List.rev file.globals;
   file.globals <- compile_enums ast.i_types @ file.globals;

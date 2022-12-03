@@ -115,8 +115,10 @@ module Gamma = struct
   let empty = M.empty
 
   let add loc env x t io =
+    let prefix = "print_var" in
+    let kind = if String.starts_with ~prefix x then Ident.Print else Ident.Stream in
     if M.mem x env then error loc (Clash x);
-    let x' = Ident.make x Ident.Stream in
+    let x' = Ident.make x kind in
     M.add x (x',t,io) env
 
   let adds loc io =
@@ -335,7 +337,7 @@ and type_expr_desc env loc = function
 
   | PE_app (f, el) ->
     begin try
-        let (f, (t_in,t_out)) , is_prim = Delta.find f in
+        let (f, (t_in,t_out)), is_prim = Delta.find f in
         let tel = type_args env loc t_in el in
         let app_node = if is_prim then TE_prim(f, tel) else TE_app(f, tel) in
         app_node ,
@@ -417,6 +419,9 @@ and type_expr_desc env loc = function
           texpr_loc  = id_loc }
       in
       TE_merge (exr, mergebody), typ
+  | PE_print e ->
+      let te = type_expr env e in
+      TE_print te, te.texpr_type
 
 and verif_mergebody env tname l id_loc =
   let tl = match List.find_opt (fun {name; _} -> name = tname) env.types with
@@ -505,8 +510,9 @@ let type_equation env eq =
           eq.peq_expr.pexpr_loc (ExpectedType (expr.texpr_type, patt.tpatt_type))
   | PE_match _ ->
       failwith "not implemented 4"
-  | PE_automaton autom ->
-      error autom.pautom_loc (Unreachable "uncompiled automaton")
+  | PE_automaton {pautom_loc = loc; _}
+  | PE_print     {pexpr_loc  = loc; _} ->
+      error loc (Unreachable "uncompiled automaton/printf")
 
 (* let type_case env adt {pn_case; pn_cond; pn_out} =
   (* let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in

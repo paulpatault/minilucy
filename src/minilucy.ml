@@ -75,10 +75,10 @@ let () =
     close_in c;
     if !parse_only then exit 0;
 
-    let fa = Compile_automaton.compile f in
+    let fa = Sugar_past.unsugar f in
     if !verbose then begin
       Format.printf "\n/**************************************/@.";
-      Format.printf "/* Compile_automaton ast              */@.";
+      Format.printf "/* Sugar automaton print              */@.";
       Format.printf "/**************************************/@.";
       Parsed_ast_printer.print_file_std fa
     end;

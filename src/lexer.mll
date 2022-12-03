@@ -37,6 +37,7 @@
         "reset", RESET;
         "when", WHEN;
         "whenot", WHENOT;
+        "print", PRINT;
 
         "automaton", AUTOMATON;
         "fby", FBY;

@@ -14,9 +14,15 @@ void check_init (struct check_mem* mem) {
 }
 
 int check (int x, int y) {
+  int aux__1;
   int o;
+  int call_1;
   
   o = (x == y);
+  
+  printf("%d", x);
+  
+  aux__1 = call_1;
   
   return o;
 }

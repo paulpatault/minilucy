@@ -202,13 +202,15 @@ and clock_expr_desc env types loc = function
           end;
           [ce1; ce2; ce3], ce1.cexpr_clock
         | _ -> error loc Unreachable
-
       in
       CE_op (op, el), cl
   | TE_app (f, el) ->
       let (f, (c_in, c_out)) = Delta.find f in
       let cel = clock_args env types loc c_in el in
       CE_app (f, cel), c_out
+  | TE_print e ->
+      let ce = clock_expr env types e in
+      CE_print ce, ce.cexpr_clock
   | TE_tuple el ->
       let cel = List.map (clock_expr env types) el in
       CE_tuple cel,
