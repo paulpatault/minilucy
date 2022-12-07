@@ -38,6 +38,7 @@
         "when", WHEN;
         "whenot", WHENOT;
         "print", PRINT;
+        "current", CURRENT;
 
         "automaton", AUTOMATON;
         "fby", FBY;

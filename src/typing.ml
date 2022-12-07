@@ -419,9 +419,12 @@ and type_expr_desc env loc = function
           texpr_loc  = id_loc }
       in
       TE_merge (exr, mergebody), typ
+
   | PE_print e ->
       let te = type_expr env e in
       TE_print te, te.texpr_type
+
+  | PE_current e -> failwith "WIP current TODO"
 
 and verif_mergebody env tname l id_loc =
   let tl = match List.find_opt (fun {name; _} -> name = tname) env.types with

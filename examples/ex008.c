@@ -4,6 +4,12 @@
 
 #include <unistd.h>
 
+int int_read() {
+  int var;
+  scanf("%d", &var);
+  return var;
+}
+
 enum inductive_bool {
   FALSE,
   TRUE
@@ -32,17 +38,11 @@ int main (int argc, char* argv[]) {
   int argv_1;
   int res;
   
-  if ((argc < 3)) {
-    printf("Error : %d needed arguments were not provided", 2);
-    
-    exit(1);
-  };
-  
-  argv_0 = atoi(argv[1]);
-  
-  argv_1 = atoi(argv[2]);
-  
   while (1) {
+    argv_0 = int_read();
+    
+    argv_1 = int_read();
+    
     res = check(argv_0, argv_1);
     
     printf("%d", res);
