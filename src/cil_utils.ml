@@ -184,3 +184,7 @@ let fflush_lval = Lval (Var fflush_info, NoOffset)
 let atoi_lval   = Lval (Var atoi_info,   NoOffset)
 let exit_lval   = Lval (Var exit_info,   NoOffset)
 
+let int_read_info   = makeGlobalVar "int_read"    (TFun (TInt (IInt, []), None, true, []))
+let float_read_info = makeGlobalVar "float_read"  (TFun (TFloat (FFloat, []), None, true, []))
+let int_read_lval   = Lval (Var int_read_info,   NoOffset)
+let float_read_lval = Lval (Var float_read_info, NoOffset)

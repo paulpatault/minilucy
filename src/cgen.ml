@@ -594,26 +594,26 @@ let compile_main file ast main_node no_sleep =
       fundec.sbody <- append_stmt mem_init_stmt fundec.sbody;
       [AddrOf mem_lval], fundec
     else
-      (* let _ = assert false in *)
       [], fundec
   in
 
 
   let main_imp_type = main_node_imp.in_input_step in (* args du main dans lustre *)
   let len = List.length main_imp_type in
-  let argc = Lval (Var (find_formal fundec "argc"), NoOffset) in
+  (* let argc = Lval (Var (find_formal fundec "argc"), NoOffset) in *)
 
-  let if_condition = BinOp (Lt, argc, mk_int_exp (len + 1), TInt (IInt, [])) in
-  let str_fmt = GoblintCil.Const (CStr ("Error : %d needed arguments were not provided", No_encoding)) in
+  (* let if_condition = BinOp (Lt, argc, mk_int_exp (len + 1), TInt (IInt, [])) in *)
+  (* let str_fmt = GoblintCil.Const (CStr ("Error : %d needed arguments were not provided", No_encoding)) in *)
 
-  let call_printf = Call (None, printf_lval, [str_fmt; mk_int_exp len], locUnknown, locUnknown) in
-  let print = mkStmtOneInstr call_printf in
-  let exit = mkStmtOneInstr (Call (None, exit_lval, [mk_int_exp 1], locUnknown, locUnknown)) in
-  let verif_inputs_stmt = mkStmt (If (if_condition, mkBlock [print;exit], mkBlock [], locUnknown, locUnknown)) in
-  fundec.sbody <- append_stmt verif_inputs_stmt fundec.sbody;
+  (* let call_printf = Call (None, printf_lval, [str_fmt; mk_int_exp len], locUnknown, locUnknown) in *)
+  (* let print = mkStmtOneInstr call_printf in *)
+  (* let exit = mkStmtOneInstr (Call (None, exit_lval, [mk_int_exp 1], locUnknown, locUnknown)) in *)
+  (* let verif_inputs_stmt = mkStmt (If (if_condition, mkBlock [print;exit], mkBlock [], locUnknown, locUnknown)) in *)
+  (* fundec.sbody <- append_stmt verif_inputs_stmt fundec.sbody; *)
 
   let atoied_vars_lvals = List.init len (fun i -> Lval (Var (makeLocalVar fundec (Format.sprintf "argv_%d" i) (TInt (IInt, []))), NoOffset)) in
-  let call_atoi_argv ret argv_i = Call (Some ret, atoi_lval, [argv_i], locUnknown, locUnknown) in
+  (* let call_atoi_argv ret argv_i = Call (Some ret, atoi_lval, [argv_i], locUnknown, locUnknown) in *)
+  let call_atoi_argv ret argv_i = Call (Some ret, int_read_lval, [], locUnknown, locUnknown) in
 
   let argv = find_formal fundec "argv" in
   let atois = List.mapi (fun i -> function
@@ -625,7 +625,7 @@ let compile_main file ast main_node no_sleep =
       atoied_vars_lvals in
 
   let atoi_block = List.map mkStmtOneInstr atois in
-  fundec.sbody <- append_stmts atoi_block fundec.sbody;
+  (* fundec.sbody <- append_stmts atoi_block fundec.sbody; *)
 
   let step_fun = find_fun main_node file.globals in
   let step_lval = Lval (Var step_fun.svar, NoOffset) in
@@ -645,8 +645,8 @@ let compile_main file ast main_node no_sleep =
 
   let step_stmt = mkStmtOneInstr step_call in
   let while_block =
-    if no_sleep then mkBlock [step_stmt; printf_stmt; fflush0_stmt]
-    else mkBlock [step_stmt; printf_stmt; fflush0_stmt; sleep1_stmt] in
+    if no_sleep then mkBlock (atoi_block @ [step_stmt; printf_stmt; fflush0_stmt])
+    else mkBlock (atoi_block @ [step_stmt; printf_stmt; fflush0_stmt; sleep1_stmt]) in
   let while_stmt = mkStmt (Loop (while_block, locUnknown, locUnknown, None, None)) in
 
   fundec.sbody <- append_stmt while_stmt fundec.sbody;
@@ -672,5 +672,6 @@ let compile ast main_node file_name no_sleep =
   file.globals <-    GText "#include <stdlib.h>"
                   :: GText "#include <printf.h>"
                   :: GText "#include <unistd.h>"
+                  :: GText "int int_read() {\n  int var;\n  scanf(\"%d\", &var);\n  return var;\n}"
                   :: file.globals;
   file
