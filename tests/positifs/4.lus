@@ -1,0 +1,12 @@
+(* ne compile pas, voir pourquoi *)
+node when2(x : int; c : bool) returns (y : int);
+let
+  automaton
+  | FirstPeriod ->
+      y = x when c;
+      until true continue Cruise
+  | Cruise ->
+      y = x when c;
+      until false continue Cruise -- default on change pas
+  end
+tel
