@@ -56,9 +56,11 @@ let mk_mem_node_fields globals mem_comp node_mem =
   mem_comp
 
 let compile_mem_comp types globals node =
+  Format.printf "IN %a --@? " Ident.print node.in_name;
   let mem = node.in_mem in
   let mem_fby_only = mk_struct types (node.in_name.name^"_mem") mem.fby_mem in
   let mem_comp = mk_mem_node_fields globals mem_fby_only mem.node_mem in
+  Format.printf "  OUT @.";
   mem_comp
 
 let compile_return_type types file node =

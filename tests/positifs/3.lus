@@ -1,0 +1,21 @@
+node count() returns (o : int);
+let
+  o = 0 fby (o + 1);
+tel
+
+node f() returns(x : bool);
+let
+  x = true;
+tel
+
+node main1 () returns (o : bool);
+let
+  automaton
+  | One ->
+      o = f();
+      until count() = 5 continue Two
+  | Two ->
+      o = f();
+      until count() = 3 continue One
+  end
+tel
