@@ -638,7 +638,7 @@ let compile_main file ast main_node no_sleep =
 
   let str_fmt = GoblintCil.Const (CStr (typ_to_format_string res_typ, No_encoding)) in
   let call_printf = Call (None, printf_lval, [str_fmt; Lval res_lval], locUnknown, locUnknown) in
-  let sleep1_stmt = mkStmtOneInstr (Call (None, sleep_lval, [mk_int_exp 1], locUnknown, locUnknown)) in
+  let sleep1_stmt = mkStmtOneInstr (Call (None, sleep_lval, [mk_int_exp 333333], locUnknown, locUnknown)) in (* 333333 micro_seconds ≃ 0.3 second *)
   let fflush0_stmt = mkStmtOneInstr (Call (None, fflush_lval, [mk_int_exp 0], locUnknown, locUnknown)) in
 
   let printf_stmt = mkStmtOneInstr call_printf in
