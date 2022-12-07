@@ -1,0 +1,5 @@
+node main() returns (a : int; b : int);
+let
+  a = b;
+  b = a;
+tel;
