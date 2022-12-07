@@ -8,14 +8,19 @@ let
   x = true;
 tel
 
+node g() returns(x : bool);
+let
+  x = false;
+tel
+
 node main1 () returns (o : bool);
 let
   automaton
   | One ->
       o = f();
-      until count() = 5 continue Two
+      until count() mod 20 = 0 continue Two
   | Two ->
-      o = f();
-      until count() = 3 continue One
+      o = g();
+      until count() mod 5 = 0 continue One
   end
 tel
