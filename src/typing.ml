@@ -435,13 +435,17 @@ and verif_mergebody env tname l id_loc =
   let sl = List.map fst l |> List.sort compare_f in
   let stl = List.sort compare tl.constr in
 
-  if not @@ List.for_all2
-      (fun a b -> match a, b with
-        | {texpr_desc = TE_const (Cadt (_, Some id1)); _}, id -> id1 = id
-        | _ -> assert false)
-      sl stl
-  then
-    error id_loc (NotExhaustiveMerge tname)
+  try
+    (* may raise Invalid arg if lists aren't same length *)
+    if not @@ List.for_all2
+        (fun a b -> match a, b with
+          | {texpr_desc = TE_const (Cadt (_, Some id1)); _}, id -> id1 = id
+          | _ -> assert false)
+        sl stl
+    then
+      error id_loc (NotExhaustiveMerge tname)
+  with Invalid_argument _ ->
+      error id_loc (NotExhaustiveMerge tname)
 
 and type_args env loc params_ty el =
   let tel = List.map (type_expr env) el in
