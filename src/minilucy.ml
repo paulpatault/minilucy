@@ -155,6 +155,9 @@ let () =
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
         eprintf "%s%sSyntax error%s\n@." "\027[31m" "\027[1m" "\027[0m";
         exit 1
+    | Sugar_past.Error (l, e) ->
+        eprintf "%s%sSugar syntax error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Sugar_past.report e;
+        exit 1
     | Typing.Error(l,e) ->
         report_loc l;
         eprintf "%s%sTyping error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Typing.report e;

@@ -1,6 +1,16 @@
 open Parse_ast
 open Asttypes
 
+type error =
+  | ConstrInconnu of string
+
+exception Error of location * error
+
+let error loc e = raise (Error (loc, e))
+
+let report fmt = function
+  | ConstrInconnu id -> Format.fprintf fmt "undefined constructor %s in automaton" id
+
 let gen = let r = ref 0 in fun s -> incr r; Printf.sprintf "%s__%d" s !r
 
 let mk_merge var over t eqs loc =
@@ -30,11 +40,16 @@ let mk_fby_merge init var over {constr; name} eqs loc =
 
 let mk_constr_expr t name loc = { pexpr_desc = PE_const (Asttypes.Cadt (t, Some name)); pexpr_loc = loc }
 
-let trad {pautom_loc; pautom} =
+let trad_autom {pautom_loc; pautom} =
   let constrs = List.map (function
     | {pn_weak=false;_} -> failwith {|automaton with "unless" clause (strong transitions) are not implemented yet|}
     | {pn_case={pn_constr;_};_} -> pn_constr
   ) pautom in
+
+  let () = match List.find_opt (fun e -> not @@ List.mem e.pn_out constrs) pautom with
+    | None -> ()
+    | Some e -> error pautom_loc (ConstrInconnu e.pn_out) in
+
 
   let eqs = List.map (fun {pn_case={pn_equation;_}; _} -> pn_equation) pautom in
   let t = Asttypes.{ name = gen "typ" ; constr = constrs } in
@@ -91,7 +106,7 @@ let map_eq l =
   let acc, l =
     List.fold_left_map (fun ((locals_non_init, typ_acc) as acc) e -> match e with
     | PE_automaton a ->
-        let t, v, state, a = trad a in
+        let t, v, state, a = trad_autom a in
         let v = List.map (fun e -> e, Asttypes.Tbool) v in
         (state :: v @ locals_non_init, t :: typ_acc), a
     | PE_print e ->
