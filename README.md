@@ -56,7 +56,11 @@ $ ../minilucy.exe [file].lus -v [main-node] [options...]
 
 - Automates (non imbriqués)
 
-- Print (types simples (pas ADT)) dans lustre
+- ADT simple (sans paramètres)
+
+- `when`, `merge`, (`reset` ?)
+
+- Print (types simples (pas ADT)) dans lustre : TODO tuples
 
 - Phases de compilation
   + `Parsed` -> `Parsed`:
