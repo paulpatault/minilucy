@@ -176,11 +176,13 @@ let find_local fundec name =
 let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, []))
 let sleep_info  = makeGlobalVar "sleep"  (TFun (TInt (IInt, []), Some ["seconds", TInt (IInt, []), []], true, []))
 let atoi_info   = makeGlobalVar "atoi"   (TFun (TInt (IInt, []), Some ["str",    charConstPtrType, []], true, []))
+let atof_info   = makeGlobalVar "atof"   (TFun (TInt (IInt, []), Some ["str",    charConstPtrType, []], true, []))
 let exit_info   = makeGlobalVar "exit"   (TFun (TVoid [],        Some ["status",  TInt (IInt, []), []], true, []))
 let fflush_info = makeGlobalVar "fflush" (TFun (TInt (IInt, []), Some ["status",  TInt (IInt, []), []], true, []))
 let printf_lval = Lval (Var printf_info, NoOffset)
 let sleep_lval  = Lval (Var sleep_info, NoOffset)
 let fflush_lval = Lval (Var fflush_info, NoOffset)
 let atoi_lval   = Lval (Var atoi_info,   NoOffset)
+let atof_lval   = Lval (Var atof_info, NoOffset)
 let exit_lval   = Lval (Var exit_info,   NoOffset)
 

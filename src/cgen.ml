@@ -601,6 +601,8 @@ let compile_main file ast main_node no_sleep =
 
   let main_imp_type = main_node_imp.in_input_step in (* args du main dans lustre *)
   let len = List.length main_imp_type in
+  let main_types = List.map (fun (_, ty, _) -> translate_type [] ty) main_imp_type
+                   |> Array.of_list in
   let argc = Lval (Var (find_formal fundec "argc"), NoOffset) in
 
   let if_condition = BinOp (Lt, argc, mk_int_exp (len + 1), TInt (IInt, [])) in
@@ -612,15 +614,21 @@ let compile_main file ast main_node no_sleep =
   let verif_inputs_stmt = mkStmt (If (if_condition, mkBlock [print;exit], mkBlock [], locUnknown, locUnknown)) in
   fundec.sbody <- append_stmt verif_inputs_stmt fundec.sbody;
 
-  let atoied_vars_lvals = List.init len (fun i -> Lval (Var (makeLocalVar fundec (Format.sprintf "argv_%d" i) (TInt (IInt, []))), NoOffset)) in
+  let atoied_vars_lvals = List.init len (fun i -> Lval (Var (makeLocalVar fundec (Format.sprintf "argv_%d" i) main_types.(i)), NoOffset)) in
   let call_atoi_argv ret argv_i = Call (Some ret, atoi_lval, [argv_i], locUnknown, locUnknown) in
+  let call_atof_argv ret argv_i = Call (Some ret, atof_lval, [argv_i], locUnknown, locUnknown) in
 
   let argv = find_formal fundec "argv" in
   let atois = List.mapi (fun i -> function
         Lval e ->
           let i_c = mk_int_exp (i+1) in
           let argv_i = Lval (Var argv, Index (i_c, NoOffset)) in
-          call_atoi_argv e argv_i
+          begin
+            match main_types.(i) with
+            | TInt _ -> call_atoi_argv e argv_i
+            | TFloat _ -> call_atof_argv e argv_i
+            | _ -> failwith "All entries of the main node must be int or real values."
+          end
       | _ -> assert false)
       atoied_vars_lvals in
 

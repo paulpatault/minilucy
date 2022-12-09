@@ -13,7 +13,7 @@ void check_init (struct check_mem* mem) {
   ;
 }
 
-int check (int x, int y) {
+int check (int x, int y, float z) {
   int aux__1;
   int o;
   int call_1;
@@ -30,10 +30,11 @@ int check (int x, int y) {
 int main (int argc, char* argv[]) {
   int argv_0;
   int argv_1;
+  float argv_2;
   int res;
   
-  if ((argc < 3)) {
-    printf("Error : %d needed arguments were not provided", 2);
+  if ((argc < 4)) {
+    printf("Error : %d needed arguments were not provided", 3);
     
     exit(1);
   };
@@ -42,8 +43,10 @@ int main (int argc, char* argv[]) {
   
   argv_1 = atoi(argv[2]);
   
+  argv_2 = atof(argv[3]);
+  
   while (1) {
-    res = check(argv_0, argv_1);
+    res = check(argv_0, argv_1, argv_2);
     
     printf("%d", res);
     

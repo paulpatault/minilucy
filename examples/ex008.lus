@@ -1,4 +1,4 @@
-node check (x: int; y: int) returns (o: bool);
+node check (x: int; y: int; z: real) returns (o: bool);
 let
   print(x);
   o = x = y;
