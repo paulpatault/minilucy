@@ -602,6 +602,7 @@ let compile_main file ast main_node no_sleep =
 
   let addr_mem_lval, fundec =
     if main_node_imp.need_mem then
+      try
       let mem_comp = find_gcomp (main_node^"_mem") file.globals in
       let mem_local = makeLocalVar fundec "mem" (TComp (mem_comp, [])) in
       let mem_lval = Var mem_local, NoOffset in
@@ -611,6 +612,7 @@ let compile_main file ast main_node no_sleep =
       let mem_init_stmt = mkStmtOneInstr mem_init_call in
       fundec.sbody <- append_stmt mem_init_stmt fundec.sbody;
       [AddrOf mem_lval], fundec
+      with Not_found -> [], fundec
     else
       [], fundec
   in
