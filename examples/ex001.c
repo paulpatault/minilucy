@@ -4,6 +4,8 @@
 
 #include <unistd.h>
 
+#include "lib.h"
+
 enum inductive_bool {
   FALSE,
   TRUE
@@ -138,15 +140,9 @@ int main (int argc, char* argv[]) {
   
   check_init(&(mem));
   
-  if ((argc < 2)) {
-    printf("Error : %d needed arguments were not provided", 1);
-    
-    exit(1);
-  };
-  
-  argv_0 = atoi(argv[1]);
-  
   while (1) {
+    argv_0 = int_read();
+    
     res = check(&(mem), argv_0);
     
     printf("%d", res);

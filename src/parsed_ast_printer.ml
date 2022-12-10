@@ -24,6 +24,8 @@ let rec print_exp fmt e = match e.pexpr_desc with
     fprintf fmt "@[%a when %s(%a)@]" print_exp e1 c print_exp e2
   | PE_print e ->
       fprintf fmt "print(@[%a@])" print_exp e
+  | PE_current e ->
+      fprintf fmt "current(@[%a@])" print_exp e
 
 
 and print_arg_list fmt e_list = match e_list with

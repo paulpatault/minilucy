@@ -57,6 +57,7 @@
 %token MERGE
 %token RESET
 %token WHEN WHENOT
+%token CURRENT
 
 %token AUTOMATON
 %token UNLESS
@@ -257,6 +258,8 @@ expr:
     { mk_expr (PE_op (Op_sub, [$2]))  $sloc}
 | NOT expr
     { mk_expr (PE_op (Op_not, [$2]))  $sloc}
+| CURRENT expr
+    { mk_expr (PE_current $2)  $sloc}
 | PRE expr
     { mk_expr (PE_pre ($2))  $sloc}
 | LPAREN expr COMMA expr_comma_list RPAREN
