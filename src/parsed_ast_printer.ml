@@ -23,7 +23,9 @@ let rec print_exp fmt e = match e.pexpr_desc with
   | PE_when (e1, c, e2) ->
     fprintf fmt "@[%a when %s(%a)@]" print_exp e1 c print_exp e2
   | PE_print e ->
-      fprintf fmt "print(@[%a@])" print_exp e
+    fprintf fmt "print(@[%a@])" print_exp e
+  | PE_reset (id, el, e) ->
+    fprintf fmt "%s(@[%a@]) every %a" id print_arg_list el print_exp e
 
 
 and print_arg_list fmt e_list = match e_list with

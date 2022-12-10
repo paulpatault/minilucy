@@ -6,6 +6,6 @@ tel
 node check (x: bool) returns (ok: bool);
 var cpt : int;
 let
-  cpt = incr(x);
+  cpt = incr(x) every x;
   ok = (0 fby cpt) <= cpt;
 tel

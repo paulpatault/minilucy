@@ -69,6 +69,7 @@ let rec compile_base_expr e =
           ) l in
         IE_case (ide, l)
     | CE_print e -> IE_print (compile_base_expr e)
+    | CE_reset _ -> assert false
   in
   { iexpr_desc = desc; iexpr_type = e.cexpr_type; }
 
@@ -138,6 +139,25 @@ let compile_equation
       { init_acc with node_init = node_init@init_acc.node_init } ,
       compute::compute_acc , update_acc
 
+  | CE_reset (id, el, e) ->
+    let mem_id = gen_mem_id id in
+    let node_mem = [mem_id, id] in
+    let step_in = (untulify el) in
+    let node_init = [mem_id, id] in
+    let compute =
+      let expr =
+        { iexpr_desc = IE_reset (id, mem_id, List.map compile_base_expr step_in, compile_base_expr e);
+          iexpr_type = List.map (function
+              | { cexpr_type = [t]; _ } -> t
+              | _ -> assert false;)
+              step_in; }
+      in
+      {ieq_patt = cvars; ieq_expr = expr;}
+    in
+    { mem_acc with node_mem = node_mem@mem_acc.node_mem },
+    { init_acc with node_init = node_init@init_acc.node_init },
+    compute::compute_acc,
+    update_acc
   | _ ->
       let eq = {ieq_patt = cvars; ieq_expr = compile_base_expr e} in
       mem_acc, init_acc, eq::compute_acc, update_acc
