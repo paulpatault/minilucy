@@ -49,8 +49,8 @@ let rec normalize ctx e =
       in
       ctx, {e with texpr_desc = TE_op (op, el');}
 
-  | TE_print e ->
-      let (new_equs, new_vars), e' = normalize ctx e in
+  | TE_print ex ->
+      let (new_equs, new_vars), e' = normalize ctx ex in
       let x_decl, x_patt, x_expr = new_patt e in
       let x_eq = {teq_patt = x_patt;
                   teq_expr = {e with texpr_desc = TE_print (e')}}
@@ -104,6 +104,13 @@ let rec normalize ctx e =
           let y_eq = {teq_patt = y_patt; teq_expr = e2'} in
           (y_eq::new_eqs, y_decl@new_vars), {e with texpr_desc = TE_when (e1', b, y_expr)}
       end
+  | TE_reset (id, el, ex) ->
+    let ctx, el' = normalize_list ctx el in
+    let (new_eqs, new_vars), e' = normalize ctx ex in
+    let x_decl, x_patt, x_expr = new_patt e in
+    let x_eq = {teq_patt = x_patt;
+                teq_expr = {e with texpr_desc = TE_reset (id, el', e')}} in
+    (x_eq::new_eqs, x_decl@new_vars), x_expr
   | TE_pre _
   | TE_arrow _ -> failwith "Unreachable"
 

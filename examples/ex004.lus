@@ -1,11 +1,9 @@
-node incr (tic: bool) returns (cpt: int);
+node incr () returns (cpt: int);
 let
-  cpt = (0 fby cpt) + if tic then 1 else 0;
+  cpt = 0 fby cpt + 1;
 tel
 
-node check (x: bool) returns (ok: bool);
-var cpt : int;
+node check (x: bool) returns (o : int);
 let
-  cpt = incr(x);
-  ok = (0 fby cpt) <= cpt;
+  o = incr() every x;
 tel

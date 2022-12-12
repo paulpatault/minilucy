@@ -46,6 +46,8 @@ let rec pp_exp fmt e = match e.cexpr_desc with
     fprintf fmt "@[%a when %s(%a)@]" pp_exp e1 s pp_exp eid
   | CE_print e ->
     fprintf fmt "@[print(%a)@]" pp_exp e
+  | CE_reset (id, el, e) ->
+    fprintf fmt "%a(@[%a]) every %a" Ident.print id pp_arg_list el pp_exp e
 
 and pp_arg_list fmt e_list = match e_list with
   | [] -> ()

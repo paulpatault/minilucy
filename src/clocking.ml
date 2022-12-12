@@ -246,9 +246,24 @@ and clock_expr_desc env types loc = function
         | _ as ct ->
           error loc (ExpectedBaseClock ct)
       end
-  | TE_when _ as e->
+  | TE_when _ as e ->
     Typed_ast_printer.print_exp Format.std_formatter {texpr_desc = e; texpr_loc = Lexing.dummy_pos, Lexing.dummy_pos; texpr_type = []};
     failwith "Not normalized"
+  | TE_reset (f, el, e) ->
+    let (f, (c_in, c_out)) = Delta.find f in
+    let cel = clock_args env types loc c_in el in
+    let ce = clock_expr env types e in
+    CE_reset (f, cel, ce),
+    begin match cel, ce with
+    | [], _ -> c_out
+    | {cexpr_clock = Ck ck1; _}::tl, {cexpr_clock = Ck ck2; _} ->
+      begin try unify_ck ck1 ck2
+        with Unify ->
+          error loc (ExpectedClock (Ck ck1, Ck ck2))
+      end;
+      c_out
+    | _ -> assert false
+    end
   | TE_pre _
   | TE_prim _
   | TE_arrow _ -> error loc Unreachable
@@ -256,13 +271,19 @@ and clock_expr_desc env types loc = function
 and clock_args env types loc params_cl el =
   let cel = List.map (clock_expr env types) el in
   let actual_clocks =
-    Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
+    match cel with
+    | [] ->
+      Cprod []
+    | {cexpr_clock; _}::[] ->
+      cexpr_clock
+    | _ ->
+      Cprod (List.map (fun {cexpr_clock; _} -> cexpr_clock) cel)
   in
   try
     unify params_cl actual_clocks;
     cel
   with Unify ->
-    error loc (ExpectedClock (actual_clocks, params_cl))
+    error loc (ExpectedClock (params_cl, actual_clocks))
 
 let rec clock_patt env patt cl =
   {cpatt_desc = patt.tpatt_desc; cpatt_type = patt.tpatt_type; cpatt_clock = cl; cpatt_loc = patt.tpatt_loc; },

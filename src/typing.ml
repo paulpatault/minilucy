@@ -423,6 +423,23 @@ and type_expr_desc env loc = function
       let te = type_expr env e in
       TE_print te, te.texpr_type
 
+  | PE_reset (id, el, e) ->
+    begin try
+        let (f, (t_in, t_out)), is_prim = Delta.find id in
+        let tel = type_args env loc t_in el in
+        if is_prim then
+          error loc (Other "You cannot reset a primitive call");
+        let te = type_expr env e in
+        if te.texpr_type <> [Tbool] then
+          error loc (ExpectedType ([Tbool], te.texpr_type));
+        TE_reset (f, tel, te), begin match t_out with
+          | [] -> assert false
+          | _ -> t_out
+        end
+      with Not_found ->
+        error loc (UnboundNode id)
+    end
+
 and verif_mergebody env tname l id_loc =
   let tl = match List.find_opt (fun {name; _} -> name = tname) env.types with
     | None -> error id_loc (UnknownAdtType tname)

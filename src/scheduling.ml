@@ -39,6 +39,8 @@ let rec add_vars_of_exp s {cexpr_desc=e} =
   | CE_fby _ -> s
   | CE_print e
   | CE_when (e, _, _) -> add_vars_of_exp s e
+  | CE_reset (_, el, e) -> List.fold_left (fun s e -> add_vars_of_exp s e) s el
+                           |> (fun s -> add_vars_of_exp s e)
 
 
 let schedule_equs inputs equs =

@@ -19,6 +19,7 @@ and p_expr_desc =
   | PE_merge of p_expr * (p_expr * p_expr) list
   | PE_when of p_expr * string * p_expr
   | PE_print of p_expr
+  | PE_reset of ident * p_expr list * p_expr
 
 type p_patt =
   { ppatt_desc: p_patt_desc;
