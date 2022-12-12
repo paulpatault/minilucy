@@ -1,6 +1,9 @@
-(rule
-(with-stdout-to tests.output (run ../minilucy.exe main -v)))
+; (rule
+;  (deps
+;   (:neg (glob_files_rec negatifs/*.lus)))
+;  (action
+;    (with-stdout-to tests.output (run ../minilucy.exe %{neg} main0 -v))))
 
-(rule
- (alias runtest)
- (action (diff tests.expected tests.output)))
+; (rule
+;  (alias runtest)
+;  (action (diff tests.expected tests.output)))
