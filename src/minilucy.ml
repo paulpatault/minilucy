@@ -166,6 +166,5 @@ let () =
         report_loc l;
         eprintf "%s%sClocking error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Clocking.report e;
     | e ->
-        let _ = Fmt.comma in
         eprintf "%s%sAnomaly:%s %s\n@." "\027[31m" "\027[1m" "\027[0m" (Printexc.to_string e);
         exit 2
