@@ -1,0 +1,6 @@
+(rule
+(with-stdout-to tests.output (run ../minilucy.exe main -v)))
+
+(rule
+ (alias runtest)
+ (action (diff tests.expected tests.output)))
