@@ -406,12 +406,8 @@ let rec compile_expr types file node fundec expr =
         let init_lval = Lval (Var init_fundec.svar, NoOffset) in
         let init_call = Call (None, init_lval, [mem_field_expr], locUnknown, locUnknown) in
         let init_stmt = mkStmtOneInstr init_call in
-        init_stmt.labels <- Case (true_const, locUnknown, locUnknown)::init_stmt.labels;
-        let break_stmt = mkStmt (Break locUnknown) in
-        let file, switch_expr, _ = compile_expr types file node fundec control in
-        let switch_stmts = [init_stmt; break_stmt;] in
-        let switch_block = mkBlock switch_stmts in
-        let switch_stmt = mkStmt (Switch (switch_expr, switch_block, switch_stmts, locUnknown, locUnknown)) in
+        let file, expr, _ = compile_expr types file node fundec control in
+        let switch_stmt = mkStmt (If (expr, mkBlock [init_stmt], mkBlock [], locUnknown, locUnknown)) in
         file, switch_stmt::call_stmt::[]
       with Not_found ->
         file, call_stmt::[]
