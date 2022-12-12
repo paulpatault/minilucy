@@ -1,4 +1,4 @@
-node f (lo, hi : int) returns (x: int);
+node main0 (lo, hi : int) returns (x: int);
 let
   automaton
   | Chaud ->

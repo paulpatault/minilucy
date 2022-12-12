@@ -112,7 +112,11 @@ module Gamma = struct
 
   let find loc env x = try
     M.find x env
-  with Not_found ->  error loc (UnboundVar x)
+  with Not_found -> error loc (UnboundVar x)
+
+  let find_noloc env x = try
+    M.find x env
+  with Not_found -> error dummy_loc (UnboundVar x)
 
 end
 
@@ -265,13 +269,34 @@ and clock_args env types loc params_cl el =
     error loc (ExpectedClock (actual_clocks, params_cl))
 
 let rec clock_patt env patt cl =
+  let () = match cl with
+  | Ck ck ->
+      begin match patt.tpatt_desc with
+                | [e] ->
+                    let ck2 = Gamma.find_noloc env e in
+                    (try unify_ck ck ck2
+                     with Unify ->
+                       error patt.tpatt_loc (ExpectedClock (Ck ck2, Ck ck)))
+                | _ -> failwith "problem"
+      end
+  | Cprod cl ->
+      List.iter2 (fun e_pat cli ->
+          match cli with
+          | Ck ck ->
+              let ck2 = Gamma.find_noloc env e_pat in
+              (try unify_ck ck ck2
+               with Unify ->
+                 error patt.tpatt_loc (ExpectedClock (Ck ck2, Ck ck)))
+          (* M.add e_pat ck acc *)
+          | _ -> failwith "tuple de tuple impossible pour l'instant") patt.tpatt_desc cl
+  in
   {cpatt_desc = patt.tpatt_desc; cpatt_type = patt.tpatt_type; cpatt_clock = cl; cpatt_loc = patt.tpatt_loc; },
   env
 
 let clock_equation env types eq =
   let expr = clock_expr env types eq.teq_expr in
   let patt, env = clock_patt env eq.teq_patt expr.cexpr_clock in
-  {ceq_patt = patt; ceq_expr = expr; }
+  env, {ceq_patt = patt; ceq_expr = expr }
 
 let check_causality loc inputs equs =
   begin try ignore (Scheduling.schedule_equs inputs equs)
@@ -286,7 +311,7 @@ let clock_node types n =
   let env0 = Gamma.adds n.tn_loc Vinput env0 n.tn_input in
 
   let env = Gamma.adds n.tn_loc Voutput env0 n.tn_output in
-  let equs = List.map (clock_equation env types) n.tn_equs in
+  let env, equs = List.fold_left_map (fun acc e -> clock_equation acc types e) env n.tn_equs in
   M.iter (fun _ ck -> unify_ck Cbase (root_ck_of ck)) env0;
   let rec ct_of_ck = function
     | [ck] -> Ck ck
