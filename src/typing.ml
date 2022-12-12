@@ -424,9 +424,9 @@ and type_expr_desc env loc = function
           texpr_loc  = id_loc }
       in
       TE_merge (exr, mergebody), typ
-  | PE_print e ->
-      let te = type_expr env e in
-      TE_print te, te.texpr_type
+  | PE_print (s, e) ->
+      let te = List.map (type_expr env) e in
+      TE_print (s, te), (List.hd te).texpr_type
 
 and verif_mergebody env tname l id_loc =
   let tl = match List.find_opt (fun {name; _} -> name = tname) env.types with
@@ -519,9 +519,12 @@ let type_equation env eq =
           eq.peq_expr.pexpr_loc (ExpectedType (expr.texpr_type, patt.tpatt_type))
   | PE_match _ ->
       failwith "not implemented 4"
-  | PE_automaton {pautom_loc = loc; _}
-  | PE_print     {pexpr_loc  = loc; _} ->
+  | PE_automaton {pautom_loc = loc; _} ->
       error loc (Unreachable "uncompiled automaton/printf")
+  | PE_print     (_, el) ->
+      (match el with
+       | [] -> assert false
+       | e :: _ -> error e.pexpr_loc (Unreachable "uncompiled automaton/printf"))
 
 (* let type_case env adt {pn_case; pn_cond; pn_out} =
   (* let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in

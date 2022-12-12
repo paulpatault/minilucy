@@ -109,12 +109,12 @@ let map_eq l =
         let t, v, state, a = trad_autom a in
         let v = List.map (fun e -> e, Asttypes.Tbool) v in
         (state :: v @ locals_non_init, t :: typ_acc), a
-    | PE_print e ->
+    | PE_print (s,e) ->
         let var = gen "print_var", Tint in
         let peq_patt =
           { ppatt_desc = PP_ident (fst var);
-            ppatt_loc  = e.pexpr_loc } in
-        let peq_expr = {pexpr_desc = PE_print e; pexpr_loc= e.pexpr_loc} in
+            ppatt_loc  = (List.hd e).pexpr_loc } in
+        let peq_expr = {pexpr_desc = PE_print (s,e); pexpr_loc= (List.hd e).pexpr_loc} in
         let eq = PE_eq {peq_patt; peq_expr} in
         let acc = var :: locals_non_init, typ_acc in
         acc, [eq]

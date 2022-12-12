@@ -28,6 +28,7 @@ let rec add_vars_of_exp s {cexpr_desc=e} =
   | CE_arrow (e1, e2) -> add_vars_of_exp (add_vars_of_exp s e1) e2
   | CE_pre e -> s
   | CE_op (_, el) -> List.fold_left (fun s e -> add_vars_of_exp s e) s el
+  | CE_print (_, l)
   | CE_app (_,l) -> List.fold_left add_vars_of_exp s l
   | CE_prim (_,l) -> List.fold_left add_vars_of_exp s l
   | CE_tuple l -> List.fold_left add_vars_of_exp s l
@@ -37,7 +38,6 @@ let rec add_vars_of_exp s {cexpr_desc=e} =
         (add_vars_of_exp s cid)
         le
   | CE_fby _ -> s
-  | CE_print e
   | CE_when (e, _, _) -> add_vars_of_exp s e
 
 

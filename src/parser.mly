@@ -25,6 +25,7 @@
 %token <bool> CONST_BOOL
 %token <int> CONST_INT
 %token <float> CONST_REAL
+%token <string> STR
 %token DIV
 %token ELSE
 %token END
@@ -184,8 +185,10 @@ eq_list:
 ;
 
 eq:
-| PRINT expr SEMICOL
-    { PE_print $2 }
+| PRINT nonempty_list(expr) SEMICOL
+    { PE_print ("", $2) }
+| PRINT LPAREN s=STR e=list(expr) RPAREN SEMICOL
+    { PE_print (s, e) }
 | pattern EQUAL expr SEMICOL
     { PE_eq { peq_patt = $1; peq_expr = $3; } }
 | AUTOMATON pautom=list(case_autom) END semi_opt

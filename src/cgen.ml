@@ -444,11 +444,15 @@ let rec compile_expr types file node fundec expr =
       file, CastE (real_t, e'), real_t
     | _ -> assert false
       end
-  | IE_print e ->
-      let arg0 =
-        match e.iexpr_type with
-        | [e] -> Cil_utils.base_ty_to_format_string e
-        | _ -> assert false in
+  | IE_print (s, e) ->
+      let arg0 = if s <> "" then s else
+          String.concat ""
+            (List.map
+               (fun e ->
+                  match e.iexpr_type with
+                  | [t] -> Cil_utils.base_ty_to_format_string t
+                  | _ -> assert false
+                  ) e) in
 
       let str_fmt = GoblintCil.Const (CStr (arg0, No_encoding)) in
 
@@ -457,7 +461,7 @@ let rec compile_expr types file node fundec expr =
             let file, arg, _ = compile_expr types file node fundec e in
             file, arg)
           file
-          [e]
+          e
       in
       let ret_ty = TInt (IInt, []) in
       let res_var = makeLocalVar fundec (gen_call_name ()) ret_ty in

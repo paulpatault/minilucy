@@ -15,8 +15,8 @@ let rec pp_iexp fmt e = match e.iexpr_desc with
       fprintf fmt "case(%a)@[<hov 2>%a@]"
         pp_iexp e
         (pp_print_list ~pp_sep:pp_eol (fun fmt (l, r) -> fprintf fmt "%a: %a"pp_iexp l pp_iexp r)) li
-  | IE_print e ->
-    fprintf fmt "@[print(%a)@]" pp_iexp e
+  | IE_print (s, e) ->
+      fprintf fmt "print(%S, @[%a@])" s (pp_print_list pp_iexp) e
 
 and pp_arg_list fmt = function
   | [] -> ()
