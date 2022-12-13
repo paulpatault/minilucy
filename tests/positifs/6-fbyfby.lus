@@ -5,7 +5,7 @@ let
   x = true fby false fby x;
 tel
 
-node check () returns (o:bool);
+node main0 () returns (o:bool);
 let
   o = f();
 tel

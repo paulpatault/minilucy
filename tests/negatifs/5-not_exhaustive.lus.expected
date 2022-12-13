@@ -10,12 +10,12 @@ type t =
   | B
   | C
 
-node main(x : adt(t)) returns (o : bool)
+node main(x : t) returns (o : bool);
 var ;
 let
   (o) = merge x 
-          (t(A) -> true when A(x))
-          (t(B) -> true when B(x));
+          (A't -> true when A(x))
+          (B't -> true when B(x));
 tel
 
 [31m[1mTyping error: [0mthe merge is not exhaustive over [t] type

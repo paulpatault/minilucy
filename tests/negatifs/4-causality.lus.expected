@@ -6,7 +6,7 @@ type inductive_bool =
   | False
   | True
 
-node main0() returns (a : int; b : int)
+node main0() returns (a : int; b : int);
 var ;
 let
   (a) = b;

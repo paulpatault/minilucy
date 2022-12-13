@@ -6,7 +6,7 @@ type inductive_bool =
   | False
   | True
 
-node main0(x : int) returns (y : int)
+node main0(x : int) returns (y : int);
 var ;
 let
   (y) = x;
@@ -118,7 +118,7 @@ int main (int argc, char* argv[]) {
     
     res = main0(argv_0);
     
-    printf("%d", res);
+    printf("%d ", res);
     
     fflush(0);
     

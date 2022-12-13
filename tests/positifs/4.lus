@@ -1,12 +1,11 @@
-(* ne compile pas, voir pourquoi *)
-node check (x : int; c : bool) returns (y : int);
+node main0 (i : int) returns (y : int);
 let
   automaton
   | FirstPeriod ->
-      y = x when c;
-      until true continue Cruise
+      y = i;
+      until true continue Cruise -- cas de base
   | Cruise ->
-      y = x when c;
-      until false continue Cruise -- default on change pas
+      y = - pre y;
+      until false continue Cruise -- on change plus
   end
 tel

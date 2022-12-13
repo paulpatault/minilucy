@@ -35,13 +35,8 @@ let
 tel
 
 (* CHECK check *)
-node check() returns (b:bool);
+node main0() returns (b:bool);
 var y:int;
-let
-  (y,b) = prod();
-tel
-
-node main() returns (y:int;b:bool);
 let
   (y,b) = prod();
 tel

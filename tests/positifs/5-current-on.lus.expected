@@ -6,7 +6,7 @@ type inductive_bool =
   | False
   | True
 
-node current(c : bool; x : int) returns (y : int)
+node current(c : bool; x : int) returns (y : int);
 var ;
 let
   (y) = merge c 
@@ -14,7 +14,7 @@ let
           (false -> (0) -> (pre (y)) when False(c));
 tel
 
-node internal_current(c : bool; x : int) returns (y : int)
+node internal_current(c : bool; x : int) returns (y : int);
 var x_cur : int;
 let
   (x_cur) = merge c 
@@ -23,7 +23,7 @@ let
   (y) = x_cur when True(c);
 tel
 
-node use_current(c : bool; x : int) returns (b : bool; y : int)
+node use_current(c : bool; x : int) returns (b : bool; y : int);
 var x_cur : int; y2 : int;
 let
   (x_cur) = current(c, x);
@@ -32,7 +32,7 @@ let
   (b) = eq(y, y2);
 tel
 
-node prod() returns (y : int; b : bool)
+node prod() returns (y : int; b : bool);
 var x : int; y_ : int; c : bool; b_ : bool;
 let
   (x) = add((0) -> (pre (x)), 1);
@@ -44,17 +44,143 @@ let
           (false -> (true) -> (pre (b)) when False(c));
 tel
 
-node check() returns (b : bool)
+node main0() returns (b : bool);
 var y : int;
 let
   (y, b) = prod();
 tel
 
-node main() returns (y : int; b : bool)
+/**************************************/
+/* Typed ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node current__8(c__6 : bool; x__7 : int) returns (y__5 : int)
 var ;
 let
-  (y, b) = prod();
+  (y__5) = merge c__6 
+             (true -> x__7)
+             (false -> ite(true fby false, 0, 0 fby y__5) when False(c__6));
 tel
 
-[31m[1mTyping error: [0munbound node main0
+node internal_current__13(c__11 : bool; x__12 : int) returns (y__9 : int)
+var x_cur__10: int;
+let
+  (x_cur__10) = merge c__11 
+                  (true -> x__12)
+                  (false -> ite(true fby false, 0,
+                            0 fby x_cur__10) when False(c__11));
+  (y__9) = x_cur__10 when True(c__11);
+tel
+
+node use_current__20(c__18 : bool; x__19 : int) returns (b__14 : bool;
+                                                         y__15 : int)
+var x_cur__16: int; y2__17: int;
+let
+  (x_cur__16) = current__8(c__18, x__19);
+  (y__15) = x_cur__16 when True(c__18);
+  (y2__17) = internal_current__13(c__18, x__19);
+  (b__14) = eq(y__15, y2__17);
+tel
+
+node prod__27() returns (y__21 : int; b__22 : bool)
+var x__23: int; y___24: int; c__25: bool; b___26: bool;
+let
+  (x__23) = add(ite(true fby false, 0, 0 fby x__23), 1);
+  (c__25) = eq(mod(x__23, 10), 0);
+  (b___26, y___24) = use_current__20(c__25, x__23 when True(c__25));
+  (y__21) = current__8(c__25, y___24);
+  (b__22) = merge c__25 
+              (true -> b___26)
+              (false -> ite(true fby false, true,
+                        false fby b__22) when False(c__25));
+tel
+
+node main0__30() returns (b__28 : bool)
+var y__29: int;
+let
+  (y__29, b__28) = prod__27();
+tel
+
+/**************************************/
+/* Normalized ast                     */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node current__8(c__6 : bool; x__7 : int) returns (y__5 : int)
+var aux'4__34: int; aux'3__33: int; aux'2__32: bool; aux'1__31: bool;
+let
+  (aux'4__34) = 0 fby aux'3__33;
+  (aux'3__33) = y__5;
+  (aux'2__32) = true fby aux'1__31;
+  (aux'1__31) = false;
+  (y__5) = merge c__6 
+             (true -> x__7)
+             (false -> ite(aux'2__32, 0, aux'4__34) when False(c__6));
+tel
+
+node internal_current__13(c__11 : bool; x__12 : int) returns (y__9 : int)
+var aux'8__38: int; aux'7__37: int; aux'6__36: bool; aux'5__35: bool;
+    x_cur__10: int;
+let
+  (aux'8__38) = 0 fby aux'7__37;
+  (aux'7__37) = x_cur__10;
+  (aux'6__36) = true fby aux'5__35;
+  (aux'5__35) = false;
+  (x_cur__10) = merge c__11 
+                  (true -> x__12)
+                  (false -> ite(aux'6__36, 0, aux'8__38) when False(c__11));
+  (y__9) = x_cur__10 when True(c__11);
+tel
+
+node use_current__20(c__18 : bool; x__19 : int) returns (b__14 : bool;
+                                                         y__15 : int)
+var aux'10__40: int; aux'9__39: int; x_cur__16: int; y2__17: int;
+let
+  (aux'9__39) = current__8(c__18, x__19);
+  (x_cur__16) = aux'9__39;
+  (y__15) = x_cur__16 when True(c__18);
+  (aux'10__40) = internal_current__13(c__18, x__19);
+  (y2__17) = aux'10__40;
+  (b__14) = eq(y__15, y2__17);
+tel
+
+node prod__27() returns (y__21 : int; b__22 : bool)
+var aux'21__51: bool; aux'20__50: bool; aux'19__49: bool; aux'18__48: bool;
+    aux'17__47: int; aux'15__45: bool; aux'16__46: int; aux'14__44: int;
+    aux'13__43: int; aux'12__42: bool; aux'11__41: bool; x__23: int;
+    y___24: int; c__25: bool; b___26: bool;
+let
+  (aux'14__44) = 0 fby aux'13__43;
+  (aux'13__43) = x__23;
+  (aux'12__42) = true fby aux'11__41;
+  (aux'11__41) = false;
+  (x__23) = add(ite(aux'12__42, 0, aux'14__44), 1);
+  (c__25) = eq(mod(x__23, 10), 0);
+  (aux'15__45, aux'16__46) = use_current__20(c__25, x__23 when True(c__25));
+  (b___26, y___24) = (aux'15__45, aux'16__46);
+  (aux'17__47) = current__8(c__25, y___24);
+  (y__21) = aux'17__47;
+  (aux'21__51) = false fby aux'20__50;
+  (aux'20__50) = b__22;
+  (aux'19__49) = true fby aux'18__48;
+  (aux'18__48) = false;
+  (b__22) = merge c__25 
+              (true -> b___26)
+              (false -> ite(aux'19__49, true, aux'21__51) when False(c__25));
+tel
+
+node main0__30() returns (b__28 : bool)
+var aux'22__52: int; aux'23__53: bool; y__29: int;
+let
+  (aux'22__52, aux'23__53) = prod__27();
+  (y__29, b__28) = (aux'22__52, aux'23__53);
+tel
+
+c__6
+[31m[1mClocking error: [0mCannot merge clocks (3)
 

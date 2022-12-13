@@ -9,7 +9,7 @@ let
     else 3;
 tel
 
-node check() returns (o:int);
+node main0() returns (o:int);
 let
   o = m0();
 tel
