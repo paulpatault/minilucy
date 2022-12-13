@@ -210,6 +210,8 @@ case:
 pattern:
 | IDENT
     { mk_patt (PP_ident $1) $sloc}
+| LPAREN IDENT RPAREN
+    { mk_patt (PP_ident $2) $sloc}
 | LPAREN IDENT COMMA ident_comma_list RPAREN
     { mk_patt (PP_tuple($2::$4)) $sloc}
 ;
