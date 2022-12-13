@@ -43,15 +43,12 @@ let gen_switch_name () =
   incr switch_cnt; "switch_"^(string_of_int !switch_cnt)
 
 let mk_mem_node_fields globals mem_comp node_mem =
-  Format.printf "IN(X)--@.";
   let fields =
     List.filter_map (fun (field_id, node_id) ->
         try
           let mem_name = (node_id.name^"_mem") in
-          Format.printf " -() %s --@." mem_name;
           let field_name = clean_name field_id.name in
           let node_mem_comp = find_gcomp mem_name globals in
-          Format.printf "  () %s --@." mem_name;
           let mem_typ = TComp (node_mem_comp, []) in
           Some {fcomp = mem_comp; fname = field_name; ftype = mem_typ; fbitfield = None; fattr = []; floc = locUnknown;}
         with Not_found -> None
@@ -59,7 +56,6 @@ let mk_mem_node_fields globals mem_comp node_mem =
       node_mem
   in
   mem_comp.cfields <- fields@(mem_comp.cfields);
-  Format.printf "OUT(X)@.";
   mem_comp
 
 let compile_mem_comp types globals node =
@@ -159,7 +155,8 @@ let compile_init types file node mem_comp =
           let field_addr = AddrOf field_mem in
           let call_instr = Call (None, Lval (Var init_fun.svar, NoOffset), [field_addr], locUnknown, locUnknown) in
           Some (mkStmtOneInstr call_instr)
-        with Not_found -> None) (* TODO : patch ici avec Not_found -> None mais peut être vaut mieux revoir la structire du code avec la gestion des mem vides *)
+        with Not_found -> None
+      ) (* TODO : patch ici avec Not_found -> None mais peut être vaut mieux revoir la structire du code avec la gestion des mem vides *)
       node.in_init.node_init
   in
   let fun_block = List.fold_left (fun block stmt -> append_stmt stmt block) fundec.sbody init_fby in
@@ -573,10 +570,8 @@ let compile_return file node fundec =
   file, fundec
 
 let compile_node types file node =
-  Format.printf "%a :: IN--@." Ident.print node.in_name;
   let mem_comp, file =
       if node.need_mem then
-        let () = Format.printf "  NEED %a--@." Ident.print node.in_name in
         let mem_comp = compile_mem_comp types file.globals node in
         if mem_comp.cfields <> [] then
           file.globals <- (GCompTag (mem_comp, locUnknown))::file.globals;
@@ -590,7 +585,6 @@ let compile_node types file node =
   let file, fundec = compile_update types file node fundec in
   let file, fundec = compile_return file node fundec in
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
-  Format.printf "%a :: OUT--@." Ident.print node.in_name;
   file
 
 let compile_main file ast main_node no_sleep =

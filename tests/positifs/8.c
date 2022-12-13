@@ -50,10 +50,6 @@ int m0 () {
   return o;
 }
 
-void main1_init (struct main1_mem* mem) {
-  ;
-}
-
 int main1 () {
   int aux__1;
   int o;
