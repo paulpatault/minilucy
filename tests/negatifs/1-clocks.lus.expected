@@ -50,3 +50,5 @@ let
   (x__5) = i__8;
 tel
 
+[31m[1mClocking error: [0mThe expected clock is Base, got Base on True(c__9)
+

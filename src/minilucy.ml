@@ -149,22 +149,23 @@ let () =
   with
     | Lexical_error s ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
-        eprintf "%s%sLexical error: %s%s\n@." "\027[31m" "\027[1m" "\027[0m" s;
-        exit 1
+        printf "%s%sLexical error: %s%s\n@." "\027[31m" "\027[1m" "\027[0m" s;
+        exit 0
     | Parser.Error ->
         report_loc (lexeme_start_p lb, lexeme_end_p lb);
-        eprintf "%s%sSyntax error%s\n@." "\027[31m" "\027[1m" "\027[0m";
-        exit 1
+        printf "%s%sSyntax error%s\n@." "\027[31m" "\027[1m" "\027[0m";
+        exit 0
     | Sugar_past.Error (l, e) ->
-        eprintf "%s%sSugar syntax error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Sugar_past.report e;
-        exit 1
+        printf "%s%sSugar syntax error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Sugar_past.report e;
+        exit 0
     | Typing.Error(l,e) ->
         report_loc l;
-        eprintf "%s%sTyping error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Typing.report e;
-        exit 1
+        printf "%s%sTyping error: %s%a\n@." "\027[31m" "\027[1m" "\027[0m" Typing.report e;
+        exit 0
     | Clocking.Error (l, e) ->
         report_loc l;
-        eprintf "%s%sClocking error: %s@?@[%a@]\n@." "\027[31m" "\027[1m" "\027[0m" Clocking.report e;
+        printf "%s%sClocking error: %s@?@[%a@]\n@." "\027[31m" "\027[1m" "\027[0m" Clocking.report e;
+        exit 0
     | e ->
-        eprintf "%s%sAnomaly:%s %s\n@." "\027[31m" "\027[1m" "\027[0m" (Printexc.to_string e);
-        exit 2
+        printf "%s%sAnomaly:%s %s\n@." "\027[31m" "\027[1m" "\027[0m" (Printexc.to_string e);
+        exit 0

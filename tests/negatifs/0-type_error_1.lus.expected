@@ -12,3 +12,5 @@ let
   (o) = add(x, x when True(1));
 tel
 
+[31m[1mTyping error: [0mthis expression has type int but is expected to have type bool
+

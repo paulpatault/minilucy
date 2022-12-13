@@ -52,6 +52,12 @@ $ cd examples
 $ ../minilucy.exe [file].lus -v [main-node] [options...]
 ```
 
+Gestion des tests :
+```
+$ make tests_neg       # si sortie vide alors les tests négatifs passent
+$ make promote -i      # mise à niveau de l'ensemble des tests négatifs
+```
+
 ## Travail réalisé
 
 - Automates (non imbriqués)

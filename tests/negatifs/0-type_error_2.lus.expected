@@ -19,3 +19,5 @@ let
           (t(C) -> false when C(x));
 tel
 
+[31m[1mTyping error: [0mthis expression has type bool but is expected to have type int
+

@@ -18,3 +18,5 @@ let
           (t(B) -> true when B(x));
 tel
 
+[31m[1mTyping error: [0mthe merge is not exhaustive over [t] type
+

@@ -34,3 +34,5 @@
   - [ ] étendre `base_ty_to_format_string` et `typ_to_format_string` aux adts/...
 
   - [ ] main avec float
+
+- tests positifs
