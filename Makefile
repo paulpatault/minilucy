@@ -18,11 +18,12 @@ cleanall:
 
 .PHONY: test
 test: $(NEG_LUS) $(POS_LUS)
+	rm out
 
 .PHONY: %.lus
 %.lus:
 	@./minilucy.exe $@ main0 -v > out 2> /dev/null
-	@diff out $@.expected
+	diff out $@.expected
 
 .PHONY: promote
 promote: $(NEG_X) $(POS_X)
