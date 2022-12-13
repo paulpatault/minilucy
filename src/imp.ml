@@ -68,7 +68,8 @@ let rec compile_base_expr e =
           case, compile_base_expr e
           ) l in
         IE_case (ide, l)
-    | CE_print e -> IE_print (compile_base_expr e)
+    | CE_print (s, e) ->
+        IE_print (s, List.map compile_base_expr e)
     | CE_reset _ -> assert false
   in
   { iexpr_desc = desc; iexpr_type = e.cexpr_type; }
@@ -91,6 +92,8 @@ let rec ck_of_ct = function
     ck::(ck_of_ct (Cprod cl))
   | Cprod [] -> []
   | _ -> assert false
+
+let h = Hashtbl.create 10
 
 let compile_equation
     {ceq_patt = p; ceq_expr = e}
@@ -120,9 +123,21 @@ let compile_equation
 
   | CE_app(n,el) ->
       let mem_id = gen_mem_id n in
-      let node_mem = [mem_id, n] in
+      let node_mem =
+        match Hashtbl.find_opt h n with
+        | Some mem ->
+            if mem = empty_mem then []
+            else [mem_id, n]
+        | None -> failwith "bizarre"
+      in
       let step_in = (untulify el) in
-      let node_init = [mem_id, n] in
+      let node_init =
+        match Hashtbl.find_opt h n with
+        | Some mem ->
+            if mem = empty_mem then []
+            else [mem_id, n]
+        | None -> failwith "bizarre"
+      in
       let compute =
         let expr =
           { iexpr_desc = IE_app (n, mem_id, List.map compile_base_expr step_in);
@@ -170,6 +185,7 @@ let compile_node n =
   let input_step = n.cn_input in
   let output_step = n.cn_output in
   let mem, init, compute, update = compile_equations n.cn_equs in
+  Hashtbl.add h n.cn_name mem;
   { in_name = n.cn_name;
     in_input_step = input_step;
     in_output_step = output_step;

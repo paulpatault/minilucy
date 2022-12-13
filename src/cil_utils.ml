@@ -174,7 +174,7 @@ let find_local fundec name =
   aux name locals
 
 let printf_info = makeGlobalVar "printf" (TFun (TInt (IInt, []), Some ["format", charConstPtrType, []], true, []))
-let sleep_info  = makeGlobalVar "sleep"  (TFun (TInt (IInt, []), Some ["seconds", TInt (IInt, []), []], true, []))
+let sleep_info  = makeGlobalVar "usleep" (TFun (TInt (IInt, []), Some ["microseconds", TInt (IInt, []), []], true, []))
 let atoi_info   = makeGlobalVar "atoi"   (TFun (TInt (IInt, []), Some ["str",    charConstPtrType, []], true, []))
 let exit_info   = makeGlobalVar "exit"   (TFun (TVoid [],        Some ["status",  TInt (IInt, []), []], true, []))
 let fflush_info = makeGlobalVar "fflush" (TFun (TInt (IInt, []), Some ["status",  TInt (IInt, []), []], true, []))

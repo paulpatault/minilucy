@@ -1,0 +1,7 @@
+node main0 (i:int; c:bool) returns (x:int);
+var t: int;
+let
+  t = 0 fby (t when True(c));
+  print(t);
+  x = i;
+tel

@@ -18,7 +18,7 @@ and p_expr_desc =
   | PE_tuple of p_expr list
   | PE_merge of p_expr * (p_expr * p_expr) list
   | PE_when of p_expr * string * p_expr
-  | PE_print of p_expr
+  | PE_print of string * p_expr list
   | PE_reset of ident * p_expr list * p_expr
 
 type p_patt =
@@ -31,7 +31,7 @@ and p_patt_desc =
 
 and p_equation =
   | PE_eq of p_eq
-  | PE_print of p_expr
+  | PE_print of string * p_expr list
   | PE_automaton of p_automaton
   | PE_match of p_expr * p_case list
 

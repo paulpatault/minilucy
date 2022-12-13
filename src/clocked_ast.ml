@@ -22,7 +22,7 @@ and c_expr_desc =
   | CE_merge of c_expr * (c_expr * c_expr) list
   | CE_fby of c_expr * c_expr
   | CE_when of c_expr * string * c_expr
-  | CE_print of c_expr
+  | CE_print of string * c_expr list
   | CE_reset of Ident.t * c_expr list * c_expr
 
 type c_patt =

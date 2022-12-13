@@ -22,7 +22,7 @@ let pp_const fmt c = match c with
   | Cint i -> fprintf fmt "%d" i
   | Creal f -> fprintf fmt "%f" f
   | Cadt (s, None) -> fprintf fmt "default(%s)" s
-  | Cadt (s, Some v) -> fprintf fmt "%s(%s)" s v
+  | Cadt (s, Some v) -> fprintf fmt "%s'%s" v s
 
 let pp_op fmt = function
   | Op_eq -> fprintf fmt "eq"
@@ -50,7 +50,7 @@ let print_base_type fmt bty = match bty with
   | Tbool -> fprintf fmt "bool"
   | Tint -> fprintf fmt "int"
   | Treal -> fprintf fmt "real"
-  | Tadt s -> fprintf fmt "adt(%s)" s
+  | Tadt s -> fprintf fmt "%s" s
 
 let pp_comma fmt () =
   fprintf fmt ", "

@@ -1,0 +1,54 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0(i : int; c : bool) returns (x : int);
+var print_var__1 : int; t : int;
+let
+  (t) = (0) -> (pre (t when True(c)));
+  (print_var__1) = print(""t);
+  (x) = i;
+tel
+
+/**************************************/
+/* Typed ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0__10(i__8 : int; c__9 : bool) returns (x__5 : int)
+var print_var__1__6: int; t__7: int;
+let
+  (t__7) = ite(true fby false, 0, 0 fby t__7 when True(c__9));
+  (print_var__1__6) = print("", t__7);
+  (x__5) = i__8;
+tel
+
+/**************************************/
+/* Normalized ast                     */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0__10(i__8 : int; c__9 : bool) returns (x__5 : int)
+var aux'5__15: int; aux'4__14: int; aux'3__13: int; aux'2__12: bool;
+    aux'1__11: bool; print_var__1__6: int; t__7: int;
+let
+  (aux'4__14) = 0 fby aux'3__13;
+  (aux'3__13) = t__7 when True(c__9);
+  (aux'2__12) = true fby aux'1__11;
+  (aux'1__11) = false;
+  (t__7) = ite(aux'2__12, 0, aux'4__14);
+  (aux'5__15) = print("", t__7);
+  (print_var__1__6) = aux'5__15;
+  (x__5) = i__8;
+tel
+
+[31m[1mClocking error: [0mThe expected clock is Base, got Base on True(c__9)
+

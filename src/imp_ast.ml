@@ -31,7 +31,7 @@ and i_expr_desc =
   | IE_prim of Ident.t * i_expr list
   | IE_tuple of i_expr list
   | IE_case of i_expr * (i_expr * i_expr) list
-  | IE_print of i_expr
+  | IE_print of string * i_expr list
   | IE_reset of Ident.t * Ident.t * i_expr list * i_expr
 
 type i_equation = {

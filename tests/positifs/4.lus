@@ -1,0 +1,11 @@
+node main0 (i : int) returns (y : int);
+let
+  automaton
+  | FirstPeriod ->
+      y = i;
+      until true continue Cruise -- cas de base
+  | Cruise ->
+      y = - pre y;
+      until false continue Cruise -- on change plus
+  end
+tel

@@ -22,11 +22,10 @@ let rec print_exp fmt e = match e.pexpr_desc with
     (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%a -> %a)" print_exp id print_exp exp)) l
   | PE_when (e1, c, e2) ->
     fprintf fmt "@[%a when %s(%a)@]" print_exp e1 c print_exp e2
-  | PE_print e ->
-    fprintf fmt "print(@[%a@])" print_exp e
+  | PE_print (s, e) ->
+      fprintf fmt "print(%S@[%a@])" s (pp_print_list print_exp) e
   | PE_reset (id, el, e) ->
     fprintf fmt "%s(@[%a@]) every %a" id print_arg_list el print_exp e
-
 
 and print_arg_list fmt e_list = match e_list with
   | [] -> ()
@@ -56,8 +55,8 @@ let print_eq fmt = function
       fprintf fmt "@[automaton ...@]" (* TODO *)
   | PE_match _ ->
       fprintf fmt "@[match ...@]" (* TODO *)
-  | PE_print e ->
-      fprintf fmt "print(@[%a@])" print_exp e
+  | PE_print (s, e) ->
+      fprintf fmt "print(%S, @[%a@])" s (pp_print_list print_exp) e
 
 let print_var_dec fmt (name, ty) =
   fprintf fmt "%s : %a" name print_base_type ty
@@ -66,7 +65,7 @@ let rec print_var_dec_list = print_list_sp print_var_dec ";"
 
 let print_node fmt nd =
   fprintf fmt
-    "@[node %s(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %s(@[%a@]) returns (@[%a@]);@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     nd.pn_name
     print_var_dec_list nd.pn_input
     print_var_dec_list nd.pn_output

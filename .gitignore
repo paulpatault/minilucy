@@ -1,5 +1,6 @@
 _build
 
 minilucy.exe
-examples/a.out
-examples/from_slides/a.out
+**/a.out
+
+out

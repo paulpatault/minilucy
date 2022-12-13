@@ -44,12 +44,15 @@ let gen_switch_name () =
 
 let mk_mem_node_fields globals mem_comp node_mem =
   let fields =
-    List.map (fun (field_id, node_id) ->
-        let mem_name = (node_id.name^"_mem") in
-        let field_name = clean_name field_id.name in
-        let node_mem_comp = find_gcomp mem_name globals in
-        let mem_typ = TComp (node_mem_comp, []) in
-        {fcomp = mem_comp; fname = field_name; ftype = mem_typ; fbitfield = None; fattr = []; floc = locUnknown;})
+    List.filter_map (fun (field_id, node_id) ->
+        try
+          let mem_name = (node_id.name^"_mem") in
+          let field_name = clean_name field_id.name in
+          let node_mem_comp = find_gcomp mem_name globals in
+          let mem_typ = TComp (node_mem_comp, []) in
+          Some {fcomp = mem_comp; fname = field_name; ftype = mem_typ; fbitfield = None; fattr = []; floc = locUnknown;}
+        with Not_found -> None
+      )
       node_mem
   in
   mem_comp.cfields <- fields@(mem_comp.cfields);
@@ -57,7 +60,7 @@ let mk_mem_node_fields globals mem_comp node_mem =
 
 let compile_mem_comp types globals node =
   let mem = node.in_mem in
-  let mem_fby_only = mk_struct types (node.in_name.name^"_mem") mem.fby_mem in
+  let mem_fby_only = mk_struct types (node.in_name.name^"_mem") mem.fby_mem  in
   let mem_comp = mk_mem_node_fields globals mem_fby_only mem.node_mem in
   mem_comp
 
@@ -80,6 +83,9 @@ let compile_func_type types file node return_type mem_comp =
       node.in_input_step
   in
   let params =
+    match mem_comp with
+    | None -> params
+    | Some mem_comp ->
     if mem_comp.cfields <> [] then
       ("mem", TPtr (TComp (mem_comp, []), []), [])::params
     else
@@ -141,13 +147,16 @@ let compile_init types file node mem_comp =
       node.in_init.fby_init
   in
   let init_node =
-    List.map (fun (f_id, init_id) ->
-        let init_fun = find_fun (init_id.name^"_init") file.globals in
-        let field = find_field_list (f_id.name) mem_comp.cfields in
-        let field_mem = (Mem (Lval (Var mem_var, NoOffset)), Field (field, NoOffset)) in
-        let field_addr = AddrOf field_mem in
-        let call_instr = Call (None, Lval (Var init_fun.svar, NoOffset), [field_addr], locUnknown, locUnknown) in
-        mkStmtOneInstr call_instr)
+    List.filter_map (fun (f_id, init_id) ->
+        try
+          let init_fun = find_fun (init_id.name^"_init") file.globals in
+          let field = find_field_list (f_id.name) mem_comp.cfields in
+          let field_mem = (Mem (Lval (Var mem_var, NoOffset)), Field (field, NoOffset)) in
+          let field_addr = AddrOf field_mem in
+          let call_instr = Call (None, Lval (Var init_fun.svar, NoOffset), [field_addr], locUnknown, locUnknown) in
+          Some (mkStmtOneInstr call_instr)
+        with Not_found -> None
+      ) (* TODO : patch ici avec Not_found -> None mais peut être vaut mieux revoir la structire du code avec la gestion des mem vides *)
       node.in_init.node_init
   in
   let fun_block = List.fold_left (fun block stmt -> append_stmt stmt block) fundec.sbody init_fby in
@@ -477,11 +486,15 @@ let rec compile_expr types file node fundec expr =
       file, CastE (real_t, e'), real_t
     | _ -> assert false
       end
-  | IE_print e ->
-      let arg0 =
-        match e.iexpr_type with
-        | [e] -> Cil_utils.base_ty_to_format_string e
-        | _ -> assert false in
+  | IE_print (s, e) ->
+      let arg0 = if s <> "" then s else
+          String.concat ""
+            (List.map
+               (fun e ->
+                  match e.iexpr_type with
+                  | [t] -> Cil_utils.base_ty_to_format_string t
+                  | _ -> assert false
+                  ) e) in
 
       let str_fmt = GoblintCil.Const (CStr (arg0, No_encoding)) in
 
@@ -490,7 +503,7 @@ let rec compile_expr types file node fundec expr =
             let file, arg, _ = compile_expr types file node fundec e in
             file, arg)
           file
-          [e]
+          e
       in
       let ret_ty = TInt (IInt, []) in
       let res_var = makeLocalVar fundec (gen_call_name ()) ret_ty in
@@ -602,12 +615,15 @@ let compile_return file node fundec =
   file, fundec
 
 let compile_node types file node =
-  let mem_comp = compile_mem_comp types file.globals node in
-  let file =
-    if mem_comp.cfields <> [] then
-      file.globals <- (GCompTag (mem_comp, locUnknown))::file.globals;
-    let file, init_fundec = compile_init types file node mem_comp in
-    file
+  let mem_comp, file =
+      if node.need_mem then
+        let mem_comp = compile_mem_comp types file.globals node in
+        if mem_comp.cfields <> [] then
+          file.globals <- (GCompTag (mem_comp, locUnknown))::file.globals;
+          let file, init_fundec = compile_init types file node mem_comp in
+          Some mem_comp, file
+      else
+        None, file
   in
   let file, fundec = compile_fundec types file node mem_comp in
   let file, fundec = compile_compute types file node fundec in
@@ -629,6 +645,7 @@ let compile_main file ast main_node no_sleep =
 
   let addr_mem_lval, fundec =
     if main_node_imp.need_mem then
+      try
       let mem_comp = find_gcomp (main_node^"_mem") file.globals in
       let mem_local = makeLocalVar fundec "mem" (TComp (mem_comp, [])) in
       let mem_lval = Var mem_local, NoOffset in
@@ -638,6 +655,7 @@ let compile_main file ast main_node no_sleep =
       let mem_init_stmt = mkStmtOneInstr mem_init_call in
       fundec.sbody <- append_stmt mem_init_stmt fundec.sbody;
       [AddrOf mem_lval], fundec
+      with Not_found -> [], fundec
     else
       [], fundec
   in
@@ -681,9 +699,9 @@ let compile_main file ast main_node no_sleep =
   let step_call_params = addr_mem_lval @ atoied_vars_lvals in
   let step_call = Call (Some res_lval, step_lval, step_call_params, locUnknown, locUnknown) in
 
-  let str_fmt = GoblintCil.Const (CStr (typ_to_format_string res_typ, No_encoding)) in
+  let str_fmt = GoblintCil.Const (CStr (typ_to_format_string res_typ ^ " ", No_encoding)) in (* ajout d'un espace *)
   let call_printf = Call (None, printf_lval, [str_fmt; Lval res_lval], locUnknown, locUnknown) in
-  let sleep1_stmt = mkStmtOneInstr (Call (None, sleep_lval, [mk_int_exp 1], locUnknown, locUnknown)) in
+  let sleep1_stmt = mkStmtOneInstr (Call (None, sleep_lval, [mk_int_exp 333333], locUnknown, locUnknown)) in (* 333333 micro_seconds ≃ 0.3 second *)
   let fflush0_stmt = mkStmtOneInstr (Call (None, fflush_lval, [mk_int_exp 0], locUnknown, locUnknown)) in
 
   let printf_stmt = mkStmtOneInstr call_printf in

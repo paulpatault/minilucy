@@ -49,11 +49,11 @@ let rec normalize ctx e =
       in
       ctx, {e with texpr_desc = TE_op (op, el');}
 
-  | TE_print ex ->
-      let (new_equs, new_vars), e' = normalize ctx ex in
+  | TE_print (s, el) ->
+      let (new_equs, new_vars), e' = normalize_list ctx el in
       let x_decl, x_patt, x_expr = new_patt e in
       let x_eq = {teq_patt = x_patt;
-                  teq_expr = {e with texpr_desc = TE_print (e')}}
+                  teq_expr = {e with texpr_desc = TE_print (s, e')}}
       in
       (x_eq::new_equs, x_decl@new_vars), x_expr
   | TE_app (f, el) ->

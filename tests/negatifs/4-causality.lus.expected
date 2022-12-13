@@ -1,0 +1,45 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0() returns (a : int; b : int);
+var ;
+let
+  (a) = b;
+  (b) = a;
+tel
+
+/**************************************/
+/* Typed ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0__7() returns (a__5 : int; b__6 : int)
+var ;
+let
+  (a__5) = b__6;
+  (b__6) = a__5;
+tel
+
+/**************************************/
+/* Normalized ast                     */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0__7() returns (a__5 : int; b__6 : int)
+var ;
+let
+  (a__5) = b__6;
+  (b__6) = a__5;
+tel
+
+(a__5) = b__6(b__6) = a__5[31m[1mClocking error: [0mCausality
+

@@ -35,6 +35,7 @@
 
         "merge", MERGE;
         "every", EVERY;
+        "reset", RESET;
         "when", WHEN;
         "whenot", WHENOT;
         "print", PRINT;
@@ -95,6 +96,8 @@ rule token = parse
       { CONST_INT (int_of_string (lexeme lexbuf)) }
   | float
       { CONST_REAL (float_of_string (lexeme lexbuf)) }
+  | '"' [^ '\n']* '"'
+      { STR (lexeme lexbuf) }
   | "-"
       { MINUS }
   | "+"

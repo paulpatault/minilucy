@@ -21,7 +21,7 @@ and t_expr_desc =
   | TE_merge of t_expr * (t_expr * t_expr) list
   | TE_fby of t_expr * t_expr
   | TE_when of t_expr * string * t_expr
-  | TE_print of t_expr
+  | TE_print of string * t_expr list
   | TE_reset of Ident.t * t_expr list * t_expr
 
 type t_patt =

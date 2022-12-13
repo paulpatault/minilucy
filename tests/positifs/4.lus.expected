@@ -1,0 +1,352 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__1 =
+  | FirstPeriod
+  | Cruise
+
+node main0(i : int) returns (y : int);
+var state__2 : typ__1; cond__4 : bool; cond__3 : bool;
+let
+  (cond__4) = false;
+  (cond__3) = true;
+  (state__2) = (FirstPeriod'typ__1) -> (pre (merge state__2 
+                                               (FirstPeriod'typ__1 -> ite(cond__3,
+                                               Cruise'typ__1,
+                                               FirstPeriod'typ__1))
+                                               (Cruise'typ__1 -> ite(cond__4,
+                                               Cruise'typ__1, Cruise'typ__1))));
+  (y) = merge state__2 
+          (FirstPeriod'typ__1 -> i)
+          (Cruise'typ__1 -> sub(pre (y)));
+tel
+
+/**************************************/
+/* Typed ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__1 =
+  | FirstPeriod
+  | Cruise
+
+node main0__10(i__9 : int) returns (y__5 : int)
+var state__2__6: typ__1; cond__4__7: bool; cond__3__8: bool;
+let
+  (cond__4__7) = false;
+  (cond__3__8) = true;
+  (state__2__6) = ite(true fby false, FirstPeriod'typ__1,
+                  default(typ__1) fby merge state__2__6 
+                                        (FirstPeriod'typ__1 -> merge cond__3__8 
+                                                                 (true -> 
+                                                                 Cruise'typ__1 when True(cond__3__8))
+                                                                 (false -> 
+                                                                 FirstPeriod'typ__1 when False(cond__3__8)))
+                                        (Cruise'typ__1 -> merge cond__4__7 
+                                                            (true -> 
+                                                            Cruise'typ__1 when True(cond__4__7))
+                                                            (false -> 
+                                                            Cruise'typ__1 when False(cond__4__7))));
+  (y__5) = merge state__2__6 
+             (FirstPeriod'typ__1 -> i__9)
+             (Cruise'typ__1 -> sub(0 fby y__5));
+tel
+
+/**************************************/
+/* Normalized ast                     */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__1 =
+  | FirstPeriod
+  | Cruise
+
+node main0__10(i__9 : int) returns (y__5 : int)
+var aux'6__16: int; aux'5__15: int; aux'4__14: typ__1; aux'3__13: typ__1;
+    aux'2__12: bool; aux'1__11: bool; state__2__6: typ__1; cond__4__7: bool;
+    cond__3__8: bool;
+let
+  (cond__4__7) = false;
+  (cond__3__8) = true;
+  (aux'4__14) = default(typ__1) fby aux'3__13;
+  (aux'3__13) = merge state__2__6 
+                  (FirstPeriod'typ__1 -> merge cond__3__8 
+                                           (true -> Cruise'typ__1 when True(cond__3__8))
+                                           (false -> FirstPeriod'typ__1 when False(cond__3__8)))
+                  (Cruise'typ__1 -> merge cond__4__7 
+                                      (true -> Cruise'typ__1 when True(cond__4__7))
+                                      (false -> Cruise'typ__1 when False(cond__4__7)));
+  (aux'2__12) = true fby aux'1__11;
+  (aux'1__11) = false;
+  (state__2__6) = ite(aux'2__12, FirstPeriod'typ__1, aux'4__14);
+  (aux'6__16) = 0 fby aux'5__15;
+  (aux'5__15) = y__5;
+  (y__5) = merge state__2__6 
+             (FirstPeriod'typ__1 -> i__9)
+             (Cruise'typ__1 -> sub(aux'6__16));
+tel
+
+/**************************************/
+/* Clocked ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__1 =
+  | FirstPeriod
+  | Cruise
+
+node main0__10(i__9 : int :: Base)
+  returns (y__5 : int :: Base)
+var aux'6__16 : int :: Base, aux'5__15 : int :: Base, aux'4__14 : typ__1 :: Base, 
+    aux'3__13 : typ__1 :: Base, aux'2__12 : bool :: Base, aux'1__11 : bool :: Base, 
+    state__2__6 : typ__1 :: Base, cond__4__7 : bool :: Base, cond__3__8 : bool :: Base;
+let
+  (cond__4__7) = false;
+  (cond__3__8) = true;
+  (aux'4__14) = default(typ__1) fby aux'3__13;
+  (aux'3__13) = merge state__2__6 
+                  (FirstPeriod'typ__1 -> merge cond__3__8 
+                                           (true -> Cruise'typ__1 when True(cond__3__8))
+                                           (false -> FirstPeriod'typ__1 when False(cond__3__8)))
+                  (Cruise'typ__1 -> merge cond__4__7 
+                                      (true -> Cruise'typ__1 when True(cond__4__7))
+                                      (false -> Cruise'typ__1 when False(cond__4__7)));
+  (aux'2__12) = true fby aux'1__11;
+  (aux'1__11) = false;
+  (state__2__6) = ite(aux'2__12, FirstPeriod'typ__1, aux'4__14);
+  (aux'6__16) = 0 fby aux'5__15;
+  (aux'5__15) = y__5;
+  (y__5) = merge state__2__6 
+             (FirstPeriod'typ__1 -> i__9)
+             (Cruise'typ__1 -> sub(aux'6__16))
+tel
+/**************************************/
+/* Scheduled ast                      */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__1 =
+  | FirstPeriod
+  | Cruise
+
+node main0__10(i__9 : int :: Base)
+  returns (y__5 : int :: Base)
+var aux'6__16 : int :: Base, aux'5__15 : int :: Base, aux'4__14 : typ__1 :: Base, 
+    aux'3__13 : typ__1 :: Base, aux'2__12 : bool :: Base, aux'1__11 : bool :: Base, 
+    state__2__6 : typ__1 :: Base, cond__4__7 : bool :: Base, cond__3__8 : bool :: Base;
+let
+  (cond__4__7) = false;
+  (cond__3__8) = true;
+  (aux'1__11) = false;
+  (aux'2__12) = true fby aux'1__11;
+  (aux'4__14) = default(typ__1) fby aux'3__13;
+  (aux'6__16) = 0 fby aux'5__15;
+  (state__2__6) = ite(aux'2__12, FirstPeriod'typ__1, aux'4__14);
+  (y__5) = merge state__2__6 
+             (FirstPeriod'typ__1 -> i__9)
+             (Cruise'typ__1 -> sub(aux'6__16));
+  (aux'3__13) = merge state__2__6 
+                  (FirstPeriod'typ__1 -> merge cond__3__8 
+                                           (true -> Cruise'typ__1 when True(cond__3__8))
+                                           (false -> FirstPeriod'typ__1 when False(cond__3__8)))
+                  (Cruise'typ__1 -> merge cond__4__7 
+                                      (true -> Cruise'typ__1 when True(cond__4__7))
+                                      (false -> Cruise'typ__1 when False(cond__4__7)));
+  (aux'5__15) = y__5
+tel
+/**************************************/
+/* Imp ast                            */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__1 =
+  | FirstPeriod
+  | Cruise
+
+node main0__10(i__9 : int :: Base)
+  returns (y__5 : int :: Base)
+var aux'6__16 : int :: Base, aux'5__15 : int :: Base, aux'4__14 : typ__1 :: Base, 
+    aux'3__13 : typ__1 :: Base, aux'2__12 : bool :: Base, aux'1__11 : bool :: Base, 
+    state__2__6 : typ__1 :: Base, cond__4__7 : bool :: Base, cond__3__8 : bool :: Base;
+  mem={node=[]
+       fby=[aux'2_next3__19 : bool :: Base, aux'4_next2__18 : typ__1 :: Base, 
+            aux'6_next1__17 : int :: Base]}
+  init={node=[]
+        fby=[(aux'2_next3__19,true), (aux'4_next2__18,default(typ__1)), (aux'6_next1__17,0)]}
+  compute={(cond__4__7 : bool :: Base) = false;
+           (cond__3__8 : bool :: Base) = true;
+           (aux'1__11 : bool :: Base) = false;
+           (aux'2__12 : bool :: Base) = aux'2_next3__19;
+           (aux'4__14 : typ__1 :: Base) = aux'4_next2__18;
+           (aux'6__16 : int :: Base) = aux'6_next1__17;
+           (state__2__6 : typ__1 :: Base) = ite(aux'2__12,
+                                            FirstPeriod'typ__1, aux'4__14);
+           (y__5 : int :: Base) = case(state__2__6)FirstPeriod'typ__1: i__9;
+                                                     Cruise'typ__1: sub(aux'6__16);
+           (aux'3__13 : typ__1 :: Base) = case(state__2__6)FirstPeriod'typ__1: case(cond__3__8)
+                                                             True'inductive_bool: Cruise'typ__1;
+                                                               False'inductive_bool: FirstPeriod'typ__1;
+                                                             Cruise'typ__1: case(cond__4__7)
+                                                             True'inductive_bool: Cruise'typ__1;
+                                                               False'inductive_bool: Cruise'typ__1;
+           (aux'5__15 : int :: Base) = y__5}
+  update={(aux'2_next3__19,aux'1__11);
+          (aux'4_next2__18,aux'3__13);
+          (aux'6_next1__17,aux'5__15)}
+  
+/**************************************/
+/* C file                             */
+/**************************************/
+#include <stdlib.h>
+
+#include <printf.h>
+
+#include <unistd.h>
+
+int int_read() {
+  int var;
+  scanf("%d", &var);
+  return var;
+}
+
+enum inductive_bool {
+  FALSE,
+  TRUE
+};
+
+enum typ__1 {
+  FIRSTPERIOD,
+  CRUISE
+};
+
+struct main0_mem {
+  int aux__2_next3;
+  enum typ__1 aux__4_next2;
+  int aux__6_next1;
+};
+
+void main0_init (struct main0_mem* mem) {
+  mem->aux__2_next3 = 1;
+  
+  mem->aux__4_next2 = FIRSTPERIOD;
+  
+  mem->aux__6_next1 = 0;
+}
+
+int main0 (struct main0_mem* mem, int i) {
+  int aux__6;
+  int aux__5;
+  enum typ__1 aux__4;
+  enum typ__1 aux__3;
+  int aux__2;
+  int aux__1;
+  enum typ__1 state__2;
+  int cond__4;
+  int cond__3;
+  int y;
+  enum typ__1 switch_1;
+  enum typ__1 switch_2;
+  enum inductive_bool switch_3;
+  enum inductive_bool switch_4;
+  
+  cond__4 = 0;
+  
+  cond__3 = 1;
+  
+  aux__1 = 0;
+  
+  aux__2 = mem->aux__2_next3;
+  
+  aux__4 = mem->aux__4_next2;
+  
+  aux__6 = mem->aux__6_next1;
+  
+  state__2 = aux__2 ? FIRSTPERIOD : aux__4;
+  
+  switch (state__2) {
+    case FIRSTPERIOD: {
+      switch_1 = i;
+      break;
+    }
+    case CRUISE: {
+      switch_1 = -(aux__6);
+      break;
+    }
+  };
+  
+  y = switch_1;
+  
+  switch (cond__3) {
+    case TRUE: {
+      switch_3 = CRUISE;
+      break;
+    }
+    case FALSE: {
+      switch_3 = FIRSTPERIOD;
+      break;
+    }
+  };
+  
+  switch (cond__4) {
+    case TRUE: {
+      switch_4 = CRUISE;
+      break;
+    }
+    case FALSE: {
+      switch_4 = CRUISE;
+      break;
+    }
+  };
+  
+  switch (state__2) {
+    case FIRSTPERIOD: {
+      switch_2 = switch_3;
+      break;
+    }
+    case CRUISE: {
+      switch_2 = switch_4;
+      break;
+    }
+  };
+  
+  aux__3 = switch_2;
+  
+  aux__5 = y;
+  
+  mem->aux__2_next3 = aux__1;
+  
+  mem->aux__4_next2 = aux__3;
+  
+  mem->aux__6_next1 = aux__5;
+  
+  return y;
+}
+
+int main (int argc, char* argv[]) {
+  struct main0_mem mem;
+  int argv_0;
+  int res;
+  
+  main0_init(&(mem));
+  
+  while (1) {
+    argv_0 = int_read();
+    
+    res = main0(&(mem), argv_0);
+    
+    printf("%d ", res);
+    
+    fflush(0);
+    
+    usleep(333333);
+  };
+}

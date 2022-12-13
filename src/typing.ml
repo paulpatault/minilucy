@@ -299,14 +299,19 @@ and type_expr_desc env loc = function
       let tt = te2.texpr_type in
       match te1 with
       | {texpr_desc = TE_ident _; _}
+      (* | {texpr_desc = TE_const (Cbool _); _} *)
       | {texpr_desc = TE_op ((Op_eq | Op_neq | Op_lt | Op_le | Op_gt | Op_ge | Op_not | Op_and | Op_or), _); _} ->
-        let c_true = {texpr_desc = TE_const (Cbool true); texpr_type = [Tbool]; texpr_loc = Lexing.dummy_pos, Lexing.dummy_pos} in
-        let c_false = {texpr_desc = TE_const (Cbool false); texpr_type = [Tbool]; texpr_loc = Lexing.dummy_pos, Lexing.dummy_pos} in
-        let then_ = {texpr_desc = TE_when (te2, "True", te1); texpr_type = tt; texpr_loc = te2.texpr_loc} in
-        let else_ = {texpr_desc = TE_when (te3, "False", te1); texpr_type = tt; texpr_loc = te3.texpr_loc} in
-        TE_merge (te1, [c_true, then_; c_false, else_]), tt
+          let c_true = {texpr_desc = TE_const (Cbool true); texpr_type = [Tbool]; texpr_loc = Lexing.dummy_pos, Lexing.dummy_pos} in
+          let c_false = {texpr_desc = TE_const (Cbool false); texpr_type = [Tbool]; texpr_loc = Lexing.dummy_pos, Lexing.dummy_pos} in
+          let then_ = {texpr_desc = TE_when (te2, "True", te1); texpr_type = tt; texpr_loc = te2.texpr_loc} in
+          let else_ = {texpr_desc = TE_when (te3, "False", te1); texpr_type = tt; texpr_loc = te3.texpr_loc} in
+          TE_merge (te1, [c_true, then_; c_false, else_]), tt
       | {texpr_desc = TE_app (f, args); _} ->
-        failwith "ne devrait pas arriver ?"
+          failwith "ne devrait pas arriver ?"
+      | {texpr_desc = TE_const (Cbool true); _} ->
+          te2.texpr_desc, tt
+      | {texpr_desc = TE_const (Cbool false); _} ->
+          te3.texpr_desc, tt
       | _ -> error loc (Other "The condition must be an identifier")
     else
       error loc (ExpectedType (te3.texpr_type, te2.texpr_type))
@@ -419,9 +424,9 @@ and type_expr_desc env loc = function
           texpr_loc  = id_loc }
       in
       TE_merge (exr, mergebody), typ
-  | PE_print e ->
-      let te = type_expr env e in
-      TE_print te, te.texpr_type
+  | PE_print (s, e) ->
+      let te = List.map (type_expr env) e in
+      TE_print (s, te), (List.hd te).texpr_type
 
   | PE_reset (id, el, e) ->
     begin try
@@ -531,9 +536,12 @@ let type_equation env eq =
           eq.peq_expr.pexpr_loc (ExpectedType (expr.texpr_type, patt.tpatt_type))
   | PE_match _ ->
       failwith "not implemented 4"
-  | PE_automaton {pautom_loc = loc; _}
-  | PE_print     {pexpr_loc  = loc; _} ->
+  | PE_automaton {pautom_loc = loc; _} ->
       error loc (Unreachable "uncompiled automaton/printf")
+  | PE_print     (_, el) ->
+      (match el with
+       | [] -> assert false
+       | e :: _ -> error e.pexpr_loc (Unreachable "uncompiled automaton/printf"))
 
 (* let type_case env adt {pn_case; pn_cond; pn_out} =
   (* let env = Gamma.adds n.pn_loc Vpatt Gamma.empty (n.pn_output@n.pn_local) in

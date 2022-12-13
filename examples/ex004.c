@@ -92,6 +92,6 @@ int main (int argc, char* argv[]) {
     
     fflush(0);
     
-    sleep(1);
+    usleep(333333);
   };
 }

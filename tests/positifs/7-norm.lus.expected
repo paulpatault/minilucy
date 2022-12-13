@@ -1,0 +1,182 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node m0() returns (o : int);
+var ;
+let
+  (o) = ite(true, ite(true, 1, 2), 3);
+tel
+
+node main0() returns (o : int);
+var ;
+let
+  (o) = m0();
+tel
+
+/**************************************/
+/* Typed ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node m0__6() returns (o__5 : int)
+var ;
+let
+  (o__5) = 1;
+tel
+
+node main0__8() returns (o__7 : int)
+var ;
+let
+  (o__7) = m0__6();
+tel
+
+/**************************************/
+/* Normalized ast                     */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node m0__6() returns (o__5 : int)
+var ;
+let
+  (o__5) = 1;
+tel
+
+node main0__8() returns (o__7 : int)
+var aux'1__9: int;
+let
+  (aux'1__9) = m0__6();
+  (o__7) = aux'1__9;
+tel
+
+/**************************************/
+/* Clocked ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node m0__6()
+  returns (o__5 : int :: Base)
+var ;
+let
+  (o__5) = 1
+tel
+node main0__8()
+  returns (o__7 : int :: Base)
+var aux'1__9 : int :: Base;
+let
+  (aux'1__9) = m0__6();
+  (o__7) = aux'1__9
+tel
+/**************************************/
+/* Scheduled ast                      */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node m0__6()
+  returns (o__5 : int :: Base)
+var ;
+let
+  (o__5) = 1
+tel
+node main0__8()
+  returns (o__7 : int :: Base)
+var aux'1__9 : int :: Base;
+let
+  (aux'1__9) = m0__6();
+  (o__7) = aux'1__9
+tel
+/**************************************/
+/* Imp ast                            */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node m0__6()
+  returns (o__5 : int :: Base)
+var ;
+  mem={node=[]
+       fby=[]}
+  init={node=[]
+        fby=[]}
+  compute={(o__5 : int :: Base) = 1}
+  update={}
+  
+node main0__8()
+  returns (o__7 : int :: Base)
+var aux'1__9 : int :: Base;
+  mem={node=[]
+       fby=[]}
+  init={node=[]
+        fby=[]}
+  compute={(aux'1__9 : int :: Base) = m0__6 <- m0_next1__10();
+           (o__7 : int :: Base) = aux'1__9}
+  update={}
+  
+/**************************************/
+/* C file                             */
+/**************************************/
+#include <stdlib.h>
+
+#include <printf.h>
+
+#include <unistd.h>
+
+int int_read() {
+  int var;
+  scanf("%d", &var);
+  return var;
+}
+
+enum inductive_bool {
+  FALSE,
+  TRUE
+};
+
+int m0 () {
+  int o;
+  
+  o = 1;
+  
+  return o;
+}
+
+int main0 () {
+  int aux__1;
+  int o;
+  int call_1;
+  
+  call_1 = m0();
+  
+  aux__1 = call_1;
+  
+  o = aux__1;
+  
+  return o;
+}
+
+int main (int argc, char* argv[]) {
+  int res;
+  
+  while (1) {
+    res = main0();
+    
+    printf("%d ", res);
+    
+    fflush(0);
+    
+    usleep(333333);
+  };
+}

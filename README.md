@@ -52,11 +52,21 @@ $ cd examples
 $ ../minilucy.exe [file].lus -v [main-node] [options...]
 ```
 
+Gestion des tests :
+```
+$ make test --always-make    # si sortie vide alors les tests passent
+$ make promote -i            # mise à niveau de l'ensemble des tests
+```
+
 ## Travail réalisé
 
 - Automates (non imbriqués)
 
-- Print (types simples (pas ADT)) dans lustre
+- ADT simple (sans paramètres)
+
+- `when`, `merge`, (`reset` ?)
+
+- Print (types simples (pas ADT)) dans lustre : TODO tuples
 
 - Phases de compilation
   + `Parsed` -> `Parsed`:
