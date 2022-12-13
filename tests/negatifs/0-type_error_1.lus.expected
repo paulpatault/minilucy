@@ -1,0 +1,14 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0(x : int) returns (o : bool)
+var ;
+let
+  (o) = add(x, x when True(1));
+tel
+

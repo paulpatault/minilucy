@@ -1,0 +1,20 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type t =
+  | A
+  | B
+  | C
+
+node main(x : adt(t)) returns (o : bool)
+var ;
+let
+  (o) = merge x 
+          (t(A) -> true when A(x))
+          (t(B) -> true when B(x));
+tel
+

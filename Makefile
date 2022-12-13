@@ -15,5 +15,8 @@ tests_neg: $(NEG_C)
 
 .PHONY: %.c
 %.c:
-	cd ./tests/negatifs/ && ../../minilucy.exe $(@:.c=.lus) -v main0 > $(@:.c=.lus).expected
-	# cd ./tests/negatifs/ && ../../minilucy.exe $(@:.c=.lus) -v main0 > out || diff out $(@:.c=.lus).expected
+	./minilucy.exe ./tests/negatifs/$(@:.c=.lus) -v main0 > out
+	diff ./tests/negatifs/out ./tests/negatifs/$(@:.c=.lus).expected
+
+# promote: $(NEG_C)
+# 	cd ./tests/negatifs/ && ../../minilucy.exe $(@:.c=.lus) -v main0 > $(@:.c=.lus).expected
