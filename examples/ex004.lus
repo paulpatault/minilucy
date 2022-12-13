@@ -5,5 +5,5 @@ tel
 
 node check (x: bool) returns (o : int);
 let
-  o = incr() every x;
+  o = reset incr() every x;
 tel

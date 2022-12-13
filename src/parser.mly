@@ -56,7 +56,7 @@
 %token VAR
 
 %token MERGE
-%token EVERY
+%token EVERY RESET
 %token WHEN WHENOT
 
 %token AUTOMATON
@@ -83,7 +83,7 @@
 %left PLUS MINUS                              /* + -  */
 %left STAR SLASH DIV MOD                      /* * /  mod */
 %nonassoc uminus                              /* - */
-%nonassoc NOT PRE                             /* not pre */
+%nonassoc NOT PRE EVERY                       /* not pre */
 %right FBY
 %left DOT
 
@@ -185,9 +185,9 @@ eq_list:
 ;
 
 eq:
-| PRINT nonempty_list(expr) SEMICOL
+| PRINT separated_nonempty_list(COMMA, expr) SEMICOL
     { PE_print ("", $2) }
-| PRINT LPAREN s=STR e=list(expr) RPAREN SEMICOL
+| PRINT LPAREN s=STR e=separated_list(COMMA, expr) RPAREN SEMICOL
     { PE_print (s, e) }
 | pattern EQUAL expr SEMICOL
     { PE_eq { peq_patt = $1; peq_expr = $3; } }
@@ -200,8 +200,6 @@ case_autom:
   { {pn_case; pn_cond; pn_out; pn_weak=true}  }
 | pn_case=case UNLESS pn_cond=expr THEN pn_out=constr
   { {pn_case; pn_cond; pn_out; pn_weak=false}  }
-/* | pn_case=case
-  { {pn_case; pn_cond = mk_expr (PE_const (Cbool false)) $sloc; pn_out = "todo"; pn_weak=false}  } */
 ;
 
 case:
@@ -226,8 +224,8 @@ expr:
     { mk_expr (PE_ident $1) $sloc }
 | IDENT LPAREN expr_comma_list_empty RPAREN
     { mk_expr (PE_app ($1, $3)) $sloc}
-| IDENT LPAREN expr_comma_list_empty RPAREN EVERY expr
-    { mk_expr (PE_reset ($1, $3, $6)) $sloc }
+| RESET id=IDENT LPAREN el=expr_comma_list_empty RPAREN EVERY e=expr
+    { mk_expr (PE_reset (id, el, e)) $sloc }
 | IF expr THEN expr ELSE expr
     { mk_expr (PE_op (Op_if, [$2; $4; $6]))  $sloc}
 | expr PLUS expr
@@ -275,7 +273,6 @@ expr:
     { mk_expr (PE_when (e1, "True", e2)) $sloc }
 | e1=expr WHENOT e2=expr
     { mk_expr (PE_when (e1, "False", e2)) $sloc }
-/* | expr WHENOT expr     { mk_expr (PE_whenot ($2, $3)) } */
 ;
 
 merge_branche:

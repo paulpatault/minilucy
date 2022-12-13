@@ -35,6 +35,7 @@
 
         "merge", MERGE;
         "every", EVERY;
+        "reset", RESET;
         "when", WHEN;
         "whenot", WHENOT;
         "print", PRINT;
