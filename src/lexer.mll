@@ -34,7 +34,7 @@
         "var", VAR;
 
         "merge", MERGE;
-        "reset", RESET;
+        "every", EVERY;
         "when", WHEN;
         "whenot", WHENOT;
         "print", PRINT;

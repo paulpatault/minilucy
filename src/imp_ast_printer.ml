@@ -17,6 +17,8 @@ let rec pp_iexp fmt e = match e.iexpr_desc with
         (pp_print_list ~pp_sep:pp_eol (fun fmt (l, r) -> fprintf fmt "%a: %a"pp_iexp l pp_iexp r)) li
   | IE_print (s, e) ->
       fprintf fmt "print(%S, @[%a@])" s (pp_print_list pp_iexp) e
+  | IE_reset (i1, i2, el, e) ->
+    fprintf fmt "%a <- %a(@[@%a]) every %a" Ident.print i1 Ident.print i2 pp_arg_list el pp_iexp e
 
 and pp_arg_list fmt = function
   | [] -> ()

@@ -56,7 +56,7 @@
 %token VAR
 
 %token MERGE
-%token RESET
+%token EVERY
 %token WHEN WHENOT
 
 %token AUTOMATON
@@ -226,6 +226,8 @@ expr:
     { mk_expr (PE_ident $1) $sloc }
 | IDENT LPAREN expr_comma_list_empty RPAREN
     { mk_expr (PE_app ($1, $3)) $sloc}
+| IDENT LPAREN expr_comma_list_empty RPAREN EVERY expr
+    { mk_expr (PE_reset ($1, $3, $6)) $sloc }
 | IF expr THEN expr ELSE expr
     { mk_expr (PE_op (Op_if, [$2; $4; $6]))  $sloc}
 | expr PLUS expr

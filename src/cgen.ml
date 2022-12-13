@@ -378,6 +378,51 @@ let rec compile_expr types file node fundec expr =
     fundec.sbody <- append_stmt call_stmt fundec.sbody;
     file, Lval res_lval, ret_ty
 
+  | IE_reset (n_name, mem_field, args, control) ->
+    let file, args' =
+      List.fold_left_map (fun file e ->
+          let file, arg, _ = compile_expr types file node fundec e in
+          file, arg)
+        file
+        args
+    in
+    let args' = try
+        let field_info = find_field_globals (node.in_name.name^"_mem") (mem_field.name) file.globals in
+        let mem_var = find_formal fundec "mem" in
+        let lval = Mem (Lval (Var mem_var, NoOffset)), Field (field_info, NoOffset) in
+        AddrOf(lval)::args'
+      with Not_found ->
+        args'
+    in
+    let callee = find_fun (n_name.name) file.globals in
+    let callee_lval = Lval (Var callee.svar, NoOffset) in
+    let ret_ty =
+      match callee.svar.vtype with
+      | TFun (ret_ty, _, _, _) -> ret_ty
+      | _ -> assert false
+    in
+    let res_var = makeLocalVar fundec (gen_call_name ()) ret_ty in
+    let res_lval = Var res_var, NoOffset in
+    let call_instr = Call (Some res_lval, callee_lval, args', locUnknown, locUnknown) in
+    let call_stmt = mkStmtOneInstr call_instr in
+    let file, stmts =
+      try
+        let field_info = find_field_globals (node.in_name.name^"_mem") (mem_field.name) file.globals in
+        let mem_var = find_formal fundec "mem" in
+        let mem_field_lval = Mem (Lval (Var mem_var, NoOffset)), Field (field_info, NoOffset) in
+        let mem_field_expr = AddrOf mem_field_lval in
+        let init_fundec = find_fun (n_name.name^"_init") file.globals in
+        let init_lval = Lval (Var init_fundec.svar, NoOffset) in
+        let init_call = Call (None, init_lval, [mem_field_expr], locUnknown, locUnknown) in
+        let init_stmt = mkStmtOneInstr init_call in
+        let file, expr, _ = compile_expr types file node fundec control in
+        let switch_stmt = mkStmt (If (expr, mkBlock [init_stmt], mkBlock [], locUnknown, locUnknown)) in
+        file, switch_stmt::call_stmt::[]
+      with Not_found ->
+        file, call_stmt::[]
+    in
+    List.iter (fun stmt -> fundec.sbody <- append_stmt stmt fundec.sbody) stmts;
+    file, Lval res_lval, ret_ty
   | IE_case (e, cases) ->
     let res_ty =
       let hd, _ = List.hd cases in
