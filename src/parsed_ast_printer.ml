@@ -65,7 +65,7 @@ let rec print_var_dec_list = print_list_sp print_var_dec ";"
 
 let print_node fmt nd =
   fprintf fmt
-    "@[node %s(@[%a@]) returns (@[%a@])@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
+    "@[node %s(@[%a@]) returns (@[%a@]);@\nvar @[%a;@]@\n@[<v 2>let@ @[%a@]@]@\ntel@]"
     nd.pn_name
     print_var_dec_list nd.pn_input
     print_var_dec_list nd.pn_output
