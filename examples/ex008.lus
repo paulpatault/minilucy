@@ -1,6 +1,0 @@
-node check (x: int; y: int) returns (o: bool);
-let
-  print(x);
-  print("c%doucou" 1);
-  o = x = y;
-tel

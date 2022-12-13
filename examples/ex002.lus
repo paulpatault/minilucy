@@ -1,4 +1,0 @@
-node check (x: int) returns (o: int);
-let
-  o = x fby (o + 1);
-tel

@@ -1,0 +1,5 @@
+node main0 (x: int) returns (o: bool);
+let
+  print("test :: %d\n\t", x);
+  o = true;
+tel

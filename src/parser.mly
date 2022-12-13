@@ -187,7 +187,7 @@ eq_list:
 eq:
 | PRINT separated_nonempty_list(COMMA, expr) SEMICOL
     { PE_print ("", $2) }
-| PRINT LPAREN s=STR e=separated_list(COMMA, expr) RPAREN SEMICOL
+| PRINT LPAREN s=STR COMMA e=separated_list(COMMA, expr) RPAREN SEMICOL
     { PE_print (s, e) }
 | pattern EQUAL expr SEMICOL
     { PE_eq { peq_patt = $1; peq_expr = $3; } }

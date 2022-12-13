@@ -1,4 +1,4 @@
-(* En gros c'est le même fichier que ex005.lus mais avec l'automate dé-sucré *)
+(* En gros c'est le même fichier que 12-automate.lus mais avec l'automate dé-sucré *)
 
 type t = Chaud | Froid
 
@@ -15,7 +15,7 @@ let
             (Froid't -> 0 fby x - 1 when Froid(state));
 tel
 
-node check () returns (o : int);
+node main0 () returns (o : int);
 let
   o = oscillateur (-5, 5);
 tel

@@ -6,10 +6,11 @@ type inductive_bool =
   | False
   | True
 
-node main0(x : int) returns (y : int);
-var ;
+node main0(x : int) returns (o : bool);
+var print_var__1 : int;
 let
-  (y) = x;
+  (print_var__1) = print("\"test :: %d\\n\\t\""x);
+  (o) = true;
 tel
 
 /**************************************/
@@ -19,10 +20,11 @@ type inductive_bool =
   | False
   | True
 
-node main0__7(x__6 : int) returns (y__5 : int)
-var ;
+node main0__8(x__7 : int) returns (o__5 : bool)
+var print_var__1__6: int;
 let
-  (y__5) = x__6;
+  (print_var__1__6) = print("\"test :: %d\\n\\t\"", x__7);
+  (o__5) = true;
 tel
 
 /**************************************/
@@ -32,10 +34,12 @@ type inductive_bool =
   | False
   | True
 
-node main0__7(x__6 : int) returns (y__5 : int)
-var ;
+node main0__8(x__7 : int) returns (o__5 : bool)
+var aux'1__9: int; print_var__1__6: int;
 let
-  (y__5) = x__6;
+  (aux'1__9) = print("\"test :: %d\\n\\t\"", x__7);
+  (print_var__1__6) = aux'1__9;
+  (o__5) = true;
 tel
 
 /**************************************/
@@ -45,11 +49,13 @@ type inductive_bool =
   | False
   | True
 
-node main0__7(x__6 : int :: Base)
-  returns (y__5 : int :: Base)
-var ;
+node main0__8(x__7 : int :: Base)
+  returns (o__5 : bool :: ck1)
+var aux'1__9 : int :: Base, print_var__1__6 : int :: Base;
 let
-  (y__5) = x__6
+  (aux'1__9) = print("\"test :: %d\\n\\t\"", x__7);
+  (print_var__1__6) = aux'1__9;
+  (o__5) = true
 tel
 /**************************************/
 /* Scheduled ast                      */
@@ -58,11 +64,13 @@ type inductive_bool =
   | False
   | True
 
-node main0__7(x__6 : int :: Base)
-  returns (y__5 : int :: Base)
-var ;
+node main0__8(x__7 : int :: Base)
+  returns (o__5 : bool :: ck1)
+var aux'1__9 : int :: Base, print_var__1__6 : int :: Base;
 let
-  (y__5) = x__6
+  (o__5) = true;
+  (aux'1__9) = print("\"test :: %d\\n\\t\"", x__7);
+  (print_var__1__6) = aux'1__9
 tel
 /**************************************/
 /* Imp ast                            */
@@ -71,14 +79,16 @@ type inductive_bool =
   | False
   | True
 
-node main0__7(x__6 : int :: Base)
-  returns (y__5 : int :: Base)
-var ;
+node main0__8(x__7 : int :: Base)
+  returns (o__5 : bool :: ck1)
+var aux'1__9 : int :: Base, print_var__1__6 : int :: Base;
   mem={node=[]
        fby=[]}
   init={node=[]
         fby=[]}
-  compute={(y__5 : int :: Base) = x__6}
+  compute={(o__5 : bool :: ck1) = true;
+           (aux'1__9 : int :: Base) = print("\"test :: %d\\n\\t\"", x__7);
+           (print_var__1__6 : int :: Base) = aux'1__9}
   update={}
   
 /**************************************/
@@ -102,11 +112,17 @@ enum inductive_bool {
 };
 
 int main0 (int x) {
-  int y;
+  int aux__1;
+  int o;
+  int call_1;
   
-  y = x;
+  o = 1;
   
-  return y;
+  printf("test :: %d\n\t", x);
+  
+  aux__1 = call_1;
+  
+  return o;
 }
 
 int main (int argc, char* argv[]) {

@@ -10,7 +10,7 @@ let
   end
 tel
 
-node check () returns (o: int);
+node main0 () returns (o: int);
 let
   o = oscillateur (-5, 5);
 tel

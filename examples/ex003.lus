@@ -1,7 +1,0 @@
-node check () returns (o: int);
-var n1, n2: int;
-let
-  n1 = 0 -> pre n1 + 1;
-  n2 = 0 -> (1 -> pre (n2 + 1));
-  o = n1 + n2;
-tel

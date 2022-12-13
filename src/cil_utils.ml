@@ -63,14 +63,14 @@ and translate_type types = function
 
 let rec base_ty_to_format_string = function
   | Tbool
-  | Tint  -> "%d"
-  | Treal -> "%f"
+  | Tint  -> "\"%d\""
+  | Treal -> "\"%f\""
   | _ -> failwith "todo"
 (* failwith ou "%d" par défaut ? *)
 
 let rec typ_to_format_string = function
-  | TInt   _ -> "%d"
-  | TFloat _ -> "%f"
+  | TInt   _ -> "\"%d\""
+  | TFloat _ -> "\"%f\""
   (* | TPtr (t, _) -> typ_to_format_string t *)
   | t ->
       (* failwith ou "%d" par défaut ? *)

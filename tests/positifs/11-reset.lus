@@ -3,7 +3,7 @@ let
   cpt = 0 fby cpt + 1;
 tel
 
-node check (x: bool) returns (o : int);
+node main0 (x: bool) returns (o : int);
 let
   o = reset incr() every x;
 tel

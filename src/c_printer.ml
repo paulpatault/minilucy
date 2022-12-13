@@ -41,7 +41,7 @@ let pp_const fmt = function
       let e, _, _ = List.nth enuminfo.eitems i in
       fprintf fmt "%s" e
   | CStr (s, _) ->
-      fprintf fmt "%S" s
+      fprintf fmt "%s" s
   | _ -> assert false
 
 let pp_unop fmt = function
