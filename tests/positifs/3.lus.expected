@@ -1,0 +1,47 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__1 =
+  | One
+  | Two
+
+node count() returns (o : int)
+var ;
+let
+  (o) = (0) -> (pre (add(o, 1)));
+tel
+
+node f() returns (x : bool)
+var ;
+let
+  (x) = true;
+tel
+
+node g() returns (x : bool)
+var ;
+let
+  (x) = false;
+tel
+
+node check() returns (o : bool)
+var state__2 : adt(typ__1); cond__4 : bool; cond__3 : bool;
+let
+  (cond__4) = eq(mod(count(), 5), 0);
+  (cond__3) = eq(mod(count(), 20), 0);
+  (state__2) = (typ__1(One)) -> (pre (merge state__2 
+                                        (typ__1(One) -> ite(cond__3,
+                                        typ__1(Two),
+                                        typ__1(One)))
+                                        (typ__1(Two) -> ite(cond__4,
+                                        typ__1(One), typ__1(Two)))));
+  (o) = merge state__2 
+          (typ__1(One) -> f())
+          (typ__1(Two) -> g());
+tel
+
+[31m[1mTyping error: [0munbound node main0
+

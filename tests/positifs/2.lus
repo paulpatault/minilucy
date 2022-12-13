@@ -10,7 +10,7 @@ let
     else (0 -> pre o);
 tel
 
-node main1 () returns (y:int);
+node check () returns (y:int);
 var half:bool;
 let
   y = counter (false fby (y > 10), half);

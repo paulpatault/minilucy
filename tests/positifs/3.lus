@@ -13,7 +13,7 @@ let
   x = false;
 tel
 
-node main1 () returns (o : bool);
+node check () returns (o : bool);
 let
   automaton
   | One ->

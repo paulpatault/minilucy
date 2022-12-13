@@ -1,0 +1,23 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node counter(res : bool; tick : bool) returns (o : int)
+var ;
+let
+  (o) = ite(res, 0, ite(tick, (1) -> (add(pre (o), 1)), (0) -> (pre (o))));
+tel
+
+node check() returns (y : int)
+var half : bool;
+let
+  (y) = counter((false) -> (pre (gt(y, 10))), half);
+  (half) = (true) -> (pre (~(half)));
+tel
+
+[31m[1mTyping error: [0munbound node main0
+

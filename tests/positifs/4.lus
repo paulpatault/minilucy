@@ -1,5 +1,5 @@
 (* ne compile pas, voir pourquoi *)
-node when2(x : int; c : bool) returns (y : int);
+node check (x : int; c : bool) returns (y : int);
 let
   automaton
   | FirstPeriod ->

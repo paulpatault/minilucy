@@ -1,0 +1,23 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node f() returns (o : bool)
+var x : bool;
+let
+  (o) = x;
+  (x) = (true) -> (pre ((false) -> (pre (x))));
+tel
+
+node check() returns (o : bool)
+var ;
+let
+  (o) = f();
+tel
+
+[31m[1mTyping error: [0munbound node main0
+

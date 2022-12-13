@@ -1,0 +1,60 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node current(c : bool; x : int) returns (y : int)
+var ;
+let
+  (y) = merge c 
+          (true -> x)
+          (false -> (0) -> (pre (y)) when False(c));
+tel
+
+node internal_current(c : bool; x : int) returns (y : int)
+var x_cur : int;
+let
+  (x_cur) = merge c 
+              (true -> x)
+              (false -> (0) -> (pre (x_cur)) when False(c));
+  (y) = x_cur when True(c);
+tel
+
+node use_current(c : bool; x : int) returns (b : bool; y : int)
+var x_cur : int; y2 : int;
+let
+  (x_cur) = current(c, x);
+  (y) = x_cur when True(c);
+  (y2) = internal_current(c, x);
+  (b) = eq(y, y2);
+tel
+
+node prod() returns (y : int; b : bool)
+var x : int; y_ : int; c : bool; b_ : bool;
+let
+  (x) = add((0) -> (pre (x)), 1);
+  (c) = eq(mod(x, 10), 0);
+  (b_, y_) = use_current(c, x when True(c));
+  (y) = current(c, y_);
+  (b) = merge c 
+          (true -> b_)
+          (false -> (true) -> (pre (b)) when False(c));
+tel
+
+node check() returns (b : bool)
+var y : int;
+let
+  (y, b) = prod();
+tel
+
+node main() returns (y : int; b : bool)
+var ;
+let
+  (y, b) = prod();
+tel
+
+[31m[1mTyping error: [0munbound node main0
+
