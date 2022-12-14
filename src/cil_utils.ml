@@ -69,6 +69,7 @@ let rec base_ty_to_format_string = function
 (* failwith ou "%d" par défaut ? *)
 
 let rec typ_to_format_string = function
+  | TEnum _
   | TInt   _ -> "%d"
   | TFloat _ -> "%f"
   (* | TPtr (t, _) -> typ_to_format_string t *)
