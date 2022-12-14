@@ -8,9 +8,8 @@
 \institute{ENS Paris-Saclay}
 
 \lstset{
-    style=mystyle,
-    basicstyle=\small\ttfamily\color{craneblue!70},
-    language=gospel,
+    basicstyle=\scriptsize\ttfamily\color{craneblue!70},
+    language=lustre,
     keywordstyle=\bfseries\color{craneblue!90},
 }
 
@@ -21,35 +20,128 @@
 
 
 \begin{frame}{Features réalisés}
-  \begin{itemize}[label=$\vcenter{\hbox{\scriptsize$\bullet$}}$]
-    \item \texttt{when}
-    \item \texttt{merge}
-    \item \texttt{reset}
-    \item \texttt{automates} (en surface uniquement)
-  \end{itemize}
+    \begin{itemize}[label=$\vcenter{\hbox{\scriptsize$\bullet$}}$]
+        \item \texttt{when}
+        \item \texttt{merge}
+        \item \texttt{reset}
+        \item \texttt{automates} (en surface uniquement)
+    \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Construction \texttt{when}}
+\begin{frame}[fragile]{Traduction de l'automate}
+
+\begin{lstlisting}
+node syracuse (i: int) returns (o: int);
+let
+  automaton
+  | Even ->
+      o = i -> pre o / 2;
+      until (o mod 2 = 1) continue Odd
+  | Odd ->
+      o = i -> pre o * 3 + 1;
+      until (o mod 2 = 0) continue Even
+  end
+tel
+\end{lstlisting}
+
 \end{frame}
+
+\begin{frame}[fragile]{Traduction de l'automate}
+
+\begin{lstlisting}
+type t = Even | Odd
+
+node syracuse(i : int) returns (o : int);
+    var state : t; cond__4 : bool; cond__3 : bool;
+let
+  cond__4 = o mod 2 = 0;
+  cond__3 = o mod 2 = 1;
+  state = Even ->
+           pre (merge state
+                 (Even -> if cond__3 then Odd else Even)
+                 (Odd -> if cond__4 then Even else Odd));
+  o = merge state
+        (Even -> i -> pre o / 2)
+        (Odd  -> i -> pre o * 3 + 1);
+tel
+\end{lstlisting}
+
+\end{frame}
+
+\lstset{
+    basicstyle=\tiny\ttfamily\color{craneblue!70},
+    language=lustre,
+    keywordstyle=\bfseries\color{craneblue!90},
+}
+
+\begin{frame}[fragile]{Automate (une slide)}
+\begin{tikzpicture}[remember picture, overlay]
+
+    \node[above left, xshift=+13em, yshift=+7em] at (current page.south west)
+        {\begin{minipage}{.4\textwidth}
+\begin{lstlisting}
+node syracuse (i: int)
+  returns (o: int);
+let
+  automaton
+  | Even ->
+      o = i -> pre o / 2;
+      until (o mod 2 = 1)
+      continue Odd
+  | Odd ->
+      o = i -> pre o * 3 + 1;
+      until (o mod 2 = 0)
+      continue Even
+  end
+tel
+\end{lstlisting}
+        \end{minipage}};
+    \node[above left, xshift=+1em, yshift=+5.5em] at (current page.south east)
+        {\begin{minipage}{.7\textwidth}
+\begin{lstlisting}
+type t = Even | Odd
+
+node syracuse(i : int)
+  returns (o : int);
+  var state : t;
+      cond__4, cond__3 : bool;
+let
+  cond__4 = o mod 2 = 0;
+  cond__3 = o mod 2 = 1;
+  state = Even ->
+           pre (merge state
+                 (Even ->
+                   if cond__3 then Odd else Even)
+                 (Odd ->
+                   if cond__4 then Even else Odd));
+  o = merge state
+        (Even -> i -> pre o / 2)
+        (Odd  -> i -> pre o * 3 + 1);
+tel
+\end{lstlisting}
+        \end{minipage}};
+ \end{tikzpicture}
+
+\end{frame}
+
 \begin{frame}[fragile]{Schéma de compilation}
-     % \scriptsize 
-%      \begin{verbatim}
+    % \scriptsize 
+    %      \begin{verbatim}
 % Warning: this pattern-matching is not exhaustive.
 % Here is a case that is not matched:
 %    Node (Node _, _, _)
     %      \end{verbatim}
     \scalebox{0.75}{
-\usetikzlibrary {arrows.meta}
+
+        \usetikzlibrary {arrows.meta}
 
 \begin{tikzpicture}
-  [auto,
-   every path/.style ={draw, ultra thick,
-       ->, % -Stealth[], 
-       shorten >=1pt, line width=1pt},
-   every node/.style ={thick, align=center, rounded corners, rectangle,
-     minimum height=3.5em, minimum width=7em},
-   state/.style  ={ draw=blue2,  fill=blue2!70},
-   ]
+    [auto,
+        every path/.style ={draw, ultra thick, ->, % -Stealth[],
+                            shorten >=1pt, line width=1pt},
+        every node/.style ={thick, align=center, rounded corners, rectangle, minimum height=3.5em, minimum width=7em},
+        state/.style ={ draw=blue2,  fill=blue2!70},
+    ]
 
   \node [state]                (ulus) {lustre} edge [loop below] ();
   \node [state, right=of ulus] (tlus) {typed lustre};

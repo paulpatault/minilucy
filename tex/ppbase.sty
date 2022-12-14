@@ -378,10 +378,21 @@
         % keywordstyle=\color{mblue},
         % classoffset=0,
     }
+    \lstdefinelanguage{lustre} {
+        keywords={%
+            automaton, node, until, continue, end, tel, pre, returns, mod,
+            let, type, match, with, when, merge, if, then, else, var, bool, int
+        },
+        sensitive=false,
+        emph={},
+        emphstyle=\color{myellow},
+        morecomment=[s]{(*}{*)},
+        commentstyle=\color{gray7},
+    }
     \lstset{
         style=mystyle,
         basicstyle=\Large\ttfamily\bfseries\color{black!60},
-        language=gospel,
+        language=lustre,
     }
 \fi
 
