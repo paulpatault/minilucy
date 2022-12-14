@@ -2,5 +2,7 @@ _build
 
 minilucy.exe
 **/a.out
+**/*.c
+
 
 out

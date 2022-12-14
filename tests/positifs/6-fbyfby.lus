@@ -1,8 +1,6 @@
 node f() returns (o:bool);
-var x:bool;
 let
-  o = x;
-  x = true fby false fby x;
+  o = true fby false fby o;
 tel
 
 node main0 () returns (o:bool);
