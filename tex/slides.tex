@@ -28,6 +28,27 @@
     \end{itemize}
 \end{frame}
 
+\begin{frame}[fragile]{Vérification des horloges}
+
+\begin{lstlisting}
+node clock_error (c: bool) returns (o: int);
+  var x: int;
+let
+  x = 0 when True(c);
+  o = x;
+tel
+\end{lstlisting}
+
+ {
+     \scriptsize \color{red!80}
+     \begin{verbatim}
+      Clocking error: The expected clock is Base, got Base on True(c)
+     \end{verbatim}
+}
+
+
+\end{frame}
+
 \begin{frame}[fragile]{Traduction de l'automate}
 
 \begin{lstlisting}
@@ -70,8 +91,6 @@ tel
 
 \lstset{
     basicstyle=\tiny\ttfamily\color{craneblue!70},
-    language=lustre,
-    keywordstyle=\bfseries\color{craneblue!90},
 }
 
 \begin{frame}[fragile]{Automate (une slide)}
@@ -125,13 +144,7 @@ tel
 \end{frame}
 
 \begin{frame}[fragile]{Schéma de compilation}
-    % \scriptsize 
-    %      \begin{verbatim}
-% Warning: this pattern-matching is not exhaustive.
-% Here is a case that is not matched:
-%    Node (Node _, _, _)
-    %      \end{verbatim}
-    \scalebox{0.75}{
+    \scalebox{0.7}{
 
         \usetikzlibrary {arrows.meta}
 
@@ -140,18 +153,21 @@ tel
         every path/.style ={draw, ultra thick, ->, % -Stealth[],
                             shorten >=1pt, line width=1pt},
         every node/.style ={thick, align=center, rounded corners, rectangle, minimum height=3.5em, minimum width=7em},
-        state/.style ={ draw=blue2,  fill=blue2!70},
+        state/.style  ={ draw=blue2,  fill=blue2!70},
+        stateX/.style ={ draw=orange2,  fill=orange2!70},
     ]
 
-  \node [state]                (ulus) {lustre} edge [loop below] ();
+  \node [stateX]                (plus) {parsed lustre};
+  \node [state, below=of plus] (ulus) {un-sugared lustre};
   \node [state, right=of ulus] (tlus) {typed lustre};
   \node [state, right=of tlus] (nlus) {normalised lustre};
   \node [state, right=of nlus] (clus) {clocked lustre};
   \node [state, below=of clus] (slus) {scheduled lustre};
   \node [state, below=of slus] (impl) {IMP};
-  \node [state, left =of impl] (c) {C};
+  \node [stateX, left =of impl] (c) {C};
 
   \begin{scope}
+    \path (plus.south) -- (ulus.north);
     \path (ulus) -- (tlus);
     \path (tlus) -- (nlus);
     \path (nlus) -- (clus);
@@ -163,6 +179,131 @@ tel
     }
 \end{frame}
 
+\lstset{
+    basicstyle=\scriptsize\ttfamily\color{craneblue!70},
+    % basicstyle=\tiny\ttfamily\color{craneblue!70},
+}
+% \begin{frame}[fragile]{Compilation des \texttt{reset}}
+\begin{frame}[fragile]{Compilation des « merge »}
+
+\begin{lstlisting}
+type t = A | B
+
+node main0 () returns (o : t);
+let
+  o = A't fby
+        (merge o
+          (A't -> B't when A(o))
+          (B't -> A't when B(o)));
+tel
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{Compilation des « merge »}
+
+\begin{lstlisting}[language=c]
+enum t { A, B };
+// ...
+enum t main0(...) {
+    // ...
+    switch (o) {
+        case A: {
+            res = B;
+            break;
+        }
+        case B: {
+            res = A;
+            break;
+        }
+    };
+    // ...
+    return res;
+}
+\end{lstlisting}
+
+\end{frame}
+
+%--------------------------------------------------------------------------------------------------
+
+\newcommand{\noeud}{n\oe{}ud\ }
+\begin{frame}[fragile]{Gestion de la mémoire}
+    on créé une mémoire pour chaque \noeud si :
+    \begin{itemize}[label=$\vcenter{\hbox{\scriptsize$\bullet$}}$]
+        \item présence d'un \texttt{fby} dans le \noeud
+        \item appel d'un \noeud qui a une mémoire
+        \item présence d'un automate
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Gestion de la mémoire}
+
+\begin{tikzpicture}[remember picture, overlay]
+
+    \node[right, xshift=+1em] at (current page.west)
+        {\begin{minipage}{.5\textwidth}
+\begin{lstlisting}
+node f () returns (o:int);
+let
+  o = 1;
+tel
+
+node main0 () returns (o:int);
+let
+  o = f();
+tel
+\end{lstlisting}
+        \end{minipage}};
+    \node[left, xshift=-1em] at (current page.east)
+        {\begin{minipage}{.5\textwidth}
+\begin{lstlisting}[escapeinside={\$}{\$}]
+node f () returns (o:int);
+let
+  o = 1 $\color{red}fby 2$;
+tel
+
+node main0 () returns (o:int);
+let
+  o = f();
+tel
+\end{lstlisting}
+        \end{minipage}};
+ \end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}[fragile]{Gestion de la mémoire}
+
+\begin{lstlisting}[language=c]
+struct f_mem {
+  int o;
+};
+struct main0_mem {
+  struct f_mem f_next;
+};
+\end{lstlisting}
+
+\end{frame}
+
+%--------------------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]{Compilation des « reset »}
+
+\begin{lstlisting}
+node incr () returns (cpt: int);
+let
+  cpt = 0 fby cpt + 1;
+tel
+
+node main0 (i: bool) returns (o : int);
+let
+  o = reset incr() every i;
+tel
+\end{lstlisting}
+
+\end{frame}
 
 
 % \begin{frame}{All small caps}
