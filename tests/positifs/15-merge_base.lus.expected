@@ -318,7 +318,7 @@ int main (int argc, char* argv[]) {
   while (1) {
     res = main0(&(mem));
     
-    printf("%d" , res);
+    printf("%d ", res);
     
     fflush(0);
     
