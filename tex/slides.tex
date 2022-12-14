@@ -15,133 +15,25 @@
 
 \usepackage[sfdefault]{FiraSans}
 
+\newcommand{\noeud}{n\oe{}ud\ }
+\renewcommand{\tt}[1]{\texttt{\color{craneblue!80}#1}}
+
+\AtBeginSection[ ]
+{
+\begin{frame}{}
+    \tableofcontents[currentsection]
+    \thispagestyle{empty}
+\end{frame}
+}
+
+%--------------------------------------------------------------------------------------------------
+
 \begin{document}
 \maketitle
 
+%--------------------------------------------------------------------------------------------------
 
-\begin{frame}{Features réalisés}
-    \begin{itemize}[label=$\vcenter{\hbox{\scriptsize$\bullet$}}$]
-        \item \texttt{when}
-        \item \texttt{merge}
-        \item \texttt{reset}
-        \item \texttt{automates} (en surface uniquement)
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Vérification des horloges}
-
-\begin{lstlisting}
-node clock_error (c: bool) returns (o: int);
-  var x: int;
-let
-  x = 0 when True(c);
-  o = x;
-tel
-\end{lstlisting}
-
- {
-     \scriptsize \color{red!80}
-     \begin{verbatim}
-      Clocking error: The expected clock is Base, got Base on True(c)
-     \end{verbatim}
-}
-
-
-\end{frame}
-
-\begin{frame}[fragile]{Traduction de l'automate}
-
-\begin{lstlisting}
-node syracuse (i: int) returns (o: int);
-let
-  automaton
-  | Even ->
-      o = i -> pre o / 2;
-      until (o mod 2 = 1) continue Odd
-  | Odd ->
-      o = i -> pre o * 3 + 1;
-      until (o mod 2 = 0) continue Even
-  end
-tel
-\end{lstlisting}
-
-\end{frame}
-
-\begin{frame}[fragile]{Traduction de l'automate}
-
-\begin{lstlisting}
-type t = Even | Odd
-
-node syracuse(i : int) returns (o : int);
-    var state : t; cond__4 : bool; cond__3 : bool;
-let
-  cond__4 = o mod 2 = 0;
-  cond__3 = o mod 2 = 1;
-  state = Even ->
-           pre (merge state
-                 (Even -> if cond__3 then Odd else Even)
-                 (Odd -> if cond__4 then Even else Odd));
-  o = merge state
-        (Even -> i -> pre o / 2)
-        (Odd  -> i -> pre o * 3 + 1);
-tel
-\end{lstlisting}
-
-\end{frame}
-
-\lstset{
-    basicstyle=\tiny\ttfamily\color{craneblue!70},
-}
-
-\begin{frame}[fragile]{Automate (une slide)}
-\begin{tikzpicture}[remember picture, overlay]
-
-    \node[above left, xshift=+13em, yshift=+7em] at (current page.south west)
-        {\begin{minipage}{.4\textwidth}
-\begin{lstlisting}
-node syracuse (i: int)
-  returns (o: int);
-let
-  automaton
-  | Even ->
-      o = i -> pre o / 2;
-      until (o mod 2 = 1)
-      continue Odd
-  | Odd ->
-      o = i -> pre o * 3 + 1;
-      until (o mod 2 = 0)
-      continue Even
-  end
-tel
-\end{lstlisting}
-        \end{minipage}};
-    \node[above left, xshift=+1em, yshift=+5.5em] at (current page.south east)
-        {\begin{minipage}{.7\textwidth}
-\begin{lstlisting}
-type t = Even | Odd
-
-node syracuse(i : int)
-  returns (o : int);
-  var state : t;
-      cond__4, cond__3 : bool;
-let
-  cond__4 = o mod 2 = 0;
-  cond__3 = o mod 2 = 1;
-  state = Even ->
-           pre (merge state
-                 (Even ->
-                   if cond__3 then Odd else Even)
-                 (Odd ->
-                   if cond__4 then Even else Odd));
-  o = merge state
-        (Even -> i -> pre o / 2)
-        (Odd  -> i -> pre o * 3 + 1);
-tel
-\end{lstlisting}
-        \end{minipage}};
- \end{tikzpicture}
-
-\end{frame}
+\section{idée générale}
 
 \begin{frame}[fragile]{Schéma de compilation}
     \scalebox{0.7}{
@@ -181,15 +73,154 @@ tel
 
 \lstset{
     basicstyle=\scriptsize\ttfamily\color{craneblue!70},
-    % basicstyle=\tiny\ttfamily\color{craneblue!70},
 }
-% \begin{frame}[fragile]{Compilation des \texttt{reset}}
+
+%--------------------------------------------------------------------------------------------------
+
+\begin{frame}{Features réalisées}
+    \begin{itemize}[label=$\vcenter{\hbox{\scriptsize$\bullet$}}$]
+        \item \texttt{when}
+        \item \texttt{merge}
+        \item \texttt{reset}
+        \item \texttt{automates} (en surface uniquement)
+    \end{itemize}
+\end{frame}
+
+%--------------------------------------------------------------------------------------------------
+
+\section{when}
+
+\begin{frame}[fragile]{Vérification des horloges}
+
+\begin{lstlisting}
+node clock_error (c: bool) returns (o: int);
+  var x: int;
+let
+  x = 0 when True(c);
+  o = x;
+tel
+\end{lstlisting}
+
+ {
+     \scriptsize \color{red!80}
+     \begin{verbatim}
+      Clocking error: The expected clock is Base, got Base on True(c)
+     \end{verbatim}
+}
+
+
+\end{frame}
+
+%--------------------------------------------------------------------------------------------------
+
+\section{automate}
+
+\begin{frame}[fragile]{Traduction de l'automate}
+
+\begin{lstlisting}
+node syracuse (i: int) returns (o: int);
+let
+  automaton
+  | Even ->
+      o = i -> pre o / 2;
+      until (o mod 2 = 1) continue Odd
+  | Odd ->
+      o = i -> pre o * 3 + 1;
+      until (o mod 2 = 0) continue Even
+  end
+tel
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{Traduction de l'automate}
+
+\begin{lstlisting}
+type t = Even | Odd
+
+node syracuse (i: int) returns (o: int);
+    var state: t; cond__4: bool; cond__3: bool;
+let
+  cond__4 = o mod 2 = 0;
+  cond__3 = o mod 2 = 1;
+  state = Even ->
+           pre (merge state
+                 (Even -> if cond__3 then Odd else Even)
+                 (Odd -> if cond__4 then Even else Odd));
+  o = merge state
+        (Even -> i -> pre o / 2)
+        (Odd  -> i -> pre o * 3 + 1);
+tel
+\end{lstlisting}
+
+\end{frame}
+
+\lstset{ basicstyle=\tiny\ttfamily\color{craneblue!70} }
+
+\begin{frame}[fragile]{Automate (une slide)}
+\begin{tikzpicture}[remember picture, overlay]
+
+    \draw[DarkerGrey, line width=0.7mm, loosely dotted] (4,3.5) -- (4,-3.5);
+
+    \node[above left, xshift=+13em, yshift=+7em] at (current page.south west)
+        {\begin{minipage}{.4\textwidth}
+\begin{lstlisting}
+node syracuse (i: int)
+  returns (o: int);
+let
+  automaton
+  | Even ->
+      o = i -> pre o / 2;
+      until (o mod 2 = 1)
+      continue Odd
+  | Odd ->
+      o = i -> pre o * 3 + 1;
+      until (o mod 2 = 0)
+      continue Even
+  end
+tel
+\end{lstlisting}
+        \end{minipage}};
+    \node[above left, xshift=+1em, yshift=+5.5em] at (current page.south east)
+        {\begin{minipage}{.7\textwidth}
+\begin{lstlisting}
+type t = Even | Odd
+
+node syracuse(i: int)
+  returns (o: int);
+  var state: t;
+      cond__4, cond__3: bool;
+let
+  cond__4 = o mod 2 = 0;
+  cond__3 = o mod 2 = 1;
+  state = Even ->
+           pre (merge state
+                 (Even ->
+                   if cond__3 then Odd else Even)
+                 (Odd ->
+                   if cond__4 then Even else Odd));
+  o = merge state
+        (Even -> i -> pre o / 2)
+        (Odd  -> i -> pre o * 3 + 1);
+tel
+\end{lstlisting}
+        \end{minipage}};
+ \end{tikzpicture}
+
+\end{frame}
+
+%--------------------------------------------------------------------------------------------------
+
+\section{merge}
+
+\lstset{ basicstyle=\scriptsize\ttfamily\color{craneblue!70}, }
+
 \begin{frame}[fragile]{Compilation des « merge »}
 
 \begin{lstlisting}
 type t = A | B
 
-node main0 () returns (o : t);
+node main0 () returns (o: t);
 let
   o = A't fby
         (merge o
@@ -224,9 +255,58 @@ enum t main0(...) {
 
 \end{frame}
 
+\lstset{ basicstyle=\tiny\ttfamily\color{craneblue!70} }
+
+\begin{frame}[fragile]{Compilation des « merge »}
+\begin{tikzpicture}[remember picture, overlay]
+
+    \draw[DarkerGrey, line width=0.7mm, loosely dotted] (5.4,3.5) -- (5.4,-3.5);
+
+    \node[above left, xshift=+15em, yshift=+7em] at (current page.south west)
+        {\begin{minipage}{.45\textwidth}
+\begin{lstlisting}
+type t = A | B
+
+node main0 () returns (o: t);
+let
+  o = A't fby
+        (merge o
+          (A't -> B't when A(o))
+          (B't -> A't when B(o)));
+tel
+\end{lstlisting}
+        \end{minipage}};
+    \node[above left, xshift=+6em, yshift=+5em] at (current page.south east)
+        {\begin{minipage}{.7\textwidth}
+\begin{lstlisting}[language=c]
+enum t { A, B };
+// ...
+enum t main0(...) {
+    // ...
+    switch (o) {
+        case A: {
+            res = B;
+            break;
+        }
+        case B: {
+            res = A;
+            break;
+        }
+    };
+    // ...
+    return res;
+}
+\end{lstlisting}
+        \end{minipage}};
+ \end{tikzpicture}
+
+\end{frame}
+
+
 %--------------------------------------------------------------------------------------------------
 
-\newcommand{\noeud}{n\oe{}ud\ }
+\section{mémoire}
+
 \begin{frame}[fragile]{Gestion de la mémoire}
     on créé une mémoire pour chaque \noeud si :
     \begin{itemize}[label=$\vcenter{\hbox{\scriptsize$\bullet$}}$]
@@ -237,10 +317,13 @@ enum t main0(...) {
 
 \end{frame}
 
+\lstset{ basicstyle=\scriptsize\ttfamily\color{craneblue!70} }
 
 \begin{frame}[fragile]{Gestion de la mémoire}
 
 \begin{tikzpicture}[remember picture, overlay]
+
+    \draw[DarkerGrey, line width=0.7mm, loosely dotted] (5.4,3.5) -- (5.4,-3.5);
 
     \node[right, xshift=+1em] at (current page.west)
         {\begin{minipage}{.5\textwidth}
@@ -283,11 +366,69 @@ struct f_mem {
 struct main0_mem {
   struct f_mem f_next;
 };
+//...
+void f_init (struct f_mem* mem) {
+  mem->o = 1;
+}
+//...
+void main0_init (struct main0_mem* mem) {
+  f_init(&(mem->f_next));
+}
+//...
 \end{lstlisting}
 
 \end{frame}
 
+\lstset{ basicstyle=\tiny\ttfamily\color{craneblue!70} }
+
+\begin{frame}[fragile]{Gestion de la mémoire}
+\begin{tikzpicture}[remember picture, overlay]
+
+    \draw[DarkerGrey, line width=0.7mm, loosely dotted] (4.4,3.5) -- (4.4,-3.5);
+
+    \node[above left, xshift=+13em, yshift=+7em] at (current page.south west)
+        {\begin{minipage}{.4\textwidth}
+\begin{lstlisting}
+node f () returns (o:int);
+let
+  o = 1 fby 2;
+tel
+
+node main0 () returns (o:int);
+let
+  o = f();
+tel
+\end{lstlisting}
+        \end{minipage}};
+    \node[above left, xshift=+3em, yshift=+5.5em] at (current page.south east)
+        {\begin{minipage}{.7\textwidth}
+\begin{lstlisting}[language=c]
+struct f_mem {
+  int o;
+};
+struct main0_mem {
+  struct f_mem f_next;
+};
+//...
+void f_init (struct f_mem* mem) {
+  mem->o = 1;
+}
+//...
+void main0_init (struct main0_mem* mem) {
+  f_init(&(mem->f_next));
+}
+//...
+\end{lstlisting}
+        \end{minipage}};
+ \end{tikzpicture}
+
+\end{frame}
+
+
 %--------------------------------------------------------------------------------------------------
+\section{reset}
+
+\lstset{ basicstyle=\scriptsize\ttfamily\color{craneblue!70}, }
 
 \begin{frame}[fragile]{Compilation des « reset »}
 
@@ -297,14 +438,22 @@ let
   cpt = 0 fby cpt + 1;
 tel
 
-node main0 (i: bool) returns (o : int);
+node main0 (i: bool) returns (o: int);
 let
   o = reset incr() every i;
 tel
 \end{lstlisting}
 
+\medskip
+
+$\to$ ajouter un appel à \tt{incr\_init()} quand \tt{i} est vrai
+
 \end{frame}
 
+\begin{frame}
+   \centerline{Démo !}
+   \thispagestyle{empty}
+\end{frame}
 
 % \begin{frame}{All small caps}
 %     This frame uses the \texttt{allsmallcaps} titleformat.
