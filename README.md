@@ -66,6 +66,10 @@ $ make promote -i            # mise à niveau de l'ensemble des tests
 
 - `when`, `merge`, (`reset` ?)
 
+- ajouter `{% set const-main %}` en tête de code pour que les arguments du main soient constants
+  (on les demande plus à chaque tour du `while` dans le main du code c généré) mais seulement en
+  entrée de programme
+
 - Print (types simples (pas ADT)) dans lustre : TODO tuples
 
 - Phases de compilation

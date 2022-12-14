@@ -1,0 +1,422 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type t =
+  | Even
+  | Odd
+
+node parity(i : int) returns (o : t);
+var ;
+let
+  (o) = ite(eq(mod(i, 2), 0), Even't, Odd't);
+tel
+
+node main0(i : int) returns (o : int);
+var x : t;
+let
+  (x) = (parity(i)) -> (pre (parity(o)));
+  (o) = (i) -> (merge x 
+                  (Even't -> div(pre (o), 2) when Even(x))
+                  (Odd't -> add(mul(pre (o), 3), 1) when Odd(x)));
+tel
+
+/**************************************/
+/* Typed ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type t =
+  | Even
+  | Odd
+
+node parity__7(i__6 : int) returns (o__5 : t)
+var ;
+let
+  (o__5) = merge eq(mod(i__6, 2),
+           0) 
+             (true -> Even't when True(eq(mod(i__6, 2), 0)))
+             (false -> Odd't when False(eq(mod(i__6, 2), 0)));
+tel
+
+node main0__11(i__10 : int) returns (o__8 : int)
+var x__9: t;
+let
+  (x__9) = ite(true fby false, parity__7(i__10),
+           default(t) fby parity__7(o__8));
+  (o__8) = ite(true fby false, i__10,
+           merge x__9 
+             (Even't -> div(0 fby o__8, 2) when Even(x__9))
+             (Odd't -> add(mul(0 fby o__8, 3), 1) when Odd(x__9)));
+tel
+
+/**************************************/
+/* Normalized ast                     */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type t =
+  | Even
+  | Odd
+
+node parity__7(i__6 : int) returns (o__5 : t)
+var aux'2__13: bool; aux'1__12: bool;
+let
+  (aux'2__13) = eq(mod(i__6, 2), 0);
+  (aux'1__12) = eq(mod(i__6, 2), 0);
+  (o__5) = merge eq(mod(i__6, 2),
+           0) 
+             (true -> Even't when True(aux'1__12))
+             (false -> Odd't when False(aux'2__13));
+tel
+
+node main0__11(i__10 : int) returns (o__8 : int)
+var aux'14__25: int; aux'13__24: int; aux'12__23: int; aux'11__22: int;
+    aux'10__21: bool; aux'9__20: bool; aux'8__19: t; aux'7__18: t;
+    aux'6__17: t; aux'5__16: t; aux'4__15: bool; aux'3__14: bool; x__9: t;
+let
+  (aux'8__19) = default(t) fby aux'7__18;
+  (aux'7__18) = aux'6__17;
+  (aux'6__17) = parity__7(o__8);
+  (aux'5__16) = parity__7(i__10);
+  (aux'4__15) = true fby aux'3__14;
+  (aux'3__14) = false;
+  (x__9) = ite(aux'4__15, aux'5__16, aux'8__19);
+  (aux'14__25) = 0 fby aux'13__24;
+  (aux'13__24) = o__8;
+  (aux'12__23) = 0 fby aux'11__22;
+  (aux'11__22) = o__8;
+  (aux'10__21) = true fby aux'9__20;
+  (aux'9__20) = false;
+  (o__8) = ite(aux'10__21, i__10,
+           merge x__9 
+             (Even't -> div(aux'12__23, 2) when Even(x__9))
+             (Odd't -> add(mul(aux'14__25, 3), 1) when Odd(x__9)));
+tel
+
+/**************************************/
+/* Clocked ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type t =
+  | Even
+  | Odd
+
+node parity__7(i__6 : int :: Base)
+  returns (o__5 : t :: Base)
+var aux'2__13 : bool :: Base, aux'1__12 : bool :: Base;
+let
+  (aux'2__13) = eq(mod(i__6, 2), 0);
+  (aux'1__12) = eq(mod(i__6, 2), 0);
+  (o__5) = merge eq(mod(i__6, 2), 0) 
+           (true -> Even't when True(aux'1__12))
+           (false -> Odd't when False(aux'2__13))
+tel
+node main0__11(i__10 : int :: Base)
+  returns (o__8 : int :: Base)
+var aux'14__25 : int :: Base, aux'13__24 : int :: Base, aux'12__23 : int :: Base, 
+    aux'11__22 : int :: Base, aux'10__21 : bool :: Base, aux'9__20 : bool :: Base, 
+    aux'8__19 : t :: Base, aux'7__18 : t :: Base, aux'6__17 : t :: Base, 
+    aux'5__16 : t :: Base, aux'4__15 : bool :: Base, aux'3__14 : bool :: Base, 
+    x__9 : t :: Base;
+let
+  (aux'8__19) = default(t) fby aux'7__18;
+  (aux'7__18) = aux'6__17;
+  (aux'6__17) = parity__7(o__8);
+  (aux'5__16) = parity__7(i__10);
+  (aux'4__15) = true fby aux'3__14;
+  (aux'3__14) = false;
+  (x__9) = ite(aux'4__15, aux'5__16, aux'8__19);
+  (aux'14__25) = 0 fby aux'13__24;
+  (aux'13__24) = o__8;
+  (aux'12__23) = 0 fby aux'11__22;
+  (aux'11__22) = o__8;
+  (aux'10__21) = true fby aux'9__20;
+  (aux'9__20) = false;
+  (o__8) = ite(aux'10__21, i__10, merge x__9 
+              (Even't -> div(aux'12__23, 2) when Even(x__9))
+              (Odd't -> add(mul(aux'14__25, 3), 1) when Odd(x__9)))
+tel
+/**************************************/
+/* Scheduled ast                      */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type t =
+  | Even
+  | Odd
+
+node parity__7(i__6 : int :: Base)
+  returns (o__5 : t :: Base)
+var aux'2__13 : bool :: Base, aux'1__12 : bool :: Base;
+let
+  (o__5) = merge eq(mod(i__6, 2), 0) 
+           (true -> Even't when True(aux'1__12))
+           (false -> Odd't when False(aux'2__13));
+  (aux'1__12) = eq(mod(i__6, 2), 0);
+  (aux'2__13) = eq(mod(i__6, 2), 0)
+tel
+node main0__11(i__10 : int :: Base)
+  returns (o__8 : int :: Base)
+var aux'14__25 : int :: Base, aux'13__24 : int :: Base, aux'12__23 : int :: Base, 
+    aux'11__22 : int :: Base, aux'10__21 : bool :: Base, aux'9__20 : bool :: Base, 
+    aux'8__19 : t :: Base, aux'7__18 : t :: Base, aux'6__17 : t :: Base, 
+    aux'5__16 : t :: Base, aux'4__15 : bool :: Base, aux'3__14 : bool :: Base, 
+    x__9 : t :: Base;
+let
+  (aux'3__14) = false;
+  (aux'4__15) = true fby aux'3__14;
+  (aux'5__16) = parity__7(i__10);
+  (aux'8__19) = default(t) fby aux'7__18;
+  (aux'9__20) = false;
+  (aux'10__21) = true fby aux'9__20;
+  (aux'12__23) = 0 fby aux'11__22;
+  (aux'14__25) = 0 fby aux'13__24;
+  (x__9) = ite(aux'4__15, aux'5__16, aux'8__19);
+  (o__8) = ite(aux'10__21, i__10, merge x__9 
+              (Even't -> div(aux'12__23, 2) when Even(x__9))
+              (Odd't -> add(mul(aux'14__25, 3), 1) when Odd(x__9)));
+  (aux'6__17) = parity__7(o__8);
+  (aux'11__22) = o__8;
+  (aux'13__24) = o__8;
+  (aux'7__18) = aux'6__17
+tel
+/**************************************/
+/* Imp ast                            */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type t =
+  | Even
+  | Odd
+
+node parity__7(i__6 : int :: Base)
+  returns (o__5 : t :: Base)
+var aux'2__13 : bool :: Base, aux'1__12 : bool :: Base;
+  mem={node=[]
+       fby=[]}
+  init={node=[]
+        fby=[]}
+  compute={(o__5 : t :: Base) = case(eq(mod(i__6, 2), 0))True'inductive_bool: Even't;
+                                                           False'inductive_bool: Odd't;
+           (aux'1__12 : bool :: Base) = eq(mod(i__6, 2), 0);
+           (aux'2__13 : bool :: Base) = eq(mod(i__6, 2), 0)}
+  update={}
+  
+node main0__11(i__10 : int :: Base)
+  returns (o__8 : int :: Base)
+var aux'14__25 : int :: Base, aux'13__24 : int :: Base, aux'12__23 : int :: Base, 
+    aux'11__22 : int :: Base, aux'10__21 : bool :: Base, aux'9__20 : bool :: Base, 
+    aux'8__19 : t :: Base, aux'7__18 : t :: Base, aux'6__17 : t :: Base, 
+    aux'5__16 : t :: Base, aux'4__15 : bool :: Base, aux'3__14 : bool :: Base, 
+    x__9 : t :: Base;
+  mem={node=[]
+       fby=[aux'4_next5__32 : bool :: Base, aux'8_next4__30 : t :: Base, 
+            aux'10_next3__29 : bool :: Base, aux'12_next2__28 : int :: Base, 
+            aux'14_next1__27 : int :: Base]}
+  init={node=[]
+        fby=[(aux'4_next5__32,true), (aux'8_next4__30,default(t)), (aux'10_next3__29,true), (aux'12_next2__28,0), (aux'14_next1__27,0)]}
+  compute={(aux'3__14 : bool :: Base) = false;
+           (aux'4__15 : bool :: Base) = aux'4_next5__32;
+           (aux'5__16 : t :: Base) = parity__7 <- parity_next2__31(i__10);
+           (aux'8__19 : t :: Base) = aux'8_next4__30;
+           (aux'9__20 : bool :: Base) = false;
+           (aux'10__21 : bool :: Base) = aux'10_next3__29;
+           (aux'12__23 : int :: Base) = aux'12_next2__28;
+           (aux'14__25 : int :: Base) = aux'14_next1__27;
+           (x__9 : t :: Base) = ite(aux'4__15, aux'5__16, aux'8__19);
+           (o__8 : int :: Base) = ite(aux'10__21, i__10,
+                                  case(x__9)Even't: div(aux'12__23, 2);
+                                              Odd't: add(mul(aux'14__25, 3),
+                                                     1));
+           (aux'6__17 : t :: Base) = parity__7 <- parity_next1__26(o__8);
+           (aux'11__22 : int :: Base) = o__8;
+           (aux'13__24 : int :: Base) = o__8;
+           (aux'7__18 : t :: Base) = aux'6__17}
+  update={(aux'4_next5__32,aux'3__14);
+          (aux'8_next4__30,aux'7__18);
+          (aux'10_next3__29,aux'9__20);
+          (aux'12_next2__28,aux'11__22);
+          (aux'14_next1__27,aux'13__24)}
+  
+/**************************************/
+/* C file                             */
+/**************************************/
+#include <stdlib.h>
+
+#include <printf.h>
+
+#include <unistd.h>
+
+int int_read() {
+  int var;
+  scanf("%d", &var);
+  return var;
+}
+
+enum inductive_bool {
+  FALSE,
+  TRUE
+};
+
+enum t {
+  EVEN,
+  ODD
+};
+
+enum t parity (int i) {
+  int aux__2;
+  int aux__1;
+  enum t o;
+  enum inductive_bool switch_1;
+  
+  switch (((i % 2) == 0)) {
+    case TRUE: {
+      switch_1 = EVEN;
+      break;
+    }
+    case FALSE: {
+      switch_1 = ODD;
+      break;
+    }
+  };
+  
+  o = switch_1;
+  
+  aux__1 = ((i % 2) == 0);
+  
+  aux__2 = ((i % 2) == 0);
+  
+  return o;
+}
+
+struct main0_mem {
+
+  int aux__4_next5;
+  enum t aux__8_next4;
+  int aux__10_next3;
+  int aux__12_next2;
+  int aux__14_next1;
+};
+
+void main0_init (struct main0_mem* mem) {
+  mem->aux__4_next5 = 1;
+  
+  mem->aux__8_next4 = EVEN;
+  
+  mem->aux__10_next3 = 1;
+  
+  mem->aux__12_next2 = 0;
+  
+  mem->aux__14_next1 = 0;
+}
+
+int main0 (struct main0_mem* mem, int i) {
+  int aux__14;
+  int aux__13;
+  int aux__12;
+  int aux__11;
+  int aux__10;
+  int aux__9;
+  enum t aux__8;
+  enum t aux__7;
+  enum t aux__6;
+  enum t aux__5;
+  int aux__4;
+  int aux__3;
+  enum t x;
+  int o;
+  enum t call_1;
+  enum t switch_2;
+  enum t call_2;
+  
+  aux__3 = 0;
+  
+  aux__4 = mem->aux__4_next5;
+  
+  call_1 = parity(i);
+  
+  aux__5 = call_1;
+  
+  aux__8 = mem->aux__8_next4;
+  
+  aux__9 = 0;
+  
+  aux__10 = mem->aux__10_next3;
+  
+  aux__12 = mem->aux__12_next2;
+  
+  aux__14 = mem->aux__14_next1;
+  
+  x = aux__4 ? aux__5 : aux__8;
+  
+  switch (x) {
+    case EVEN: {
+      switch_2 = (aux__12 / 2);
+      break;
+    }
+    case ODD: {
+      switch_2 = ((aux__14 * 3) + 1);
+      break;
+    }
+  };
+  
+  o = aux__10 ? i : switch_2;
+  
+  call_2 = parity(o);
+  
+  aux__6 = call_2;
+  
+  aux__11 = o;
+  
+  aux__13 = o;
+  
+  aux__7 = aux__6;
+  
+  mem->aux__4_next5 = aux__3;
+  
+  mem->aux__8_next4 = aux__7;
+  
+  mem->aux__10_next3 = aux__9;
+  
+  mem->aux__12_next2 = aux__11;
+  
+  mem->aux__14_next1 = aux__13;
+  
+  return o;
+}
+
+int main (int argc, char* argv[]) {
+  struct main0_mem mem;
+  int argv_0;
+  int res;
+  
+  main0_init(&(mem));
+  
+  if ((argc < 2)) {
+    printf("Error : %d needed arguments were not provided", 1);
+    
+    exit(1);
+  };
+  
+  argv_0 = atoi(argv[1]);
+  
+  while (1) {
+    res = main0(&(mem), argv_0);
+    
+    printf("%d ", res);
+    
+    fflush(0);
+    
+    usleep(333333);
+  };
+}
