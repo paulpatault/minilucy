@@ -71,6 +71,9 @@
 \definecolor{LightGreen}{RGB}{130,161,119}
 \definecolor{Violet}{RGB}{190,144,252}
 
+% \definecolor{cranegreen}{RGB}{4,76,6}
+\definecolor{cranegreen}{RGB}{24,106,26}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% NEW COUNTER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -238,6 +241,7 @@
     % \usecolortheme{default}
     \usecolortheme{crane}
 
+
     % \definecolor{craneorange}{RGB}{252,187,6}
     % \definecolor{craneblue}{RGB}{2,3,38}
     % \definecolor{craneorange}{rgb}{0.2,0.2,0.7}
@@ -382,12 +386,16 @@
     \lstdefinelanguage{lustre} {
         keywords={%
             automaton, node, until, continue, end, tel, pre, returns, mod, fby,
-            let, type, match, with, when, merge, if, then, else, var, bool, int,
+            let, type, match, with, when, merge, if, then, else, var,
             reset, every
         },
         sensitive=false,
-        emph={},
-        emphstyle=\color{myellow},
+            classoffset=1,
+            keywords={bool, int},
+            keywordstyle=\color{cranegreen!90},
+            classoffset=0,
+        % emph={},
+        % emphstyle=\color{myellow},
         morecomment=[s]{(*}{*)},
         commentstyle=\color{gray7},
     }
