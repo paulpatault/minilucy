@@ -81,10 +81,10 @@ var x__6 : bool :: Base;
 let
   (x__6) = true;
   (o__5) = merge x__6 
-             (true -> merge x__6 
-                        (true -> 1 when True(x__6))
-                        (false -> 2 when False(x__6)) when True(x__6))
-             (false -> 3 when False(x__6))
+           (true -> merge x__6 
+           (true -> 1 when True(x__6))
+           (false -> 2 when False(x__6)) when True(x__6))
+           (false -> 3 when False(x__6))
 tel
 node main0__9()
   returns (o__8 : int :: Base)
@@ -106,10 +106,10 @@ var x__6 : bool :: Base;
 let
   (x__6) = true;
   (o__5) = merge x__6 
-             (true -> merge x__6 
-                        (true -> 1 when True(x__6))
-                        (false -> 2 when False(x__6)) when True(x__6))
-             (false -> 3 when False(x__6))
+           (true -> merge x__6 
+           (true -> 1 when True(x__6))
+           (false -> 2 when False(x__6)) when True(x__6))
+           (false -> 3 when False(x__6))
 tel
 node main0__9()
   returns (o__8 : int :: Base)

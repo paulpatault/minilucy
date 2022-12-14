@@ -28,22 +28,22 @@ let rec pp_ct fmt = function
 let rec pp_exp fmt e = match e.cexpr_desc with
   | CE_const c -> pp_const fmt c
   | CE_ident x -> fprintf fmt "%a" Ident.print x
-  | CE_op (op, el) -> fprintf fmt "%a(%a)" pp_op op pp_arg_list el
+  | CE_op (op, el) -> fprintf fmt "%a@[(%a)@]" pp_op op pp_arg_list el
   | CE_app (name, e_list) | CE_prim (name, e_list) ->
       fprintf fmt "%a(@[%a@])" Ident.print name pp_arg_list e_list
   | CE_arrow (l, r) ->
-      fprintf fmt "@[(@[%a@]) -> (@[%a@])@]" pp_exp l pp_exp r
+      fprintf fmt "(@[%a@]) -> (@[%a@])" pp_exp l pp_exp r
   | CE_pre e ->
       fprintf fmt "pre (@[%a@])" pp_exp e
   | CE_tuple e_list ->
       fprintf fmt "(@[%a@])" pp_tuple_arg_list e_list
   | CE_merge (m, l) ->
-      fprintf fmt "@[merge %a @\n  @[%a@]@]" pp_exp m
+      fprintf fmt "merge %a @\n@[%a@]" pp_exp m
         (print_list_nl (fun fmt (id,exp) -> fprintf fmt "(%a -> %a)" pp_exp id pp_exp exp)) l
   | CE_fby (e1, e2) ->
-    fprintf fmt "@[%a fby %a@]" pp_exp e1 pp_exp e2
+    fprintf fmt "%a fby %a" pp_exp e1 pp_exp e2
   | CE_when (e1, s, eid) ->
-    fprintf fmt "@[%a when %s(%a)@]" pp_exp e1 s pp_exp eid
+    fprintf fmt "%a when %s(%a)" pp_exp e1 s pp_exp eid
   | CE_print (s, e) ->
       fprintf fmt "print(%S, @[%a@])" s (pp_print_list pp_exp) e
   | CE_reset (id, el, e) ->
@@ -52,7 +52,7 @@ let rec pp_exp fmt e = match e.cexpr_desc with
 and pp_arg_list fmt e_list = match e_list with
   | [] -> ()
   | [x] -> fprintf fmt "%a" pp_exp x
-  | h :: t -> fprintf fmt "%a,@ %a" pp_exp h pp_arg_list t
+  | h :: t -> fprintf fmt "%a, %a" pp_exp h pp_arg_list t
 
 and pp_tuple_arg_list fmt e_list = match e_list with
   | [] -> assert false

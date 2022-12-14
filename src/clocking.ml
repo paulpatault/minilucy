@@ -322,7 +322,7 @@ let clock_equation env types eq =
 let check_causality loc inputs equs =
   begin try ignore (Scheduling.schedule_equs inputs equs)
     with Scheduling.Causality ->
-      List.iter (Clocked_ast_printer.pp_eq std_formatter) equs;
+      List.iter (fprintf std_formatter "%a\n" Clocked_ast_printer.pp_eq) equs;
       error loc Causality
   end
 

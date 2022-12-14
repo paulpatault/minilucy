@@ -140,12 +140,12 @@ let
   (cond__3__8) = ge(x__5, hi__10);
   (aux'4__17) = default(typ__1) fby aux'3__16;
   (aux'3__16) = merge state__2__6 
-                  (Chaud'typ__1 -> merge cond__3__8 
-                                     (true -> Froid'typ__1 when True(cond__3__8))
-                                     (false -> Chaud'typ__1 when False(cond__3__8)))
-                  (Froid'typ__1 -> merge cond__4__7 
-                                     (true -> Chaud'typ__1 when True(cond__4__7))
-                                     (false -> Froid'typ__1 when False(cond__4__7)));
+                (Chaud'typ__1 -> merge cond__3__8 
+                (true -> Froid'typ__1 when True(cond__3__8))
+                (false -> Chaud'typ__1 when False(cond__3__8)))
+                (Froid'typ__1 -> merge cond__4__7 
+                (true -> Chaud'typ__1 when True(cond__4__7))
+                (false -> Froid'typ__1 when False(cond__4__7)));
   (aux'2__15) = true fby aux'1__14;
   (aux'1__14) = false;
   (state__2__6) = ite(aux'2__15, Chaud'typ__1, aux'4__17);
@@ -158,9 +158,8 @@ let
   (aux'6__19) = true fby aux'5__18;
   (aux'5__18) = false;
   (x__5) = merge state__2__6 
-             (Chaud'typ__1 -> ite(aux'6__19, 0, add(aux'8__21,
-             1)))
-             (Froid'typ__1 -> ite(aux'10__23, 0, sub(aux'12__25, 1)))
+           (Chaud'typ__1 -> ite(aux'6__19, 0, add(aux'8__21, 1)))
+           (Froid'typ__1 -> ite(aux'10__23, 0, sub(aux'12__25, 1)))
 tel
 node main0__13()
   returns (o__12 : int :: Base)
@@ -198,20 +197,19 @@ let
   (aux'12__25) = 0 fby aux'11__24;
   (state__2__6) = ite(aux'2__15, Chaud'typ__1, aux'4__17);
   (x__5) = merge state__2__6 
-             (Chaud'typ__1 -> ite(aux'6__19, 0, add(aux'8__21,
-             1)))
-             (Froid'typ__1 -> ite(aux'10__23, 0, sub(aux'12__25, 1)));
+           (Chaud'typ__1 -> ite(aux'6__19, 0, add(aux'8__21, 1)))
+           (Froid'typ__1 -> ite(aux'10__23, 0, sub(aux'12__25, 1)));
   (cond__4__7) = le(x__5, lo__9);
   (cond__3__8) = ge(x__5, hi__10);
   (aux'7__20) = x__5;
   (aux'11__24) = x__5;
   (aux'3__16) = merge state__2__6 
-                  (Chaud'typ__1 -> merge cond__3__8 
-                                     (true -> Froid'typ__1 when True(cond__3__8))
-                                     (false -> Chaud'typ__1 when False(cond__3__8)))
-                  (Froid'typ__1 -> merge cond__4__7 
-                                     (true -> Chaud'typ__1 when True(cond__4__7))
-                                     (false -> Froid'typ__1 when False(cond__4__7)))
+                (Chaud'typ__1 -> merge cond__3__8 
+                (true -> Froid'typ__1 when True(cond__3__8))
+                (false -> Chaud'typ__1 when False(cond__3__8)))
+                (Froid'typ__1 -> merge cond__4__7 
+                (true -> Chaud'typ__1 when True(cond__4__7))
+                (false -> Froid'typ__1 when False(cond__4__7)))
 tel
 node main0__13()
   returns (o__12 : int :: Base)

@@ -112,20 +112,20 @@ let
   (cond__3__8) = true;
   (aux'4__14) = default(typ__1) fby aux'3__13;
   (aux'3__13) = merge state__2__6 
-                  (FirstPeriod'typ__1 -> merge cond__3__8 
-                                           (true -> Cruise'typ__1 when True(cond__3__8))
-                                           (false -> FirstPeriod'typ__1 when False(cond__3__8)))
-                  (Cruise'typ__1 -> merge cond__4__7 
-                                      (true -> Cruise'typ__1 when True(cond__4__7))
-                                      (false -> Cruise'typ__1 when False(cond__4__7)));
+                (FirstPeriod'typ__1 -> merge cond__3__8 
+                (true -> Cruise'typ__1 when True(cond__3__8))
+                (false -> FirstPeriod'typ__1 when False(cond__3__8)))
+                (Cruise'typ__1 -> merge cond__4__7 
+                (true -> Cruise'typ__1 when True(cond__4__7))
+                (false -> Cruise'typ__1 when False(cond__4__7)));
   (aux'2__12) = true fby aux'1__11;
   (aux'1__11) = false;
   (state__2__6) = ite(aux'2__12, FirstPeriod'typ__1, aux'4__14);
   (aux'6__16) = 0 fby aux'5__15;
   (aux'5__15) = y__5;
   (y__5) = merge state__2__6 
-             (FirstPeriod'typ__1 -> i__9)
-             (Cruise'typ__1 -> sub(aux'6__16))
+           (FirstPeriod'typ__1 -> i__9)
+           (Cruise'typ__1 -> sub(aux'6__16))
 tel
 /**************************************/
 /* Scheduled ast                      */
@@ -151,15 +151,15 @@ let
   (aux'6__16) = 0 fby aux'5__15;
   (state__2__6) = ite(aux'2__12, FirstPeriod'typ__1, aux'4__14);
   (y__5) = merge state__2__6 
-             (FirstPeriod'typ__1 -> i__9)
-             (Cruise'typ__1 -> sub(aux'6__16));
+           (FirstPeriod'typ__1 -> i__9)
+           (Cruise'typ__1 -> sub(aux'6__16));
   (aux'3__13) = merge state__2__6 
-                  (FirstPeriod'typ__1 -> merge cond__3__8 
-                                           (true -> Cruise'typ__1 when True(cond__3__8))
-                                           (false -> FirstPeriod'typ__1 when False(cond__3__8)))
-                  (Cruise'typ__1 -> merge cond__4__7 
-                                      (true -> Cruise'typ__1 when True(cond__4__7))
-                                      (false -> Cruise'typ__1 when False(cond__4__7)));
+                (FirstPeriod'typ__1 -> merge cond__3__8 
+                (true -> Cruise'typ__1 when True(cond__3__8))
+                (false -> FirstPeriod'typ__1 when False(cond__3__8)))
+                (Cruise'typ__1 -> merge cond__4__7 
+                (true -> Cruise'typ__1 when True(cond__4__7))
+                (false -> Cruise'typ__1 when False(cond__4__7)));
   (aux'5__15) = y__5
 tel
 /**************************************/

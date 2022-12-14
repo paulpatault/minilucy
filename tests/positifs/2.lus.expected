@@ -114,12 +114,10 @@ let
   (aux'2__13) = true fby aux'1__12;
   (aux'1__12) = false;
   (o__5) = merge res__6 
-             (true -> 0 when True(res__6))
-             (false -> merge tick__7 
-                         (true -> ite(aux'2__13, 1, add(aux'4__15,
-                                  1)) when True(tick__7))
-                         (false -> ite(aux'6__17, 0,
-                                   aux'8__19) when False(tick__7)) when False(res__6))
+           (true -> 0 when True(res__6))
+           (false -> merge tick__7 
+           (true -> ite(aux'2__13, 1, add(aux'4__15, 1)) when True(tick__7))
+           (false -> ite(aux'6__17, 0, aux'8__19) when False(tick__7)) when False(res__6))
 tel
 node main0__11()
   returns (y__9 : int :: Base)
@@ -160,12 +158,10 @@ let
   (aux'6__17) = true fby aux'5__16;
   (aux'8__19) = 0 fby aux'7__18;
   (o__5) = merge res__6 
-             (true -> 0 when True(res__6))
-             (false -> merge tick__7 
-                         (true -> ite(aux'2__13, 1, add(aux'4__15,
-                                  1)) when True(tick__7))
-                         (false -> ite(aux'6__17, 0,
-                                   aux'8__19) when False(tick__7)) when False(res__6));
+           (true -> 0 when True(res__6))
+           (false -> merge tick__7 
+           (true -> ite(aux'2__13, 1, add(aux'4__15, 1)) when True(tick__7))
+           (false -> ite(aux'6__17, 0, aux'8__19) when False(tick__7)) when False(res__6));
   (aux'3__14) = o__5;
   (aux'7__18) = o__5
 tel

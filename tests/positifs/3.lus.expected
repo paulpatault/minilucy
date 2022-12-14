@@ -195,20 +195,20 @@ let
   (cond__3__14) = eq(mod(aux'6__21, 20), 0);
   (aux'10__25) = default(typ__1) fby aux'9__24;
   (aux'9__24) = merge state__2__12 
-                  (One'typ__1 -> merge cond__3__14 
-                                   (true -> Two'typ__1 when True(cond__3__14))
-                                   (false -> One'typ__1 when False(cond__3__14)))
-                  (Two'typ__1 -> merge cond__4__13 
-                                   (true -> One'typ__1 when True(cond__4__13))
-                                   (false -> Two'typ__1 when False(cond__4__13)));
+                (One'typ__1 -> merge cond__3__14 
+                (true -> Two'typ__1 when True(cond__3__14))
+                (false -> One'typ__1 when False(cond__3__14)))
+                (Two'typ__1 -> merge cond__4__13 
+                (true -> One'typ__1 when True(cond__4__13))
+                (false -> Two'typ__1 when False(cond__4__13)));
   (aux'8__23) = true fby aux'7__22;
   (aux'7__22) = false;
   (state__2__12) = ite(aux'8__23, One'typ__1, aux'10__25);
   (aux'12__27) = g__10();
   (aux'11__26) = f__8();
   (o__11) = merge state__2__12 
-              (One'typ__1 -> aux'11__26)
-              (Two'typ__1 -> aux'12__27)
+            (One'typ__1 -> aux'11__26)
+            (Two'typ__1 -> aux'12__27)
 tel
 /**************************************/
 /* Scheduled ast                      */
@@ -261,15 +261,15 @@ let
   (cond__4__13) = eq(mod(aux'5__20, 5), 0);
   (cond__3__14) = eq(mod(aux'6__21, 20), 0);
   (o__11) = merge state__2__12 
-              (One'typ__1 -> aux'11__26)
-              (Two'typ__1 -> aux'12__27);
+            (One'typ__1 -> aux'11__26)
+            (Two'typ__1 -> aux'12__27);
   (aux'9__24) = merge state__2__12 
-                  (One'typ__1 -> merge cond__3__14 
-                                   (true -> Two'typ__1 when True(cond__3__14))
-                                   (false -> One'typ__1 when False(cond__3__14)))
-                  (Two'typ__1 -> merge cond__4__13 
-                                   (true -> One'typ__1 when True(cond__4__13))
-                                   (false -> Two'typ__1 when False(cond__4__13)))
+                (One'typ__1 -> merge cond__3__14 
+                (true -> Two'typ__1 when True(cond__3__14))
+                (false -> One'typ__1 when False(cond__3__14)))
+                (Two'typ__1 -> merge cond__4__13 
+                (true -> One'typ__1 when True(cond__4__13))
+                (false -> Two'typ__1 when False(cond__4__13)))
 tel
 /**************************************/
 /* Imp ast                            */

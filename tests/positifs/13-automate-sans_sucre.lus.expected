@@ -145,14 +145,12 @@ var aux'16__27 : int :: Base, aux'15__26 : int :: Base, aux'14__25 : bool :: Bas
 let
   (aux'8__19) = default(t) fby aux'7__18;
   (aux'7__18) = merge state__6 
-                  (Chaud't -> merge ge(x__5,
-                              hi__8) 
-                                (true -> Froid't when True(aux'3__14))
-                                (false -> Chaud't when False(aux'4__15)))
-                  (Froid't -> merge le(x__5,
-                              lo__7) 
-                                (true -> Chaud't when True(aux'5__16))
-                                (false -> Froid't when False(aux'6__17)));
+                (Chaud't -> merge ge(x__5, hi__8) 
+                (true -> Froid't when True(aux'3__14))
+                (false -> Chaud't when False(aux'4__15)))
+                (Froid't -> merge le(x__5, lo__7) 
+                (true -> Chaud't when True(aux'5__16))
+                (false -> Froid't when False(aux'6__17)));
   (aux'6__17) = le(x__5, lo__7);
   (aux'5__16) = le(x__5, lo__7);
   (aux'4__15) = ge(x__5, hi__8);
@@ -169,10 +167,8 @@ let
   (aux'10__21) = true fby aux'9__20;
   (aux'9__20) = false;
   (x__5) = merge state__6 
-             (Chaud't -> add(ite(aux'10__21, 0, aux'12__23),
-                         1) when Chaud(state__6))
-             (Froid't -> sub(ite(aux'14__25, 0, aux'16__27),
-                         1) when Froid(state__6))
+           (Chaud't -> add(ite(aux'10__21, 0, aux'12__23), 1) when Chaud(state__6))
+           (Froid't -> sub(ite(aux'14__25, 0, aux'16__27), 1) when Froid(state__6))
 tel
 node main0__11()
   returns (o__10 : int :: Base)
@@ -211,23 +207,19 @@ let
   (aux'16__27) = 0 fby aux'15__26;
   (state__6) = ite(aux'2__13, Chaud't, aux'8__19);
   (x__5) = merge state__6 
-             (Chaud't -> add(ite(aux'10__21, 0, aux'12__23),
-                         1) when Chaud(state__6))
-             (Froid't -> sub(ite(aux'14__25, 0, aux'16__27),
-                         1) when Froid(state__6));
+           (Chaud't -> add(ite(aux'10__21, 0, aux'12__23), 1) when Chaud(state__6))
+           (Froid't -> sub(ite(aux'14__25, 0, aux'16__27), 1) when Froid(state__6));
   (aux'3__14) = ge(x__5, hi__8);
   (aux'4__15) = ge(x__5, hi__8);
   (aux'5__16) = le(x__5, lo__7);
   (aux'6__17) = le(x__5, lo__7);
   (aux'7__18) = merge state__6 
-                  (Chaud't -> merge ge(x__5,
-                              hi__8) 
-                                (true -> Froid't when True(aux'3__14))
-                                (false -> Chaud't when False(aux'4__15)))
-                  (Froid't -> merge le(x__5,
-                              lo__7) 
-                                (true -> Chaud't when True(aux'5__16))
-                                (false -> Froid't when False(aux'6__17)));
+                (Chaud't -> merge ge(x__5, hi__8) 
+                (true -> Froid't when True(aux'3__14))
+                (false -> Chaud't when False(aux'4__15)))
+                (Froid't -> merge le(x__5, lo__7) 
+                (true -> Chaud't when True(aux'5__16))
+                (false -> Froid't when False(aux'6__17)));
   (aux'11__22) = x__5;
   (aux'15__26) = x__5
 tel

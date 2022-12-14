@@ -106,12 +106,11 @@ let
   (aux'2__17) = true fby aux'1__16;
   (aux'1__16) = false;
   (o__5) = merge tic__8 
-             (true -> v__7 when True(tic__8))
-             (false -> ite(aux'2__17, 0, add(aux'4__19,
-                       v__7)) when False(tic__8));
+           (true -> v__7 when True(tic__8))
+           (false -> ite(aux'2__17, 0, add(aux'4__19, v__7)) when False(tic__8));
   (v__7) = merge toc__9 
-             (true -> 1 when True(toc__9))
-             (false -> 0 when False(toc__9));
+           (true -> 1 when True(toc__9))
+           (false -> 0 when False(toc__9));
   (y__6) = v__7
 tel
 node main0__15(x__14 : bool :: Base)
@@ -122,8 +121,8 @@ let
   (aux'5__20, aux'6__21) = counting__10(x__14, x__14);
   (y__12, z__13) = (aux'5__20, aux'6__21);
   (o__11) = merge x__14 
-              (true -> false when True(x__14))
-              (false -> true when False(x__14))
+            (true -> false when True(x__14))
+            (false -> true when False(x__14))
 tel
 /**************************************/
 /* Scheduled ast                      */
@@ -138,15 +137,14 @@ var aux'4__19 : int :: Base, aux'3__18 : int :: Base, aux'2__17 : bool :: Base,
     aux'1__16 : bool :: Base, v__7 : int :: Base;
 let
   (v__7) = merge toc__9 
-             (true -> 1 when True(toc__9))
-             (false -> 0 when False(toc__9));
+           (true -> 1 when True(toc__9))
+           (false -> 0 when False(toc__9));
   (aux'1__16) = false;
   (aux'2__17) = true fby aux'1__16;
   (aux'4__19) = 0 fby aux'3__18;
   (o__5) = merge tic__8 
-             (true -> v__7 when True(tic__8))
-             (false -> ite(aux'2__17, 0, add(aux'4__19,
-                       v__7)) when False(tic__8));
+           (true -> v__7 when True(tic__8))
+           (false -> ite(aux'2__17, 0, add(aux'4__19, v__7)) when False(tic__8));
   (y__6) = v__7;
   (aux'3__18) = o__5
 tel
@@ -156,8 +154,8 @@ var aux'5__20 : int :: Base, aux'6__21 : int :: Base, y__12 : int :: Base,
     z__13 : int :: Base;
 let
   (o__11) = merge x__14 
-              (true -> false when True(x__14))
-              (false -> true when False(x__14));
+            (true -> false when True(x__14))
+            (false -> true when False(x__14));
   (aux'5__20, aux'6__21) = counting__10(x__14, x__14);
   (y__12, z__13) = (aux'5__20, aux'6__21)
 tel

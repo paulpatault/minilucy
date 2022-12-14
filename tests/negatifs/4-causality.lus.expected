@@ -41,5 +41,7 @@ let
   (b__6) = a__5;
 tel
 
-(a__5) = b__6(b__6) = a__5[31m[1mClocking error: [0mCausality
+(a__5) = b__6
+(b__6) = a__5
+[31m[1mClocking error: [0mCausality
 
