@@ -131,7 +131,7 @@ let () =
 
     let file_name = (Format.sprintf "%s.c" (Filename.remove_extension file)) in
 
-    let fc = Cgen.compile fi main_node file_name !no_sleep in
+    let fc = Cgen.compile fi main_node file_name !no_sleep fa.const_main_input in
     if !verbose then begin
       Format.printf "/**************************************/@.";
       Format.printf "/* C file                             */@.";

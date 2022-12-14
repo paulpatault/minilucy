@@ -70,4 +70,5 @@ type p_node =
 type p_file =
   { p_types: adt_type list;
     p_nodes: p_node list;
+    const_main_input: bool;
   }

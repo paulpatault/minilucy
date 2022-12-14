@@ -71,6 +71,7 @@
 %token <string> CONSTR
 %token <string * string> TCONSTR
 %token PRINT
+%token CONST_MAIN
 
 %nonassoc THEN
 %nonassoc ELSE
@@ -94,8 +95,8 @@
 
 %%
 
-file: type_decs node_decs EOF
-  { { p_types = $1 ; p_nodes = $2; } }
+file: CONST_MAIN? type_decs node_decs EOF
+  { { p_types = $2 ; p_nodes = $3; const_main_input = Option.is_some $1} }
 ;
 
 type_decs:
@@ -137,13 +138,10 @@ local_params_init:
  | x = X { x &@ $sloc }
 ;
 
-in_params:
-| /* empty */
-    { [] }
+in_params: { [] }
 | param_list
     { $1 }
 ;
-
 
 out_params:
 | param_list

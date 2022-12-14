@@ -81,6 +81,7 @@ rule token = parse
       { newline lexbuf; token lexbuf }
   | "/*"
       { comment lexbuf; token lexbuf }
+  | "{%" ' '+ "set" ' '+ "const-main" ' '+ "%}" { CONST_MAIN }
   | "(*"
       { comment2 lexbuf; token lexbuf }
   | ident

@@ -126,6 +126,6 @@ let apply node =
   let (locals, types), pn_equs = map_eq node.pn_equs in
   types, { node with pn_equs ; pn_local = locals @ node.pn_local}
 
-let unsugar { p_nodes; p_types } =
+let unsugar { p_nodes; p_types; const_main_input } =
   let acc, nodes = List.fold_left_map (fun acc e -> let types, trad = apply e in types @ acc, trad) [] p_nodes in
-  { p_nodes = nodes; p_types = p_types @ acc }
+  { p_nodes = nodes; p_types = p_types @ acc; const_main_input }

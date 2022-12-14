@@ -488,7 +488,7 @@ let rec compile_expr types file node fundec expr =
       end
   | IE_print (s, e) ->
       let arg0 = if s <> "" then s else
-          String.concat ""
+          String.concat " "
             (List.map
                (fun e ->
                   match e.iexpr_type with
@@ -632,7 +632,7 @@ let compile_node types file node =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
-let compile_main file ast main_node no_sleep =
+let compile_main file ast main_node no_sleep const_main =
   let main_node_imp = List.find (fun {in_name;_}-> in_name.name = main_node) ast.i_nodes in
   let args = [
     "argc", TInt (IInt, []), [];
@@ -663,20 +663,27 @@ let compile_main file ast main_node no_sleep =
 
   let main_imp_type = main_node_imp.in_input_step in (* args du main dans lustre *)
   let len = List.length main_imp_type in
-  (* let argc = Lval (Var (find_formal fundec "argc"), NoOffset) in *)
 
-  (* let if_condition = BinOp (Lt, argc, mk_int_exp (len + 1), TInt (IInt, [])) in *)
-  (* let str_fmt = GoblintCil.Const (CStr ("Error : %d needed arguments were not provided", No_encoding)) in *)
+  if const_main then (
+    let argc = Lval (Var (find_formal fundec "argc"), NoOffset) in
 
-  (* let call_printf = Call (None, printf_lval, [str_fmt; mk_int_exp len], locUnknown, locUnknown) in *)
-  (* let print = mkStmtOneInstr call_printf in *)
-  (* let exit = mkStmtOneInstr (Call (None, exit_lval, [mk_int_exp 1], locUnknown, locUnknown)) in *)
-  (* let verif_inputs_stmt = mkStmt (If (if_condition, mkBlock [print;exit], mkBlock [], locUnknown, locUnknown)) in *)
-  (* fundec.sbody <- append_stmt verif_inputs_stmt fundec.sbody; *)
+    let if_condition = BinOp (Lt, argc, mk_int_exp (len + 1), TInt (IInt, [])) in
+    let str_fmt = GoblintCil.Const (CStr ("\"Error : %d needed arguments were not provided\"", No_encoding)) in
+
+    let call_printf = Call (None, printf_lval, [str_fmt; mk_int_exp len], locUnknown, locUnknown) in
+    let print = mkStmtOneInstr call_printf in
+    let exit = mkStmtOneInstr (Call (None, exit_lval, [mk_int_exp 1], locUnknown, locUnknown)) in
+    let verif_inputs_stmt = mkStmt (If (if_condition, mkBlock [print;exit], mkBlock [], locUnknown, locUnknown)) in
+    fundec.sbody <- append_stmt verif_inputs_stmt fundec.sbody
+  );
 
   let atoied_vars_lvals = List.init len (fun i -> Lval (Var (makeLocalVar fundec (Format.sprintf "argv_%d" i) (TInt (IInt, []))), NoOffset)) in
-  (* let call_atoi_argv ret argv_i = Call (Some ret, atoi_lval, [argv_i], locUnknown, locUnknown) in *)
-  let call_atoi_argv ret argv_i = Call (Some ret, int_read_lval, [], locUnknown, locUnknown) in
+
+  let call_atoi_argv ret argv_i = 
+    if const_main then
+      Call (Some ret, atoi_lval, [argv_i], locUnknown, locUnknown)
+    else
+      Call (Some ret, int_read_lval, [], locUnknown, locUnknown) in
 
   let argv = find_formal fundec "argv" in
   let atois = List.mapi (fun i -> function
@@ -687,8 +694,12 @@ let compile_main file ast main_node no_sleep =
       | _ -> assert false)
       atoied_vars_lvals in
 
-  let atoi_block = List.map mkStmtOneInstr atois in
-  (* fundec.sbody <- append_stmts atoi_block fundec.sbody; *)
+  let atoi_block =
+    let atoi_block = List.map mkStmtOneInstr atois in
+    if const_main then (
+      fundec.sbody <- append_stmts atoi_block fundec.sbody;
+      []
+    ) else atoi_block in
 
   let step_fun = find_fun main_node file.globals in
   let step_lval = Lval (Var step_fun.svar, NoOffset) in
@@ -699,7 +710,7 @@ let compile_main file ast main_node no_sleep =
   let step_call_params = addr_mem_lval @ atoied_vars_lvals in
   let step_call = Call (Some res_lval, step_lval, step_call_params, locUnknown, locUnknown) in
 
-  let str_fmt = GoblintCil.Const (CStr (typ_to_format_string res_typ ^ " ", No_encoding)) in (* ajout d'un espace *)
+  let str_fmt = GoblintCil.Const (CStr (Format.sprintf "\"%s \"" (typ_to_format_string res_typ), No_encoding)) in (* ajout d'un espace *)
   let call_printf = Call (None, printf_lval, [str_fmt; Lval res_lval], locUnknown, locUnknown) in
   let sleep1_stmt = mkStmtOneInstr (Call (None, sleep_lval, [mk_int_exp 333333], locUnknown, locUnknown)) in (* 333333 micro_seconds ≃ 0.3 second *)
   let fflush0_stmt = mkStmtOneInstr (Call (None, fflush_lval, [mk_int_exp 0], locUnknown, locUnknown)) in
@@ -721,7 +732,7 @@ let compile_enums types =
     let typeinfo = { tname = name; ttype = mk_enum types name; treferenced = false} in
     GType (typeinfo, locUnknown)) types
 
-let compile ast main_node file_name no_sleep =
+let compile ast main_node file_name no_sleep const_main =
   let file = {
     fileName = file_name;
     globals = [];
@@ -729,7 +740,7 @@ let compile ast main_node file_name no_sleep =
     globinitcalled = false;
   } in
   let file = List.fold_left (compile_node ast.i_types) file ast.i_nodes in
-  let file = compile_main file ast main_node no_sleep in
+  let file = compile_main file ast main_node no_sleep const_main in
   file.globals <- List.rev file.globals;
   file.globals <- compile_enums ast.i_types @ file.globals;
   file.globals <-    GText "#include <stdlib.h>"
