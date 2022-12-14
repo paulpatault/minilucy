@@ -30,13 +30,48 @@
 \end{frame}
 
 \begin{frame}[fragile]{Construction \texttt{when}}
-     \scriptsize
-     \begin{verbatim}
-Warning: this pattern-matching is not exhaustive.
-Here is a case that is not matched:
-   Node (Node _, _, _)
-     \end{verbatim}
 \end{frame}
+\begin{frame}[fragile]{Schéma de compilation}
+     % \scriptsize 
+%      \begin{verbatim}
+% Warning: this pattern-matching is not exhaustive.
+% Here is a case that is not matched:
+%    Node (Node _, _, _)
+    %      \end{verbatim}
+    \scalebox{0.75}{
+\usetikzlibrary {arrows.meta}
+
+\begin{tikzpicture}
+  [auto,
+   every path/.style ={draw, ultra thick,
+       ->, % -Stealth[], 
+       shorten >=1pt, line width=1pt},
+   every node/.style ={thick, align=center, rounded corners, rectangle,
+     minimum height=3.5em, minimum width=7em},
+   state/.style  ={ draw=blue2,  fill=blue2!70},
+   ]
+
+  \node [state]                (ulus) {lustre} edge [loop below] ();
+  \node [state, right=of ulus] (tlus) {typed lustre};
+  \node [state, right=of tlus] (nlus) {normalised lustre};
+  \node [state, right=of nlus] (clus) {clocked lustre};
+  \node [state, below=of clus] (slus) {scheduled lustre};
+  \node [state, below=of slus] (impl) {IMP};
+  \node [state, left =of impl] (c) {C};
+
+  \begin{scope}
+    \path (ulus) -- (tlus);
+    \path (tlus) -- (nlus);
+    \path (nlus) -- (clus);
+    \path (clus.south) -- (slus.north);
+    \path (slus.south) -- (impl.north);
+    \path (impl.west)  -- (c.east);
+  \end{scope}
+\end{tikzpicture}
+    }
+\end{frame}
+
+
 
 % \begin{frame}{All small caps}
 %     This frame uses the \texttt{allsmallcaps} titleformat.
