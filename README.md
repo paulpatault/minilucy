@@ -39,6 +39,7 @@ où `OPTIONS` :
 - `-imp-only` : arrêt après la traduction vers `imp`
 - `-c-only` : arrêt après la traduction vers `C`
 - `-no-sleep` : n'ajoute pas la fonction `sleep(1)` dans le main du fichier `C`
+- `-no-nl` : n'ajoute pas de `\n` dans le `printf` du `while` du main du fichier `C`
 
 Exemple :
 ```

@@ -1,0 +1,773 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__6 =
+  | Plus
+  | Moins
+type typ__1 =
+  | Up
+  | Down
+
+node f() returns (o : int);
+var state__7 : typ__6; cond__9 : bool; cond__8 : bool; print_var__5 : int;
+    state__2 : typ__1; cond__4 : bool; cond__3 : bool; x : int; y : int;
+let
+  (x) = (0) -> (add(pre (x), 1));
+  (cond__4) = eq(mod(x, 3), 0);
+  (cond__3) = eq(mod(x, 3), 0);
+  (state__2) = (Up'typ__1) -> (pre (merge state__2 
+                                      (Up'typ__1 -> ite(cond__3, Down'typ__1,
+                                                        Up'typ__1))
+                                      (Down'typ__1 -> ite(cond__4, Up'typ__1,
+                                                          Down'typ__1))));
+  (y) = merge state__2 
+          (Up'typ__1 -> (0) -> (add(pre (y), 1)))
+          (Down'typ__1 -> (0) -> (sub(pre (y), 1)));
+  (print_var__5) = print("\"%d \""y);
+  (cond__9) = eq(mod(x, 5), 0);
+  (cond__8) = eq(mod(x, 5), 0);
+  (state__7) = (Plus'typ__6) -> (pre (merge state__7 
+                                        (Plus'typ__6 -> ite(cond__8,
+                                                            Moins'typ__6,
+                                                            Plus'typ__6))
+                                        (Moins'typ__6 -> ite(cond__9,
+                                                             Plus'typ__6,
+                                                             Moins'typ__6))));
+  (o) = merge state__7 
+          (Plus'typ__6 -> x)
+          (Moins'typ__6 -> sub(x));
+tel
+
+node main0() returns (o : int);
+var ;
+let
+  (o) = f();
+tel
+
+/**************************************/
+/* Typed ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__6 =
+  | Plus
+  | Moins
+type typ__1 =
+  | Up
+  | Down
+
+node f__15() returns (o__5 : int)
+var state__7__6: typ__6; cond__9__7: bool; cond__8__8: bool;
+    print_var__5__9: int; state__2__10: typ__1; cond__4__11: bool;
+    cond__3__12: bool; x__13: int; y__14: int;
+let
+  (x__13) = ite(true fby false, 0, add(0 fby x__13, 1));
+  (cond__4__11) = eq(mod(x__13, 3), 0);
+  (cond__3__12) = eq(mod(x__13, 3), 0);
+  (state__2__10) = ite(true fby false, Up'typ__1,
+                   default(typ__1) fby merge state__2__10 
+                                         (Up'typ__1 -> merge cond__3__12 
+                                                         (true -> Down'typ__1 when True(cond__3__12))
+                                                         (false -> Up'typ__1 when False(cond__3__12)))
+                                         (Down'typ__1 -> merge cond__4__11 
+                                                           (true -> Up'typ__1 when True(cond__4__11))
+                                                           (false -> 
+                                                           Down'typ__1 when False(cond__4__11))));
+  (y__14) = merge state__2__10 
+              (Up'typ__1 -> ite(true fby false, 0, add(0 fby y__14,
+              1)))
+              (Down'typ__1 -> ite(true fby false, 0, sub(0 fby y__14, 1)));
+  (print_var__5__9) = print("\"%d \"", y__14);
+  (cond__9__7) = eq(mod(x__13, 5), 0);
+  (cond__8__8) = eq(mod(x__13, 5), 0);
+  (state__7__6) = ite(true fby false, Plus'typ__6,
+                  default(typ__6) fby merge state__7__6 
+                                        (Plus'typ__6 -> merge cond__8__8 
+                                                          (true -> Moins'typ__6 when True(cond__8__8))
+                                                          (false -> Plus'typ__6 when False(cond__8__8)))
+                                        (Moins'typ__6 -> merge cond__9__7 
+                                                           (true -> Plus'typ__6 when True(cond__9__7))
+                                                           (false -> 
+                                                           Moins'typ__6 when False(cond__9__7))));
+  (o__5) = merge state__7__6 
+             (Plus'typ__6 -> x__13)
+             (Moins'typ__6 -> sub(x__13));
+tel
+
+node main0__17() returns (o__16 : int)
+var ;
+let
+  (o__16) = f__15();
+tel
+
+/**************************************/
+/* Normalized ast                     */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__6 =
+  | Plus
+  | Moins
+type typ__1 =
+  | Up
+  | Down
+
+node f__15() returns (o__5 : int)
+var aux'21__38: typ__6; aux'20__37: typ__6; aux'19__36: bool;
+    aux'18__35: bool; aux'17__34: int; aux'16__33: int; aux'15__32: int;
+    aux'14__31: bool; aux'13__30: bool; aux'12__29: int; aux'11__28: int;
+    aux'10__27: bool; aux'9__26: bool; aux'8__25: typ__1; aux'7__24: typ__1;
+    aux'6__23: bool; aux'5__22: bool; aux'4__21: int; aux'3__20: int;
+    aux'2__19: bool; aux'1__18: bool; state__7__6: typ__6; cond__9__7: bool;
+    cond__8__8: bool; print_var__5__9: int; state__2__10: typ__1;
+    cond__4__11: bool; cond__3__12: bool; x__13: int; y__14: int;
+let
+  (aux'4__21) = 0 fby aux'3__20;
+  (aux'3__20) = x__13;
+  (aux'2__19) = true fby aux'1__18;
+  (aux'1__18) = false;
+  (x__13) = ite(aux'2__19, 0, add(aux'4__21, 1));
+  (cond__4__11) = eq(mod(x__13, 3), 0);
+  (cond__3__12) = eq(mod(x__13, 3), 0);
+  (aux'8__25) = default(typ__1) fby aux'7__24;
+  (aux'7__24) = merge state__2__10 
+                  (Up'typ__1 -> merge cond__3__12 
+                                  (true -> Down'typ__1 when True(cond__3__12))
+                                  (false -> Up'typ__1 when False(cond__3__12)))
+                  (Down'typ__1 -> merge cond__4__11 
+                                    (true -> Up'typ__1 when True(cond__4__11))
+                                    (false -> Down'typ__1 when False(cond__4__11)));
+  (aux'6__23) = true fby aux'5__22;
+  (aux'5__22) = false;
+  (state__2__10) = ite(aux'6__23, Up'typ__1, aux'8__25);
+  (aux'16__33) = 0 fby aux'15__32;
+  (aux'15__32) = y__14;
+  (aux'14__31) = true fby aux'13__30;
+  (aux'13__30) = false;
+  (aux'12__29) = 0 fby aux'11__28;
+  (aux'11__28) = y__14;
+  (aux'10__27) = true fby aux'9__26;
+  (aux'9__26) = false;
+  (y__14) = merge state__2__10 
+              (Up'typ__1 -> ite(aux'10__27, 0, add(aux'12__29,
+              1)))
+              (Down'typ__1 -> ite(aux'14__31, 0, sub(aux'16__33, 1)));
+  (aux'17__34) = print("\"%d \"", y__14);
+  (print_var__5__9) = aux'17__34;
+  (cond__9__7) = eq(mod(x__13, 5), 0);
+  (cond__8__8) = eq(mod(x__13, 5), 0);
+  (aux'21__38) = default(typ__6) fby aux'20__37;
+  (aux'20__37) = merge state__7__6 
+                   (Plus'typ__6 -> merge cond__8__8 
+                                     (true -> Moins'typ__6 when True(cond__8__8))
+                                     (false -> Plus'typ__6 when False(cond__8__8)))
+                   (Moins'typ__6 -> merge cond__9__7 
+                                      (true -> Plus'typ__6 when True(cond__9__7))
+                                      (false -> Moins'typ__6 when False(cond__9__7)));
+  (aux'19__36) = true fby aux'18__35;
+  (aux'18__35) = false;
+  (state__7__6) = ite(aux'19__36, Plus'typ__6, aux'21__38);
+  (o__5) = merge state__7__6 
+             (Plus'typ__6 -> x__13)
+             (Moins'typ__6 -> sub(x__13));
+tel
+
+node main0__17() returns (o__16 : int)
+var aux'22__39: int;
+let
+  (aux'22__39) = f__15();
+  (o__16) = aux'22__39;
+tel
+
+/**************************************/
+/* Clocked ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__6 =
+  | Plus
+  | Moins
+type typ__1 =
+  | Up
+  | Down
+
+node f__15()
+  returns (o__5 : int :: Base)
+var aux'21__38 : typ__6 :: Base, aux'20__37 : typ__6 :: Base, aux'19__36 : bool :: Base, 
+    aux'18__35 : bool :: Base, aux'17__34 : int :: Base, aux'16__33 : int :: Base, 
+    aux'15__32 : int :: Base, aux'14__31 : bool :: Base, aux'13__30 : bool :: Base, 
+    aux'12__29 : int :: Base, aux'11__28 : int :: Base, aux'10__27 : bool :: Base, 
+    aux'9__26 : bool :: Base, aux'8__25 : typ__1 :: Base, aux'7__24 : typ__1 :: Base, 
+    aux'6__23 : bool :: Base, aux'5__22 : bool :: Base, aux'4__21 : int :: Base, 
+    aux'3__20 : int :: Base, aux'2__19 : bool :: Base, aux'1__18 : bool :: Base, 
+    state__7__6 : typ__6 :: Base, cond__9__7 : bool :: Base, cond__8__8 : bool :: Base, 
+    print_var__5__9 : int :: Base, state__2__10 : typ__1 :: Base, cond__4__11 : bool :: Base, 
+    cond__3__12 : bool :: Base, x__13 : int :: Base, y__14 : int :: Base;
+let
+  (aux'4__21) = 0 fby aux'3__20;
+  (aux'3__20) = x__13;
+  (aux'2__19) = true fby aux'1__18;
+  (aux'1__18) = false;
+  (x__13) = ite(aux'2__19, 0, add(aux'4__21, 1));
+  (cond__4__11) = eq(mod(x__13, 3), 0);
+  (cond__3__12) = eq(mod(x__13, 3), 0);
+  (aux'8__25) = default(typ__1) fby aux'7__24;
+  (aux'7__24) = merge state__2__10 
+                (Up'typ__1 -> merge cond__3__12 
+                (true -> Down'typ__1 when True(cond__3__12))
+                (false -> Up'typ__1 when False(cond__3__12)))
+                (Down'typ__1 -> merge cond__4__11 
+                (true -> Up'typ__1 when True(cond__4__11))
+                (false -> Down'typ__1 when False(cond__4__11)));
+  (aux'6__23) = true fby aux'5__22;
+  (aux'5__22) = false;
+  (state__2__10) = ite(aux'6__23, Up'typ__1, aux'8__25);
+  (aux'16__33) = 0 fby aux'15__32;
+  (aux'15__32) = y__14;
+  (aux'14__31) = true fby aux'13__30;
+  (aux'13__30) = false;
+  (aux'12__29) = 0 fby aux'11__28;
+  (aux'11__28) = y__14;
+  (aux'10__27) = true fby aux'9__26;
+  (aux'9__26) = false;
+  (y__14) = merge state__2__10 
+            (Up'typ__1 -> ite(aux'10__27, 0, add(aux'12__29, 1)))
+            (Down'typ__1 -> ite(aux'14__31, 0, sub(aux'16__33, 1)));
+  (aux'17__34) = print("\"%d \"", y__14);
+  (print_var__5__9) = aux'17__34;
+  (cond__9__7) = eq(mod(x__13, 5), 0);
+  (cond__8__8) = eq(mod(x__13, 5), 0);
+  (aux'21__38) = default(typ__6) fby aux'20__37;
+  (aux'20__37) = merge state__7__6 
+                 (Plus'typ__6 -> merge cond__8__8 
+                 (true -> Moins'typ__6 when True(cond__8__8))
+                 (false -> Plus'typ__6 when False(cond__8__8)))
+                 (Moins'typ__6 -> merge cond__9__7 
+                 (true -> Plus'typ__6 when True(cond__9__7))
+                 (false -> Moins'typ__6 when False(cond__9__7)));
+  (aux'19__36) = true fby aux'18__35;
+  (aux'18__35) = false;
+  (state__7__6) = ite(aux'19__36, Plus'typ__6, aux'21__38);
+  (o__5) = merge state__7__6 
+           (Plus'typ__6 -> x__13)
+           (Moins'typ__6 -> sub(x__13))
+tel
+node main0__17()
+  returns (o__16 : int :: Base)
+var aux'22__39 : int :: Base;
+let
+  (aux'22__39) = f__15();
+  (o__16) = aux'22__39
+tel
+/**************************************/
+/* Scheduled ast                      */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__6 =
+  | Plus
+  | Moins
+type typ__1 =
+  | Up
+  | Down
+
+node f__15()
+  returns (o__5 : int :: Base)
+var aux'21__38 : typ__6 :: Base, aux'20__37 : typ__6 :: Base, aux'19__36 : bool :: Base, 
+    aux'18__35 : bool :: Base, aux'17__34 : int :: Base, aux'16__33 : int :: Base, 
+    aux'15__32 : int :: Base, aux'14__31 : bool :: Base, aux'13__30 : bool :: Base, 
+    aux'12__29 : int :: Base, aux'11__28 : int :: Base, aux'10__27 : bool :: Base, 
+    aux'9__26 : bool :: Base, aux'8__25 : typ__1 :: Base, aux'7__24 : typ__1 :: Base, 
+    aux'6__23 : bool :: Base, aux'5__22 : bool :: Base, aux'4__21 : int :: Base, 
+    aux'3__20 : int :: Base, aux'2__19 : bool :: Base, aux'1__18 : bool :: Base, 
+    state__7__6 : typ__6 :: Base, cond__9__7 : bool :: Base, cond__8__8 : bool :: Base, 
+    print_var__5__9 : int :: Base, state__2__10 : typ__1 :: Base, cond__4__11 : bool :: Base, 
+    cond__3__12 : bool :: Base, x__13 : int :: Base, y__14 : int :: Base;
+let
+  (aux'1__18) = false;
+  (aux'2__19) = true fby aux'1__18;
+  (aux'4__21) = 0 fby aux'3__20;
+  (aux'5__22) = false;
+  (aux'6__23) = true fby aux'5__22;
+  (aux'8__25) = default(typ__1) fby aux'7__24;
+  (aux'9__26) = false;
+  (aux'10__27) = true fby aux'9__26;
+  (aux'12__29) = 0 fby aux'11__28;
+  (aux'13__30) = false;
+  (aux'14__31) = true fby aux'13__30;
+  (aux'16__33) = 0 fby aux'15__32;
+  (aux'18__35) = false;
+  (aux'19__36) = true fby aux'18__35;
+  (aux'21__38) = default(typ__6) fby aux'20__37;
+  (state__7__6) = ite(aux'19__36, Plus'typ__6, aux'21__38);
+  (state__2__10) = ite(aux'6__23, Up'typ__1, aux'8__25);
+  (x__13) = ite(aux'2__19, 0, add(aux'4__21, 1));
+  (o__5) = merge state__7__6 
+           (Plus'typ__6 -> x__13)
+           (Moins'typ__6 -> sub(x__13));
+  (cond__9__7) = eq(mod(x__13, 5), 0);
+  (cond__8__8) = eq(mod(x__13, 5), 0);
+  (cond__4__11) = eq(mod(x__13, 3), 0);
+  (cond__3__12) = eq(mod(x__13, 3), 0);
+  (y__14) = merge state__2__10 
+            (Up'typ__1 -> ite(aux'10__27, 0, add(aux'12__29, 1)))
+            (Down'typ__1 -> ite(aux'14__31, 0, sub(aux'16__33, 1)));
+  (aux'3__20) = x__13;
+  (aux'7__24) = merge state__2__10 
+                (Up'typ__1 -> merge cond__3__12 
+                (true -> Down'typ__1 when True(cond__3__12))
+                (false -> Up'typ__1 when False(cond__3__12)))
+                (Down'typ__1 -> merge cond__4__11 
+                (true -> Up'typ__1 when True(cond__4__11))
+                (false -> Down'typ__1 when False(cond__4__11)));
+  (aux'11__28) = y__14;
+  (aux'15__32) = y__14;
+  (aux'17__34) = print("\"%d \"", y__14);
+  (aux'20__37) = merge state__7__6 
+                 (Plus'typ__6 -> merge cond__8__8 
+                 (true -> Moins'typ__6 when True(cond__8__8))
+                 (false -> Plus'typ__6 when False(cond__8__8)))
+                 (Moins'typ__6 -> merge cond__9__7 
+                 (true -> Plus'typ__6 when True(cond__9__7))
+                 (false -> Moins'typ__6 when False(cond__9__7)));
+  (print_var__5__9) = aux'17__34
+tel
+node main0__17()
+  returns (o__16 : int :: Base)
+var aux'22__39 : int :: Base;
+let
+  (aux'22__39) = f__15();
+  (o__16) = aux'22__39
+tel
+/**************************************/
+/* Imp ast                            */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+type typ__6 =
+  | Plus
+  | Moins
+type typ__1 =
+  | Up
+  | Down
+
+node f__15()
+  returns (o__5 : int :: Base)
+var aux'21__38 : typ__6 :: Base, aux'20__37 : typ__6 :: Base, aux'19__36 : bool :: Base, 
+    aux'18__35 : bool :: Base, aux'17__34 : int :: Base, aux'16__33 : int :: Base, 
+    aux'15__32 : int :: Base, aux'14__31 : bool :: Base, aux'13__30 : bool :: Base, 
+    aux'12__29 : int :: Base, aux'11__28 : int :: Base, aux'10__27 : bool :: Base, 
+    aux'9__26 : bool :: Base, aux'8__25 : typ__1 :: Base, aux'7__24 : typ__1 :: Base, 
+    aux'6__23 : bool :: Base, aux'5__22 : bool :: Base, aux'4__21 : int :: Base, 
+    aux'3__20 : int :: Base, aux'2__19 : bool :: Base, aux'1__18 : bool :: Base, 
+    state__7__6 : typ__6 :: Base, cond__9__7 : bool :: Base, cond__8__8 : bool :: Base, 
+    print_var__5__9 : int :: Base, state__2__10 : typ__1 :: Base, cond__4__11 : bool :: Base, 
+    cond__3__12 : bool :: Base, x__13 : int :: Base, y__14 : int :: Base;
+  mem={node=[]
+       fby=[aux'2_next10__49 : bool :: Base, aux'4_next9__48 : int :: Base, 
+            aux'6_next8__47 : bool :: Base, aux'8_next7__46 : typ__1 :: Base, 
+            aux'10_next6__45 : bool :: Base, aux'12_next5__44 : int :: Base, 
+            aux'14_next4__43 : bool :: Base, aux'16_next3__42 : int :: Base, 
+            aux'19_next2__41 : bool :: Base, aux'21_next1__40 : typ__6 :: Base]}
+  init={node=[]
+        fby=[(aux'2_next10__49,true), (aux'4_next9__48,0), (aux'6_next8__47,true), (aux'8_next7__46,default(typ__1)), (aux'10_next6__45,true), (aux'12_next5__44,0), (aux'14_next4__43,true), (aux'16_next3__42,0), (aux'19_next2__41,true), (aux'21_next1__40,default(typ__6))]}
+  compute={(aux'1__18 : bool :: Base) = false;
+           (aux'2__19 : bool :: Base) = aux'2_next10__49;
+           (aux'4__21 : int :: Base) = aux'4_next9__48;
+           (aux'5__22 : bool :: Base) = false;
+           (aux'6__23 : bool :: Base) = aux'6_next8__47;
+           (aux'8__25 : typ__1 :: Base) = aux'8_next7__46;
+           (aux'9__26 : bool :: Base) = false;
+           (aux'10__27 : bool :: Base) = aux'10_next6__45;
+           (aux'12__29 : int :: Base) = aux'12_next5__44;
+           (aux'13__30 : bool :: Base) = false;
+           (aux'14__31 : bool :: Base) = aux'14_next4__43;
+           (aux'16__33 : int :: Base) = aux'16_next3__42;
+           (aux'18__35 : bool :: Base) = false;
+           (aux'19__36 : bool :: Base) = aux'19_next2__41;
+           (aux'21__38 : typ__6 :: Base) = aux'21_next1__40;
+           (state__7__6 : typ__6 :: Base) = ite(aux'19__36, Plus'typ__6,
+                                            aux'21__38);
+           (state__2__10 : typ__1 :: Base) = ite(aux'6__23, Up'typ__1,
+                                             aux'8__25);
+           (x__13 : int :: Base) = ite(aux'2__19, 0, add(aux'4__21, 1));
+           (o__5 : int :: Base) = case(state__7__6)Plus'typ__6: x__13;
+                                                     Moins'typ__6: sub(x__13);
+           (cond__9__7 : bool :: Base) = eq(mod(x__13, 5), 0);
+           (cond__8__8 : bool :: Base) = eq(mod(x__13, 5), 0);
+           (cond__4__11 : bool :: Base) = eq(mod(x__13, 3), 0);
+           (cond__3__12 : bool :: Base) = eq(mod(x__13, 3), 0);
+           (y__14 : int :: Base) = case(state__2__10)Up'typ__1: ite(aux'10__27,
+                                                                0,
+                                                                add(aux'12__29,
+                                                                1));
+                                                       Down'typ__1: ite(aux'14__31,
+                                                                    0,
+                                                                    sub(aux'16__33,
+                                                                    1));
+           (aux'3__20 : int :: Base) = x__13;
+           (aux'7__24 : typ__1 :: Base) = case(state__2__10)Up'typ__1: case(cond__3__12)
+                                                              True'inductive_bool: Down'typ__1;
+                                                                False'inductive_bool: Up'typ__1;
+                                                              Down'typ__1: case(cond__4__11)
+                                                              True'inductive_bool: Up'typ__1;
+                                                                False'inductive_bool: Down'typ__1;
+           (aux'11__28 : int :: Base) = y__14;
+           (aux'15__32 : int :: Base) = y__14;
+           (aux'17__34 : int :: Base) = print("\"%d \"", y__14);
+           (aux'20__37 : typ__6 :: Base) = case(state__7__6)Plus'typ__6: case(cond__8__8)
+                                                              True'inductive_bool: Moins'typ__6;
+                                                                False'inductive_bool: Plus'typ__6;
+                                                              Moins'typ__6: case(cond__9__7)
+                                                              True'inductive_bool: Plus'typ__6;
+                                                                False'inductive_bool: Moins'typ__6;
+           (print_var__5__9 : int :: Base) = aux'17__34}
+  update={(aux'2_next10__49,aux'1__18);
+          (aux'4_next9__48,aux'3__20);
+          (aux'6_next8__47,aux'5__22);
+          (aux'8_next7__46,aux'7__24);
+          (aux'10_next6__45,aux'9__26);
+          (aux'12_next5__44,aux'11__28);
+          (aux'14_next4__43,aux'13__30);
+          (aux'16_next3__42,aux'15__32);
+          (aux'19_next2__41,aux'18__35);
+          (aux'21_next1__40,aux'20__37)}
+  
+node main0__17()
+  returns (o__16 : int :: Base)
+var aux'22__39 : int :: Base;
+  mem={node=[(f_next1__50,f__15)]
+       fby=[]}
+  init={node=[(f_next1__50,f__15)]
+        fby=[]}
+  compute={(aux'22__39 : int :: Base) = f__15 <- f_next1__50();
+           (o__16 : int :: Base) = aux'22__39}
+  update={}
+  
+/**************************************/
+/* C file                             */
+/**************************************/
+#include <stdlib.h>
+
+#include <printf.h>
+
+#include <unistd.h>
+
+int int_read() {
+  int var;
+  scanf("%d", &var);
+  return var;
+}
+
+enum inductive_bool {
+  FALSE,
+  TRUE
+};
+
+enum typ__6 {
+  PLUS,
+  MOINS
+};
+
+enum typ__1 {
+  UP,
+  DOWN
+};
+
+struct f_mem {
+
+  int aux__2_next10;
+  int aux__4_next9;
+  int aux__6_next8;
+  enum typ__1 aux__8_next7;
+  int aux__10_next6;
+  int aux__12_next5;
+  int aux__14_next4;
+  int aux__16_next3;
+  int aux__19_next2;
+  enum typ__6 aux__21_next1;
+};
+
+void f_init (struct f_mem* mem) {
+  mem->aux__2_next10 = 1;
+  
+  mem->aux__4_next9 = 0;
+  
+  mem->aux__6_next8 = 1;
+  
+  mem->aux__8_next7 = UP;
+  
+  mem->aux__10_next6 = 1;
+  
+  mem->aux__12_next5 = 0;
+  
+  mem->aux__14_next4 = 1;
+  
+  mem->aux__16_next3 = 0;
+  
+  mem->aux__19_next2 = 1;
+  
+  mem->aux__21_next1 = PLUS;
+}
+
+int f (struct f_mem* mem) {
+  enum typ__6 aux__21;
+  enum typ__6 aux__20;
+  int aux__19;
+  int aux__18;
+  int aux__17;
+  int aux__16;
+  int aux__15;
+  int aux__14;
+  int aux__13;
+  int aux__12;
+  int aux__11;
+  int aux__10;
+  int aux__9;
+  enum typ__1 aux__8;
+  enum typ__1 aux__7;
+  int aux__6;
+  int aux__5;
+  int aux__4;
+  int aux__3;
+  int aux__2;
+  int aux__1;
+  enum typ__6 state__7;
+  int cond__9;
+  int cond__8;
+  enum typ__1 state__2;
+  int cond__4;
+  int cond__3;
+  int x;
+  int y;
+  int o;
+  enum typ__6 switch_1;
+  enum typ__1 switch_2;
+  enum typ__1 switch_3;
+  enum inductive_bool switch_4;
+  enum inductive_bool switch_5;
+  int call_1;
+  enum typ__6 switch_6;
+  enum inductive_bool switch_7;
+  enum inductive_bool switch_8;
+  
+  aux__1 = 0;
+  
+  aux__2 = mem->aux__2_next10;
+  
+  aux__4 = mem->aux__4_next9;
+  
+  aux__5 = 0;
+  
+  aux__6 = mem->aux__6_next8;
+  
+  aux__8 = mem->aux__8_next7;
+  
+  aux__9 = 0;
+  
+  aux__10 = mem->aux__10_next6;
+  
+  aux__12 = mem->aux__12_next5;
+  
+  aux__13 = 0;
+  
+  aux__14 = mem->aux__14_next4;
+  
+  aux__16 = mem->aux__16_next3;
+  
+  aux__18 = 0;
+  
+  aux__19 = mem->aux__19_next2;
+  
+  aux__21 = mem->aux__21_next1;
+  
+  state__7 = aux__19 ? PLUS : aux__21;
+  
+  state__2 = aux__6 ? UP : aux__8;
+  
+  x = aux__2 ? 0 : (aux__4 + 1);
+  
+  switch (state__7) {
+    case PLUS: {
+      switch_1 = x;
+      break;
+    }
+    case MOINS: {
+      switch_1 = -(x);
+      break;
+    }
+  };
+  
+  o = switch_1;
+  
+  cond__9 = ((x % 5) == 0);
+  
+  cond__8 = ((x % 5) == 0);
+  
+  cond__4 = ((x % 3) == 0);
+  
+  cond__3 = ((x % 3) == 0);
+  
+  switch (state__2) {
+    case UP: {
+      switch_2 = aux__10 ? 0 : (aux__12 + 1);
+      break;
+    }
+    case DOWN: {
+      switch_2 = aux__14 ? 0 : (aux__16 - 1);
+      break;
+    }
+  };
+  
+  y = switch_2;
+  
+  aux__3 = x;
+  
+  switch (cond__3) {
+    case TRUE: {
+      switch_4 = DOWN;
+      break;
+    }
+    case FALSE: {
+      switch_4 = UP;
+      break;
+    }
+  };
+  
+  switch (cond__4) {
+    case TRUE: {
+      switch_5 = UP;
+      break;
+    }
+    case FALSE: {
+      switch_5 = DOWN;
+      break;
+    }
+  };
+  
+  switch (state__2) {
+    case UP: {
+      switch_3 = switch_4;
+      break;
+    }
+    case DOWN: {
+      switch_3 = switch_5;
+      break;
+    }
+  };
+  
+  aux__7 = switch_3;
+  
+  aux__11 = y;
+  
+  aux__15 = y;
+  
+  printf("%d ", y);
+  
+  aux__17 = call_1;
+  
+  switch (cond__8) {
+    case TRUE: {
+      switch_7 = MOINS;
+      break;
+    }
+    case FALSE: {
+      switch_7 = PLUS;
+      break;
+    }
+  };
+  
+  switch (cond__9) {
+    case TRUE: {
+      switch_8 = PLUS;
+      break;
+    }
+    case FALSE: {
+      switch_8 = MOINS;
+      break;
+    }
+  };
+  
+  switch (state__7) {
+    case PLUS: {
+      switch_6 = switch_7;
+      break;
+    }
+    case MOINS: {
+      switch_6 = switch_8;
+      break;
+    }
+  };
+  
+  aux__20 = switch_6;
+  
+  mem->aux__2_next10 = aux__1;
+  
+  mem->aux__4_next9 = aux__3;
+  
+  mem->aux__6_next8 = aux__5;
+  
+  mem->aux__8_next7 = aux__7;
+  
+  mem->aux__10_next6 = aux__9;
+  
+  mem->aux__12_next5 = aux__11;
+  
+  mem->aux__14_next4 = aux__13;
+  
+  mem->aux__16_next3 = aux__15;
+  
+  mem->aux__19_next2 = aux__18;
+  
+  mem->aux__21_next1 = aux__20;
+  
+  return o;
+}
+
+struct main0_mem {
+  struct f_mem f_next1;
+};
+
+void main0_init (struct main0_mem* mem) {
+  f_init(&(mem->f_next1));
+}
+
+int main0 (struct main0_mem* mem) {
+  int aux__22;
+  int o;
+  int call_2;
+  
+  call_2 = f(&(mem->f_next1));
+  
+  aux__22 = call_2;
+  
+  o = aux__22;
+  
+  return o;
+}
+
+int main (int argc, char* argv[]) {
+  struct main0_mem mem;
+  int res;
+  
+  main0_init(&(mem));
+  
+  while (1) {
+    res = main0(&(mem));
+    
+    printf("%d\n", res);
+    
+    fflush(0);
+    
+    usleep(333333);
+  };
+}

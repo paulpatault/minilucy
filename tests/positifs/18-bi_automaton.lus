@@ -1,16 +1,25 @@
-node f () returns (o:int);
-var x, y: int;
+(*
+    deux automates en ||
+    - [y] oscille entre 3 et -3
+    - [o] est un compteur qui change de signe tous les 5 coups
+ *)
+
+node f () returns (o: int);
+  var x, y: int;
 let
   x = 0 -> pre x + 1;
+
   automaton
-  | Plus0 ->
+  | Up ->
       y = 0 -> pre y + 1;
-      until x mod 5 = 0 continue Moins0
-  | Moins0 ->
+      until x mod 3 = 0 continue Down
+  | Down ->
       y = 0 -> pre y - 1;
-      until x mod 5 = 0 continue Plus0
+      until x mod 3 = 0 continue Up
   end
-  print("y = %d\n", y);
+
+  print("%d ", y);
+
   automaton
   | Plus ->
       o = x;
@@ -21,7 +30,7 @@ let
   end
 tel
 
-node main0 () returns (o:int);
+node main0 () returns (o: int);
 let
   o = f();
 tel

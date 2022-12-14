@@ -225,7 +225,7 @@ int main (int argc, char* argv[]) {
   while (1) {
     res = main0();
     
-    printf("%d ", res);
+    printf("%d\n", res);
     
     fflush(0);
     

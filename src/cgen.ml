@@ -187,7 +187,7 @@ let rec compile_expr types file node fundec expr =
     end
   | IE_ident id ->
     let lval, ty =
-      try 
+      try
         let var = find_formal fundec (id.name) in
         Lval (Var var, NoOffset), var.vtype
       with Not_found ->
@@ -206,7 +206,7 @@ let rec compile_expr types file node fundec expr =
       try find_formal fundec "mem"
       with Not_found -> failwith (Format.sprintf "Mem not found for node: %s" node.in_name.name) in
     let fieldinfo =
-      try find_field_globals (node.in_name.name^"_mem") (id.name) file.globals 
+      try find_field_globals (node.in_name.name^"_mem") (id.name) file.globals
       with Not_found ->
         failwith (Format.sprintf "Mem or field not found: %s %s" (node.in_name.name^"_mem") (id.name))
     in
@@ -632,7 +632,7 @@ let compile_node types file node =
   file.globals <- (GFun (fundec, locUnknown))::file.globals;
   file
 
-let compile_main file ast main_node no_sleep const_main =
+let compile_main file ast main_node no_sleep no_nl const_main =
   let main_node_imp = List.find (fun {in_name;_}-> in_name.name = main_node) ast.i_nodes in
   let args = [
     "argc", TInt (IInt, []), [];
@@ -679,7 +679,7 @@ let compile_main file ast main_node no_sleep const_main =
 
   let atoied_vars_lvals = List.init len (fun i -> Lval (Var (makeLocalVar fundec (Format.sprintf "argv_%d" i) (TInt (IInt, []))), NoOffset)) in
 
-  let call_atoi_argv ret argv_i = 
+  let call_atoi_argv ret argv_i =
     if const_main then
       Call (Some ret, atoi_lval, [argv_i], locUnknown, locUnknown)
     else
@@ -710,7 +710,11 @@ let compile_main file ast main_node no_sleep const_main =
   let step_call_params = addr_mem_lval @ atoied_vars_lvals in
   let step_call = Call (Some res_lval, step_lval, step_call_params, locUnknown, locUnknown) in
 
-  let str_fmt = GoblintCil.Const (CStr (Format.sprintf "\"%s \"" (typ_to_format_string res_typ), No_encoding)) in (* ajout d'un espace *)
+  let str_fmt =
+    if no_nl then
+      GoblintCil.Const (CStr (Format.sprintf "\"%s \"" (typ_to_format_string res_typ), No_encoding)) (* ajout d'un espace *)
+    else
+      GoblintCil.Const (CStr (Format.sprintf "\"%s\\n\"" (typ_to_format_string res_typ), No_encoding)) in
   let call_printf = Call (None, printf_lval, [str_fmt; Lval res_lval], locUnknown, locUnknown) in
   let sleep1_stmt = mkStmtOneInstr (Call (None, sleep_lval, [mk_int_exp 333333], locUnknown, locUnknown)) in (* 333333 micro_seconds ≃ 0.3 second *)
   let fflush0_stmt = mkStmtOneInstr (Call (None, fflush_lval, [mk_int_exp 0], locUnknown, locUnknown)) in
@@ -732,7 +736,7 @@ let compile_enums types =
     let typeinfo = { tname = name; ttype = mk_enum types name; treferenced = false} in
     GType (typeinfo, locUnknown)) types
 
-let compile ast main_node file_name no_sleep const_main =
+let compile ast main_node file_name no_sleep no_nl const_main =
   let file = {
     fileName = file_name;
     globals = [];
@@ -740,7 +744,7 @@ let compile ast main_node file_name no_sleep const_main =
     globinitcalled = false;
   } in
   let file = List.fold_left (compile_node ast.i_types) file ast.i_nodes in
-  let file = compile_main file ast main_node no_sleep const_main in
+  let file = compile_main file ast main_node no_sleep no_nl const_main in
   file.globals <- List.rev file.globals;
   file.globals <- compile_enums ast.i_types @ file.globals;
   file.globals <-    GText "#include <stdlib.h>"

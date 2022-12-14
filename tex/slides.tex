@@ -49,7 +49,7 @@
         stateX/.style ={ draw=orange2,  fill=orange2!70},
     ]
 
-  \node [stateX]                (plus) {parsed lustre};
+  \node [stateX]               (plus) {parsed lustre};
   \node [state, below=of plus] (ulus) {un-sugared lustre};
   \node [state, right=of ulus] (tlus) {typed lustre};
   \node [state, right=of tlus] (nlus) {normalised lustre};
@@ -79,10 +79,10 @@
 
 \begin{frame}{Features réalisées}
     \begin{itemize}[label=$\vcenter{\hbox{\scriptsize$\bullet$}}$]
-        \item \texttt{when}
-        \item \texttt{merge}
-        \item \texttt{reset}
-        \item \texttt{automates} (en surface uniquement)
+        \item when
+        \item merge
+        \item reset
+        \item automates (en surface uniquement)
     \end{itemize}
 \end{frame}
 
@@ -448,6 +448,11 @@ tel
 
 $\to$ ajouter un appel à \tt{incr\_init()} quand \tt{i} est vrai
 
+\end{frame}
+
+\begin{frame}
+   \centerline{\url{https://github.com/paulpatault/minilucy}}
+   \thispagestyle{empty}
 \end{frame}
 
 \begin{frame}

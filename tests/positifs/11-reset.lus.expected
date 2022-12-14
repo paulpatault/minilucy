@@ -12,10 +12,10 @@ let
   (cpt) = add((0) -> (pre (cpt)), 1);
 tel
 
-node main0(x : bool) returns (o : int);
+node main0(i : bool) returns (o : int);
 var ;
 let
-  (o) = incr() every x;
+  (o) = incr() every i;
 tel
 
 /**************************************/
@@ -31,10 +31,10 @@ let
   (cpt__5) = add(ite(true fby false, 0, 0 fby cpt__5), 1);
 tel
 
-node main0__9(x__8 : bool) returns (o__7 : int)
+node main0__9(i__8 : bool) returns (o__7 : int)
 var ;
 let
-  (o__7) = (incr__6()) every x__8;
+  (o__7) = (incr__6()) every i__8;
 tel
 
 /**************************************/
@@ -54,10 +54,10 @@ let
   (cpt__5) = add(ite(aux'2__11, 0, aux'4__13), 1);
 tel
 
-node main0__9(x__8 : bool) returns (o__7 : int)
+node main0__9(i__8 : bool) returns (o__7 : int)
 var aux'5__14: int;
 let
-  (aux'5__14) = (incr__6()) every x__8;
+  (aux'5__14) = (incr__6()) every i__8;
   (o__7) = aux'5__14;
 tel
 
@@ -79,11 +79,11 @@ let
   (aux'1__10) = false;
   (cpt__5) = add(ite(aux'2__11, 0, aux'4__13), 1)
 tel
-node main0__9(x__8 : bool :: Base)
+node main0__9(i__8 : bool :: Base)
   returns (o__7 : int :: Base)
 var aux'5__14 : int :: Base;
 let
-  (aux'5__14) = incr__6(]) every x__8;
+  (aux'5__14) = incr__6(]) every i__8;
   (o__7) = aux'5__14
   tel
 /**************************************/
@@ -104,11 +104,11 @@ let
   (cpt__5) = add(ite(aux'2__11, 0, aux'4__13), 1);
   (aux'3__12) = cpt__5
 tel
-node main0__9(x__8 : bool :: Base)
+node main0__9(i__8 : bool :: Base)
   returns (o__7 : int :: Base)
 var aux'5__14 : int :: Base;
 let
-  (aux'5__14) = incr__6(]) every x__8;
+  (aux'5__14) = incr__6(]) every i__8;
   (o__7) = aux'5__14
   tel
 /**************************************/
@@ -134,14 +134,14 @@ var aux'4__13 : int :: Base, aux'3__12 : int :: Base, aux'2__11 : bool :: Base,
   update={(aux'2_next2__16,aux'1__10);
           (aux'4_next1__15,aux'3__12)}
   
-node main0__9(x__8 : bool :: Base)
+node main0__9(i__8 : bool :: Base)
   returns (o__7 : int :: Base)
 var aux'5__14 : int :: Base;
   mem={node=[(incr_next1__17,incr__6)]
        fby=[]}
   init={node=[(incr_next1__17,incr__6)]
         fby=[]}
-  compute={(aux'5__14 : int :: Base) = incr__6 <- incr_next1__17(@]) every x__8;
+  compute={(aux'5__14 : int :: Base) = incr__6 <- incr_next1__17(@]) every i__8;
            (o__7 : int :: Base) = aux'5__14}
            update={}
            
@@ -208,12 +208,12 @@ void main0_init (struct main0_mem* mem) {
   incr_init(&(mem->incr_next1));
 }
 
-int main0 (struct main0_mem* mem, int x) {
+int main0 (struct main0_mem* mem, int i) {
   int aux__5;
   int o;
   int call_1;
   
-  if (x) {
+  if (i) {
     incr_init(&(mem->incr_next1));
   };
   
@@ -238,7 +238,7 @@ int main (int argc, char* argv[]) {
     
     res = main0(&(mem), argv_0);
     
-    printf("%d ", res);
+    printf("%d\n", res);
     
     fflush(0);
     

@@ -32,7 +32,7 @@ int main (int argc, char* argv[]) {
     
     res = main0(argv_0);
     
-    printf("%d ", res);
+    printf("%d\n", res);
     
     fflush(0);
     
