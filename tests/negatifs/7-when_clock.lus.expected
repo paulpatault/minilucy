@@ -1,0 +1,45 @@
+
+/**************************************/
+/* Sugar automaton print              */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0(c : bool) returns (o : int);
+var x : int;
+let
+  (x) = 0 when True(c);
+  (o) = x;
+tel
+
+/**************************************/
+/* Typed ast                          */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0__8(c__7 : bool) returns (o__5 : int)
+var x__6: int;
+let
+  (x__6) = 0 when True(c__7);
+  (o__5) = x__6;
+tel
+
+/**************************************/
+/* Normalized ast                     */
+/**************************************/
+type inductive_bool =
+  | False
+  | True
+
+node main0__8(c__7 : bool) returns (o__5 : int)
+var x__6: int;
+let
+  (x__6) = 0 when True(c__7);
+  (o__5) = x__6;
+tel
+
+[31m[1mClocking error: [0mThe expected clock is Base, got Base on True(c__7)
+

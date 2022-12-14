@@ -15,11 +15,12 @@ let
   (cond__4) = false;
   (cond__3) = true;
   (state__2) = (FirstPeriod'typ__1) -> (pre (merge state__2 
-                                               (FirstPeriod'typ__1 -> ite(cond__3,
-                                               Cruise'typ__1,
+                                               (FirstPeriod'typ__1 -> ite(
+                                               cond__3, Cruise'typ__1,
                                                FirstPeriod'typ__1))
-                                               (Cruise'typ__1 -> ite(cond__4,
-                                               Cruise'typ__1, Cruise'typ__1))));
+                                               (Cruise'typ__1 -> ite(
+                                               cond__4, Cruise'typ__1,
+                                               Cruise'typ__1))));
   (y) = merge state__2 
           (FirstPeriod'typ__1 -> i)
           (Cruise'typ__1 -> sub(pre (y)));

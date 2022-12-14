@@ -16,10 +16,11 @@ let
   (cond__3) = ge(x, hi);
   (state__2) = (Chaud'typ__1) -> (pre (merge state__2 
                                          (Chaud'typ__1 -> ite(cond__3,
-                                         Froid'typ__1,
-                                         Chaud'typ__1))
+                                                              Froid'typ__1,
+                                                              Chaud'typ__1))
                                          (Froid'typ__1 -> ite(cond__4,
-                                         Chaud'typ__1, Froid'typ__1))));
+                                                              Chaud'typ__1,
+                                                              Froid'typ__1))));
   (x) = merge state__2 
           (Chaud'typ__1 -> (0) -> (add(pre (x), 1)))
           (Froid'typ__1 -> (0) -> (sub(pre (x), 1)));

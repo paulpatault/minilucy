@@ -9,17 +9,24 @@ type typ__1 =
   | Even
   | Odd
 
+node pair(i : int) returns (o : bool);
+var ;
+let
+  (o) = eq(mod(i, 2), 0);
+tel
+
 node main0(i : int) returns (o : int);
 var state__2 : typ__1; cond__4 : bool; cond__3 : bool;
 let
-  (cond__4) = eq(mod(o, 2), 0);
-  (cond__3) = eq(mod(o, 2), 1);
+  (cond__4) = pair(o);
+  (cond__3) = ~(pair(o));
   (state__2) = (Even'typ__1) -> (pre (merge state__2 
                                         (Even'typ__1 -> ite(cond__3,
-                                        Odd'typ__1,
-                                        Even'typ__1))
+                                                            Odd'typ__1,
+                                                            Even'typ__1))
                                         (Odd'typ__1 -> ite(cond__4,
-                                        Even'typ__1, Odd'typ__1))));
+                                                           Even'typ__1,
+                                                           Odd'typ__1))));
   (o) = merge state__2 
           (Even'typ__1 -> (i) -> (div(pre (o), 2)))
           (Odd'typ__1 -> (i) -> (add(mul(pre (o), 3), 1)));
@@ -35,24 +42,30 @@ type typ__1 =
   | Even
   | Odd
 
-node main0__10(i__9 : int) returns (o__5 : int)
-var state__2__6: typ__1; cond__4__7: bool; cond__3__8: bool;
+node pair__7(i__6 : int) returns (o__5 : bool)
+var ;
 let
-  (cond__4__7) = eq(mod(o__5, 2), 0);
-  (cond__3__8) = eq(mod(o__5, 2), 1);
-  (state__2__6) = ite(true fby false, Even'typ__1,
-                  default(typ__1) fby merge state__2__6 
-                                        (Even'typ__1 -> merge cond__3__8 
-                                                          (true -> Odd'typ__1 when True(cond__3__8))
-                                                          (false -> Even'typ__1 when False(cond__3__8)))
-                                        (Odd'typ__1 -> merge cond__4__7 
-                                                         (true -> Even'typ__1 when True(cond__4__7))
-                                                         (false -> Odd'typ__1 when False(cond__4__7))));
-  (o__5) = merge state__2__6 
-             (Even'typ__1 -> ite(true fby false, i__9, div(0 fby o__5,
+  (o__5) = eq(mod(i__6, 2), 0);
+tel
+
+node main0__13(i__12 : int) returns (o__8 : int)
+var state__2__9: typ__1; cond__4__10: bool; cond__3__11: bool;
+let
+  (cond__4__10) = pair__7(o__8);
+  (cond__3__11) = ~(pair__7(o__8));
+  (state__2__9) = ite(true fby false, Even'typ__1,
+                  default(typ__1) fby merge state__2__9 
+                                        (Even'typ__1 -> merge cond__3__11 
+                                                          (true -> Odd'typ__1 when True(cond__3__11))
+                                                          (false -> Even'typ__1 when False(cond__3__11)))
+                                        (Odd'typ__1 -> merge cond__4__10 
+                                                         (true -> Even'typ__1 when True(cond__4__10))
+                                                         (false -> Odd'typ__1 when False(cond__4__10))));
+  (o__8) = merge state__2__9 
+             (Even'typ__1 -> ite(true fby false, i__12, div(0 fby o__8,
              2)))
-             (Odd'typ__1 -> ite(true fby false, i__9, add(mul(0 fby o__5, 3),
-             1)));
+             (Odd'typ__1 -> ite(true fby false, i__12, add(mul(0 fby o__8,
+             3), 1)));
 tel
 
 /**************************************/
@@ -65,37 +78,46 @@ type typ__1 =
   | Even
   | Odd
 
-node main0__10(i__9 : int) returns (o__5 : int)
-var aux'12__22: int; aux'11__21: int; aux'10__20: bool; aux'9__19: bool;
-    aux'8__18: int; aux'7__17: int; aux'6__16: bool; aux'5__15: bool;
-    aux'4__14: typ__1; aux'3__13: typ__1; aux'2__12: bool; aux'1__11: bool;
-    state__2__6: typ__1; cond__4__7: bool; cond__3__8: bool;
+node pair__7(i__6 : int) returns (o__5 : bool)
+var ;
 let
-  (cond__4__7) = eq(mod(o__5, 2), 0);
-  (cond__3__8) = eq(mod(o__5, 2), 1);
-  (aux'4__14) = default(typ__1) fby aux'3__13;
-  (aux'3__13) = merge state__2__6 
-                  (Even'typ__1 -> merge cond__3__8 
-                                    (true -> Odd'typ__1 when True(cond__3__8))
-                                    (false -> Even'typ__1 when False(cond__3__8)))
-                  (Odd'typ__1 -> merge cond__4__7 
-                                   (true -> Even'typ__1 when True(cond__4__7))
-                                   (false -> Odd'typ__1 when False(cond__4__7)));
-  (aux'2__12) = true fby aux'1__11;
-  (aux'1__11) = false;
-  (state__2__6) = ite(aux'2__12, Even'typ__1, aux'4__14);
-  (aux'12__22) = 0 fby aux'11__21;
-  (aux'11__21) = o__5;
-  (aux'10__20) = true fby aux'9__19;
-  (aux'9__19) = false;
-  (aux'8__18) = 0 fby aux'7__17;
-  (aux'7__17) = o__5;
-  (aux'6__16) = true fby aux'5__15;
-  (aux'5__15) = false;
-  (o__5) = merge state__2__6 
-             (Even'typ__1 -> ite(aux'6__16, i__9, div(aux'8__18,
+  (o__5) = eq(mod(i__6, 2), 0);
+tel
+
+node main0__13(i__12 : int) returns (o__8 : int)
+var aux'14__27: int; aux'13__26: int; aux'12__25: bool; aux'11__24: bool;
+    aux'10__23: int; aux'9__22: int; aux'8__21: bool; aux'7__20: bool;
+    aux'6__19: typ__1; aux'5__18: typ__1; aux'4__17: bool; aux'3__16: bool;
+    aux'2__15: bool; aux'1__14: bool; state__2__9: typ__1; cond__4__10: bool;
+    cond__3__11: bool;
+let
+  (aux'1__14) = pair__7(o__8);
+  (cond__4__10) = aux'1__14;
+  (aux'2__15) = pair__7(o__8);
+  (cond__3__11) = ~(aux'2__15);
+  (aux'6__19) = default(typ__1) fby aux'5__18;
+  (aux'5__18) = merge state__2__9 
+                  (Even'typ__1 -> merge cond__3__11 
+                                    (true -> Odd'typ__1 when True(cond__3__11))
+                                    (false -> Even'typ__1 when False(cond__3__11)))
+                  (Odd'typ__1 -> merge cond__4__10 
+                                   (true -> Even'typ__1 when True(cond__4__10))
+                                   (false -> Odd'typ__1 when False(cond__4__10)));
+  (aux'4__17) = true fby aux'3__16;
+  (aux'3__16) = false;
+  (state__2__9) = ite(aux'4__17, Even'typ__1, aux'6__19);
+  (aux'14__27) = 0 fby aux'13__26;
+  (aux'13__26) = o__8;
+  (aux'12__25) = true fby aux'11__24;
+  (aux'11__24) = false;
+  (aux'10__23) = 0 fby aux'9__22;
+  (aux'9__22) = o__8;
+  (aux'8__21) = true fby aux'7__20;
+  (aux'7__20) = false;
+  (o__8) = merge state__2__9 
+             (Even'typ__1 -> ite(aux'8__21, i__12, div(aux'10__23,
              2)))
-             (Odd'typ__1 -> ite(aux'10__20, i__9, add(mul(aux'12__22, 3),
+             (Odd'typ__1 -> ite(aux'12__25, i__12, add(mul(aux'14__27, 3),
              1)));
 tel
 
@@ -109,38 +131,47 @@ type typ__1 =
   | Even
   | Odd
 
-node main0__10(i__9 : int :: Base)
-  returns (o__5 : int :: Base)
-var aux'12__22 : int :: Base, aux'11__21 : int :: Base, aux'10__20 : bool :: Base, 
-    aux'9__19 : bool :: Base, aux'8__18 : int :: Base, aux'7__17 : int :: Base, 
-    aux'6__16 : bool :: Base, aux'5__15 : bool :: Base, aux'4__14 : typ__1 :: Base, 
-    aux'3__13 : typ__1 :: Base, aux'2__12 : bool :: Base, aux'1__11 : bool :: Base, 
-    state__2__6 : typ__1 :: Base, cond__4__7 : bool :: Base, cond__3__8 : bool :: Base;
+node pair__7(i__6 : int :: Base)
+  returns (o__5 : bool :: Base)
+var ;
 let
-  (cond__4__7) = eq(mod(o__5, 2), 0);
-  (cond__3__8) = eq(mod(o__5, 2), 1);
-  (aux'4__14) = default(typ__1) fby aux'3__13;
-  (aux'3__13) = merge state__2__6 
-                (Even'typ__1 -> merge cond__3__8 
-                (true -> Odd'typ__1 when True(cond__3__8))
-                (false -> Even'typ__1 when False(cond__3__8)))
-                (Odd'typ__1 -> merge cond__4__7 
-                (true -> Even'typ__1 when True(cond__4__7))
-                (false -> Odd'typ__1 when False(cond__4__7)));
-  (aux'2__12) = true fby aux'1__11;
-  (aux'1__11) = false;
-  (state__2__6) = ite(aux'2__12, Even'typ__1, aux'4__14);
-  (aux'12__22) = 0 fby aux'11__21;
-  (aux'11__21) = o__5;
-  (aux'10__20) = true fby aux'9__19;
-  (aux'9__19) = false;
-  (aux'8__18) = 0 fby aux'7__17;
-  (aux'7__17) = o__5;
-  (aux'6__16) = true fby aux'5__15;
-  (aux'5__15) = false;
-  (o__5) = merge state__2__6 
-           (Even'typ__1 -> ite(aux'6__16, i__9, div(aux'8__18, 2)))
-           (Odd'typ__1 -> ite(aux'10__20, i__9, add(mul(aux'12__22, 3), 1)))
+  (o__5) = eq(mod(i__6, 2), 0)
+tel
+node main0__13(i__12 : int :: Base)
+  returns (o__8 : int :: Base)
+var aux'14__27 : int :: Base, aux'13__26 : int :: Base, aux'12__25 : bool :: Base, 
+    aux'11__24 : bool :: Base, aux'10__23 : int :: Base, aux'9__22 : int :: Base, 
+    aux'8__21 : bool :: Base, aux'7__20 : bool :: Base, aux'6__19 : typ__1 :: Base, 
+    aux'5__18 : typ__1 :: Base, aux'4__17 : bool :: Base, aux'3__16 : bool :: Base, 
+    aux'2__15 : bool :: Base, aux'1__14 : bool :: Base, state__2__9 : typ__1 :: Base, 
+    cond__4__10 : bool :: Base, cond__3__11 : bool :: Base;
+let
+  (aux'1__14) = pair__7(o__8);
+  (cond__4__10) = aux'1__14;
+  (aux'2__15) = pair__7(o__8);
+  (cond__3__11) = ~(aux'2__15);
+  (aux'6__19) = default(typ__1) fby aux'5__18;
+  (aux'5__18) = merge state__2__9 
+                (Even'typ__1 -> merge cond__3__11 
+                (true -> Odd'typ__1 when True(cond__3__11))
+                (false -> Even'typ__1 when False(cond__3__11)))
+                (Odd'typ__1 -> merge cond__4__10 
+                (true -> Even'typ__1 when True(cond__4__10))
+                (false -> Odd'typ__1 when False(cond__4__10)));
+  (aux'4__17) = true fby aux'3__16;
+  (aux'3__16) = false;
+  (state__2__9) = ite(aux'4__17, Even'typ__1, aux'6__19);
+  (aux'14__27) = 0 fby aux'13__26;
+  (aux'13__26) = o__8;
+  (aux'12__25) = true fby aux'11__24;
+  (aux'11__24) = false;
+  (aux'10__23) = 0 fby aux'9__22;
+  (aux'9__22) = o__8;
+  (aux'8__21) = true fby aux'7__20;
+  (aux'7__20) = false;
+  (o__8) = merge state__2__9 
+           (Even'typ__1 -> ite(aux'8__21, i__12, div(aux'10__23, 2)))
+           (Odd'typ__1 -> ite(aux'12__25, i__12, add(mul(aux'14__27, 3), 1)))
 tel
 /**************************************/
 /* Scheduled ast                      */
@@ -152,38 +183,47 @@ type typ__1 =
   | Even
   | Odd
 
-node main0__10(i__9 : int :: Base)
-  returns (o__5 : int :: Base)
-var aux'12__22 : int :: Base, aux'11__21 : int :: Base, aux'10__20 : bool :: Base, 
-    aux'9__19 : bool :: Base, aux'8__18 : int :: Base, aux'7__17 : int :: Base, 
-    aux'6__16 : bool :: Base, aux'5__15 : bool :: Base, aux'4__14 : typ__1 :: Base, 
-    aux'3__13 : typ__1 :: Base, aux'2__12 : bool :: Base, aux'1__11 : bool :: Base, 
-    state__2__6 : typ__1 :: Base, cond__4__7 : bool :: Base, cond__3__8 : bool :: Base;
+node pair__7(i__6 : int :: Base)
+  returns (o__5 : bool :: Base)
+var ;
 let
-  (aux'1__11) = false;
-  (aux'2__12) = true fby aux'1__11;
-  (aux'4__14) = default(typ__1) fby aux'3__13;
-  (aux'5__15) = false;
-  (aux'6__16) = true fby aux'5__15;
-  (aux'8__18) = 0 fby aux'7__17;
-  (aux'9__19) = false;
-  (aux'10__20) = true fby aux'9__19;
-  (aux'12__22) = 0 fby aux'11__21;
-  (state__2__6) = ite(aux'2__12, Even'typ__1, aux'4__14);
-  (o__5) = merge state__2__6 
-           (Even'typ__1 -> ite(aux'6__16, i__9, div(aux'8__18, 2)))
-           (Odd'typ__1 -> ite(aux'10__20, i__9, add(mul(aux'12__22, 3), 1)));
-  (cond__4__7) = eq(mod(o__5, 2), 0);
-  (cond__3__8) = eq(mod(o__5, 2), 1);
-  (aux'7__17) = o__5;
-  (aux'11__21) = o__5;
-  (aux'3__13) = merge state__2__6 
-                (Even'typ__1 -> merge cond__3__8 
-                (true -> Odd'typ__1 when True(cond__3__8))
-                (false -> Even'typ__1 when False(cond__3__8)))
-                (Odd'typ__1 -> merge cond__4__7 
-                (true -> Even'typ__1 when True(cond__4__7))
-                (false -> Odd'typ__1 when False(cond__4__7)))
+  (o__5) = eq(mod(i__6, 2), 0)
+tel
+node main0__13(i__12 : int :: Base)
+  returns (o__8 : int :: Base)
+var aux'14__27 : int :: Base, aux'13__26 : int :: Base, aux'12__25 : bool :: Base, 
+    aux'11__24 : bool :: Base, aux'10__23 : int :: Base, aux'9__22 : int :: Base, 
+    aux'8__21 : bool :: Base, aux'7__20 : bool :: Base, aux'6__19 : typ__1 :: Base, 
+    aux'5__18 : typ__1 :: Base, aux'4__17 : bool :: Base, aux'3__16 : bool :: Base, 
+    aux'2__15 : bool :: Base, aux'1__14 : bool :: Base, state__2__9 : typ__1 :: Base, 
+    cond__4__10 : bool :: Base, cond__3__11 : bool :: Base;
+let
+  (aux'3__16) = false;
+  (aux'4__17) = true fby aux'3__16;
+  (aux'6__19) = default(typ__1) fby aux'5__18;
+  (aux'7__20) = false;
+  (aux'8__21) = true fby aux'7__20;
+  (aux'10__23) = 0 fby aux'9__22;
+  (aux'11__24) = false;
+  (aux'12__25) = true fby aux'11__24;
+  (aux'14__27) = 0 fby aux'13__26;
+  (state__2__9) = ite(aux'4__17, Even'typ__1, aux'6__19);
+  (o__8) = merge state__2__9 
+           (Even'typ__1 -> ite(aux'8__21, i__12, div(aux'10__23, 2)))
+           (Odd'typ__1 -> ite(aux'12__25, i__12, add(mul(aux'14__27, 3), 1)));
+  (aux'1__14) = pair__7(o__8);
+  (aux'2__15) = pair__7(o__8);
+  (aux'9__22) = o__8;
+  (aux'13__26) = o__8;
+  (cond__4__10) = aux'1__14;
+  (cond__3__11) = ~(aux'2__15);
+  (aux'5__18) = merge state__2__9 
+                (Even'typ__1 -> merge cond__3__11 
+                (true -> Odd'typ__1 when True(cond__3__11))
+                (false -> Even'typ__1 when False(cond__3__11)))
+                (Odd'typ__1 -> merge cond__4__10 
+                (true -> Even'typ__1 when True(cond__4__10))
+                (false -> Odd'typ__1 when False(cond__4__10)))
 tel
 /**************************************/
 /* Imp ast                            */
@@ -195,55 +235,68 @@ type typ__1 =
   | Even
   | Odd
 
-node main0__10(i__9 : int :: Base)
-  returns (o__5 : int :: Base)
-var aux'12__22 : int :: Base, aux'11__21 : int :: Base, aux'10__20 : bool :: Base, 
-    aux'9__19 : bool :: Base, aux'8__18 : int :: Base, aux'7__17 : int :: Base, 
-    aux'6__16 : bool :: Base, aux'5__15 : bool :: Base, aux'4__14 : typ__1 :: Base, 
-    aux'3__13 : typ__1 :: Base, aux'2__12 : bool :: Base, aux'1__11 : bool :: Base, 
-    state__2__6 : typ__1 :: Base, cond__4__7 : bool :: Base, cond__3__8 : bool :: Base;
+node pair__7(i__6 : int :: Base)
+  returns (o__5 : bool :: Base)
+var ;
   mem={node=[]
-       fby=[aux'2_next6__28 : bool :: Base, aux'4_next5__27 : typ__1 :: Base, 
-            aux'6_next4__26 : bool :: Base, aux'8_next3__25 : int :: Base, 
-            aux'10_next2__24 : bool :: Base, aux'12_next1__23 : int :: Base]}
+       fby=[]}
   init={node=[]
-        fby=[(aux'2_next6__28,true), (aux'4_next5__27,default(typ__1)), (aux'6_next4__26,true), (aux'8_next3__25,0), (aux'10_next2__24,true), (aux'12_next1__23,0)]}
-  compute={(aux'1__11 : bool :: Base) = false;
-           (aux'2__12 : bool :: Base) = aux'2_next6__28;
-           (aux'4__14 : typ__1 :: Base) = aux'4_next5__27;
-           (aux'5__15 : bool :: Base) = false;
-           (aux'6__16 : bool :: Base) = aux'6_next4__26;
-           (aux'8__18 : int :: Base) = aux'8_next3__25;
-           (aux'9__19 : bool :: Base) = false;
-           (aux'10__20 : bool :: Base) = aux'10_next2__24;
-           (aux'12__22 : int :: Base) = aux'12_next1__23;
-           (state__2__6 : typ__1 :: Base) = ite(aux'2__12, Even'typ__1,
-                                            aux'4__14);
-           (o__5 : int :: Base) = case(state__2__6)Even'typ__1: ite(aux'6__16,
-                                                                i__9,
-                                                                div(aux'8__18,
+        fby=[]}
+  compute={(o__5 : bool :: Base) = eq(mod(i__6, 2), 0)}
+  update={}
+  
+node main0__13(i__12 : int :: Base)
+  returns (o__8 : int :: Base)
+var aux'14__27 : int :: Base, aux'13__26 : int :: Base, aux'12__25 : bool :: Base, 
+    aux'11__24 : bool :: Base, aux'10__23 : int :: Base, aux'9__22 : int :: Base, 
+    aux'8__21 : bool :: Base, aux'7__20 : bool :: Base, aux'6__19 : typ__1 :: Base, 
+    aux'5__18 : typ__1 :: Base, aux'4__17 : bool :: Base, aux'3__16 : bool :: Base, 
+    aux'2__15 : bool :: Base, aux'1__14 : bool :: Base, state__2__9 : typ__1 :: Base, 
+    cond__4__10 : bool :: Base, cond__3__11 : bool :: Base;
+  mem={node=[]
+       fby=[aux'4_next6__35 : bool :: Base, aux'6_next5__34 : typ__1 :: Base, 
+            aux'8_next4__33 : bool :: Base, aux'10_next3__32 : int :: Base, 
+            aux'12_next2__31 : bool :: Base, aux'14_next1__30 : int :: Base]}
+  init={node=[]
+        fby=[(aux'4_next6__35,true), (aux'6_next5__34,default(typ__1)), (aux'8_next4__33,true), (aux'10_next3__32,0), (aux'12_next2__31,true), (aux'14_next1__30,0)]}
+  compute={(aux'3__16 : bool :: Base) = false;
+           (aux'4__17 : bool :: Base) = aux'4_next6__35;
+           (aux'6__19 : typ__1 :: Base) = aux'6_next5__34;
+           (aux'7__20 : bool :: Base) = false;
+           (aux'8__21 : bool :: Base) = aux'8_next4__33;
+           (aux'10__23 : int :: Base) = aux'10_next3__32;
+           (aux'11__24 : bool :: Base) = false;
+           (aux'12__25 : bool :: Base) = aux'12_next2__31;
+           (aux'14__27 : int :: Base) = aux'14_next1__30;
+           (state__2__9 : typ__1 :: Base) = ite(aux'4__17, Even'typ__1,
+                                            aux'6__19);
+           (o__8 : int :: Base) = case(state__2__9)Even'typ__1: ite(aux'8__21,
+                                                                i__12,
+                                                                div(aux'10__23,
                                                                 2));
-                                                     Odd'typ__1: ite(aux'10__20,
-                                                                 i__9,
+                                                     Odd'typ__1: ite(aux'12__25,
+                                                                 i__12,
                                                                  add(
-                                                                 mul(aux'12__22,
+                                                                 mul(aux'14__27,
                                                                  3), 1));
-           (cond__4__7 : bool :: Base) = eq(mod(o__5, 2), 0);
-           (cond__3__8 : bool :: Base) = eq(mod(o__5, 2), 1);
-           (aux'7__17 : int :: Base) = o__5;
-           (aux'11__21 : int :: Base) = o__5;
-           (aux'3__13 : typ__1 :: Base) = case(state__2__6)Even'typ__1: case(cond__3__8)
+           (aux'1__14 : bool :: Base) = pair__7 <- pair_next2__29(o__8);
+           (aux'2__15 : bool :: Base) = pair__7 <- pair_next1__28(o__8);
+           (aux'9__22 : int :: Base) = o__8;
+           (aux'13__26 : int :: Base) = o__8;
+           (cond__4__10 : bool :: Base) = aux'1__14;
+           (cond__3__11 : bool :: Base) = ~(aux'2__15);
+           (aux'5__18 : typ__1 :: Base) = case(state__2__9)Even'typ__1: case(cond__3__11)
                                                              True'inductive_bool: Odd'typ__1;
                                                                False'inductive_bool: Even'typ__1;
-                                                             Odd'typ__1: case(cond__4__7)
+                                                             Odd'typ__1: case(cond__4__10)
                                                              True'inductive_bool: Even'typ__1;
                                                                False'inductive_bool: Odd'typ__1}
-  update={(aux'2_next6__28,aux'1__11);
-          (aux'4_next5__27,aux'3__13);
-          (aux'6_next4__26,aux'5__15);
-          (aux'8_next3__25,aux'7__17);
-          (aux'10_next2__24,aux'9__19);
-          (aux'12_next1__23,aux'11__21)}
+  update={(aux'4_next6__35,aux'3__16);
+          (aux'6_next5__34,aux'5__18);
+          (aux'8_next4__33,aux'7__20);
+          (aux'10_next3__32,aux'9__22);
+          (aux'12_next2__31,aux'11__24);
+          (aux'14_next1__30,aux'13__26)}
   
 /**************************************/
 /* C file                             */
@@ -270,41 +323,51 @@ enum typ__1 {
   ODD
 };
 
+int pair (int i) {
+  int o;
+  
+  o = ((i % 2) == 0);
+  
+  return o;
+}
+
 struct main0_mem {
 
-  int aux__2_next6;
-  enum typ__1 aux__4_next5;
-  int aux__6_next4;
-  int aux__8_next3;
-  int aux__10_next2;
-  int aux__12_next1;
+  int aux__4_next6;
+  enum typ__1 aux__6_next5;
+  int aux__8_next4;
+  int aux__10_next3;
+  int aux__12_next2;
+  int aux__14_next1;
 };
 
 void main0_init (struct main0_mem* mem) {
-  mem->aux__2_next6 = 1;
+  mem->aux__4_next6 = 1;
   
-  mem->aux__4_next5 = EVEN;
+  mem->aux__6_next5 = EVEN;
   
-  mem->aux__6_next4 = 1;
+  mem->aux__8_next4 = 1;
   
-  mem->aux__8_next3 = 0;
+  mem->aux__10_next3 = 0;
   
-  mem->aux__10_next2 = 1;
+  mem->aux__12_next2 = 1;
   
-  mem->aux__12_next1 = 0;
+  mem->aux__14_next1 = 0;
 }
 
 int main0 (struct main0_mem* mem, int i) {
+  int aux__14;
+  int aux__13;
   int aux__12;
   int aux__11;
   int aux__10;
   int aux__9;
   int aux__8;
   int aux__7;
-  int aux__6;
-  int aux__5;
-  enum typ__1 aux__4;
-  enum typ__1 aux__3;
+  enum typ__1 aux__6;
+  enum typ__1 aux__5;
+  int aux__4;
+  int aux__3;
   int aux__2;
   int aux__1;
   enum typ__1 state__2;
@@ -312,50 +375,60 @@ int main0 (struct main0_mem* mem, int i) {
   int cond__3;
   int o;
   enum typ__1 switch_1;
+  int call_1;
+  int call_2;
   enum typ__1 switch_2;
   enum inductive_bool switch_3;
   enum inductive_bool switch_4;
   
-  aux__1 = 0;
+  aux__3 = 0;
   
-  aux__2 = mem->aux__2_next6;
+  aux__4 = mem->aux__4_next6;
   
-  aux__4 = mem->aux__4_next5;
+  aux__6 = mem->aux__6_next5;
   
-  aux__5 = 0;
+  aux__7 = 0;
   
-  aux__6 = mem->aux__6_next4;
+  aux__8 = mem->aux__8_next4;
   
-  aux__8 = mem->aux__8_next3;
+  aux__10 = mem->aux__10_next3;
   
-  aux__9 = 0;
+  aux__11 = 0;
   
-  aux__10 = mem->aux__10_next2;
+  aux__12 = mem->aux__12_next2;
   
-  aux__12 = mem->aux__12_next1;
+  aux__14 = mem->aux__14_next1;
   
-  state__2 = aux__2 ? EVEN : aux__4;
+  state__2 = aux__4 ? EVEN : aux__6;
   
   switch (state__2) {
     case EVEN: {
-      switch_1 = aux__6 ? i : (aux__8 / 2);
+      switch_1 = aux__8 ? i : (aux__10 / 2);
       break;
     }
     case ODD: {
-      switch_1 = aux__10 ? i : ((aux__12 * 3) + 1);
+      switch_1 = aux__12 ? i : ((aux__14 * 3) + 1);
       break;
     }
   };
   
   o = switch_1;
   
-  cond__4 = ((o % 2) == 0);
+  call_1 = pair(o);
   
-  cond__3 = ((o % 2) == 1);
+  aux__1 = call_1;
   
-  aux__7 = o;
+  call_2 = pair(o);
   
-  aux__11 = o;
+  aux__2 = call_2;
+  
+  aux__9 = o;
+  
+  aux__13 = o;
+  
+  cond__4 = aux__1;
+  
+  cond__3 = !(aux__2);
   
   switch (cond__3) {
     case TRUE: {
@@ -390,19 +463,19 @@ int main0 (struct main0_mem* mem, int i) {
     }
   };
   
-  aux__3 = switch_2;
+  aux__5 = switch_2;
   
-  mem->aux__2_next6 = aux__1;
+  mem->aux__4_next6 = aux__3;
   
-  mem->aux__4_next5 = aux__3;
+  mem->aux__6_next5 = aux__5;
   
-  mem->aux__6_next4 = aux__5;
+  mem->aux__8_next4 = aux__7;
   
-  mem->aux__8_next3 = aux__7;
+  mem->aux__10_next3 = aux__9;
   
-  mem->aux__10_next2 = aux__9;
+  mem->aux__12_next2 = aux__11;
   
-  mem->aux__12_next1 = aux__11;
+  mem->aux__14_next1 = aux__13;
   
   return o;
 }

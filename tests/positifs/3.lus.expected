@@ -34,10 +34,11 @@ let
   (cond__3) = eq(mod(count(), 20), 0);
   (state__2) = (One'typ__1) -> (pre (merge state__2 
                                        (One'typ__1 -> ite(cond__3,
-                                       Two'typ__1,
-                                       One'typ__1))
+                                                          Two'typ__1,
+                                                          One'typ__1))
                                        (Two'typ__1 -> ite(cond__4,
-                                       One'typ__1, Two'typ__1))));
+                                                          One'typ__1,
+                                                          Two'typ__1))));
   (o) = merge state__2 
           (One'typ__1 -> f())
           (Two'typ__1 -> g());

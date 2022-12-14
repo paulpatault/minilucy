@@ -13,10 +13,8 @@ node oscillateur(lo : int; hi : int) returns (x : int);
 var state : t;
 let
   (state) = (Chaud't) -> (pre (merge state 
-                                 (Chaud't -> ite(ge(x, hi), Froid't,
-                                 Chaud't))
-                                 (Froid't -> ite(le(x, lo), Chaud't,
-                                 Froid't))));
+                                 (Chaud't -> ite(ge(x, hi), Froid't, Chaud't))
+                                 (Froid't -> ite(le(x, lo), Chaud't, Froid't))));
   (x) = merge state 
           (Chaud't -> add((0) -> (pre (x)), 1) when Chaud(state))
           (Froid't -> sub((0) -> (pre (x)), 1) when Froid(state));
