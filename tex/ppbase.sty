@@ -1,0 +1,461 @@
+
+\ProvidesPackage{ppbase}[2022]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% BASE PKG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{ulem}\normalem
+\RequirePackage[utf8]{inputenc}
+% \renewcommand{\refname}{Références}
+
+\RequirePackage[T1]{fontenc}
+% \RequirePackage[french]{babel}
+
+\RequirePackage{url}
+\RequirePackage{xcolor}
+\RequirePackage{enumerate}
+\RequirePackage{enumitem}
+
+\RequirePackage{transparent}
+
+\RequirePackage{amsfonts, amsthm, amsmath, amssymb}
+\RequirePackage{mathpartir}
+\RequirePackage{adjustbox}
+
+\RequirePackage{framed}
+\RequirePackage{lmodern}
+\RequirePackage{booktabs}
+
+\RequirePackage{anyfontsize}
+\RequirePackage{lipsum}
+
+\RequirePackage{mathtools}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% BASE COLORS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{thered}{rgb}{0.797,0,0}
+\definecolor{lightgrey}{gray}{0.9}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{gray7}{rgb}{0.7,0.7,0.7}
+\definecolor{g3}{rgb}{0.3,0.3,0.3}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{grayblue}{rgb}{0.6, 0.78, 0.95}
+\definecolor{blue2}{rgb}{0.7, 0.83, 1}
+\definecolor{blue1}{RGB}{54,104,163}
+\definecolor{ocolor}{rgb}{1, 0.74, 0.31}
+\definecolor{mypink1}{rgb}{0.858, 0.188, 0.478}
+
+\definecolor{lightred}{RGB}{255,245,245}
+\definecolor{darkred}{RGB}{170,0,0}
+\definecolor{mgreen}{RGB}{40,150,40}
+\definecolor{myellow}{RGB}{244,159,4}
+\definecolor{mblue}{RGB}{4,100,244}
+\definecolor{mgreen}{RGB}{30,160,8}
+\definecolor{titlecolor}{RGB}{74, 114, 159}
+\definecolor{titledarkcolor}{RGB}{51,102,153}
+\definecolor{LightGrey}{RGB}{232, 232, 232}
+\definecolor{Grey}{RGB}{222, 223, 225}
+\definecolor{DarkerGrey}{RGB}{215,217,219}
+\definecolor{FontColor}{RGB}{131,136,138}
+\definecolor{Red}{RGB}{204,0,0}
+\definecolor{L-lig}{RGB}{25,124,192}
+\definecolor{G-lig}{RGB}{62,66,68}
+\definecolor{Orange}{RGB}{240,163,10}
+\definecolor{Gray}{RGB}{186,200,211}
+\definecolor{LightRed}{RGB}{214,98,93}
+\definecolor{LightBlue}{RGB}{160,200,217}
+\definecolor{LightGreen}{RGB}{130,161,119}
+\definecolor{Violet}{RGB}{190,144,252}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% NEW COUNTER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \newcounter{daggerfootnote}
+% \newcommand*{\daggerfootnote}[1]{%
+%     \setcounter{daggerfootnote}{\value{footnote}}%
+%     \renewcommand*{\thefootnote}{\fnsymbol{footnote}}%
+%     \footnote[2]{#1}%
+%     \setcounter{footnote}{\value{daggerfootnote}}%
+%     \renewcommand*{\thefootnote}{\arabic{footnote}}%
+% }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% IF-INCLUSION PKG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newif\if@code     \@codefalse
+\newif\if@figs     \@figsfalse
+\newif\if@tikz     \@tikzfalse
+\newif\if@href     \@hreffalse
+\newif\if@gantt    \@ganttfalse
+\newif\if@abeamer  \@abeamerfalse
+\newif\if@document \@abeamerfalse
+\newif\if@poster   \@abeamerfalse
+
+\DeclareOption{tikz}{\@tikztrue}
+\DeclareOption{figs}{\@figstrue}
+\DeclareOption{code}{\@codetrue}
+\DeclareOption{href}{\@hreftrue}
+\DeclareOption{gantt}{\@gantttrue}
+\DeclareOption{abeamer}{\@abeamertrue}
+\DeclareOption{document}{\@documenttrue}
+\DeclareOption{poster}{\@postertrue}
+
+\DeclareOption*{}
+\ProcessOptions
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% TIKZ PKG %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@tikz
+    \RequirePackage{tikz}
+    \usetikzlibrary{decorations.text,calc}
+    \usetikzlibrary{arrows,shapes}
+    % \usetikzlibrary{arrows.meta}
+    % \usetikzlibrary{shapes.geometric}
+    \usetikzlibrary{automata,positioning}
+    \usetikzlibrary{matrix,backgrounds}
+    \usetikzlibrary{angles,calc,quotes}
+    \usetikzlibrary{matrix}
+    \RequirePackage{graphviz}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% POSTER CONF %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@poster
+
+    \RequirePackage[
+         activate={true,nocompatibility},
+         final,
+         % tracking=true,
+         kerning=true,
+         factor=1100,
+         stretch=10,
+         shrink=10]{microtype}
+
+    \usepackage{lipsum}
+    \usepackage{fancyhdr}
+    % \usepackage[scaled]{helvet}
+    \usepackage{PTSansCaption}
+
+    % \usepackage[scaled,black]{merriweather} %% Option 'black' gives heavier bold face 
+    \newcommand\sia{35}
+    \newcommand\sib{40}
+
+    \renewcommand\familydefault{\sfdefault}
+
+    \RequirePackage{tikz}
+    \usetikzlibrary{arrows,shapes}
+
+    \usepackage{soulutf8} % surligner du texte
+    %\sethlcolor{} % couleur du surlignage
+
+    \usepackage[backend=biber,
+        style=numeric-comp,
+        maxcitenames=1,
+        maxbibnames=1,
+        %backref=true
+        ]{biblatex}
+
+    \usepackage{colortbl}
+    \usepackage{xspace}
+
+    % \tikzposterlatexaffectionproofoff %enlever phrase en bas à droite
+    \usetheme{Simple}
+
+    \colorlet{blocktitlefgcolor}{blue1} %titre des blocks
+    \colorlet{blocktitlebgcolor}{Grey} %couleur des lignes blocks
+    % \colorlet{blockbodybgcolor}{mypink1}%????
+    \colorlet{blockbodyfgcolor}{FontColor} %couleur du texte dans blocks
+    %\colorlet{innerblocktitlebgcolor}{G-lig}
+
+    \colorlet{innerblocktitlebgcolor}{L-lig}
+    \colorlet{innerblocktitlefgcolor}{white}
+
+    % \colorlet{notefrcolor}{Red!60} % ligne autour cadre notes
+    % \colorlet{notefgcolor}{white} % couleur police notes
+    % \colorlet{notebgcolor}{Red!60} % BG couleur des notes
+
+    \colorlet{notebgcolor}{myellow}
+    % \colorlet{notefgcolor}{black!70}
+    % \colorlet{notefrcolor}{blue1!90}
+
+
+    % ---- Titre
+    \settitle{
+        \begin{minipage}[b]{0.75\linewidth}
+            \vspace{2cm}\hspace{1cm}
+            \color{white}{\Huge\textsc{\textbf{\@title}} \par}
+            \vspace*{2em}\hspace{1cm}
+            \color{white}{\LARGE \@author \par}
+            \vspace*{2em}\hspace{1cm}
+            {\Large \@institute}
+            \vspace{0.5cm}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.25\linewidth}
+            \vspace{-15cm}
+            %%% insert second logo at the top
+            % \transparent{0.6}\includegraphics[scale=0.6]{images/Logos/lmf-logo-transparent.png}
+            % \vspace{5cm}
+            % \hspace{2.2cm}\transparent{0.6}\includegraphics[scale=0.6]{images/Logos/lmf-logo-transparent.png}
+            \transparent{0.6}\includegraphics[scale=0.6]{images/Logos/lmf-logo-transparent.png}
+        \end{minipage}
+     }
+
+    \definetitlestyle{sampletitle}
+        { width=840mm, roundedcorners=0, linewidth=2pt, innersep=15pt,
+          titletotopverticalspace=0mm, titletoblockverticalspace=30mm}
+        { \begin{scope}[line width=\titlelinewidth, rounded corners=\titleroundedcorners]
+                \draw[fill=blue1, color=blue1]
+                (\titleposleft,\titleposbottom) rectangle (\titleposright,\titlepostop);
+          \end{scope} }
+
+    \usetitlestyle[]{sampletitle}
+    \setlength{\columnseprule}{0.4pt}
+    \addbibresource{Biblio/Biblio.bib}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% BEAMER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@abeamer
+    \usetheme{metropolis}
+    \useoutertheme{metropolis}
+    \useinnertheme{metropolis}
+    \usefonttheme{metropolis}
+    % \usecolortheme{seahorse}
+    % \usetheme{focus}
+    % \usecolortheme{default}
+    \usecolortheme{crane}
+
+    % \definecolor{craneorange}{RGB}{252,187,6}
+    % \definecolor{craneblue}{RGB}{2,3,38}
+    % \definecolor{craneorange}{rgb}{0.2,0.2,0.7}
+
+% \definecolor{mSybilaRed}{HTML}{990000}
+
+% \setbeamercolor{title separator}{
+%   fg=mSybilaRed
+% }
+
+% \setbeamercolor{progress bar}{%
+%   fg=mSybilaRed,
+%   bg=mSybilaRed!90!black!30
+% }
+
+% \setbeamercolor{progress bar in section page}{
+%   use=progress bar,
+%   parent=progress bar
+% }
+
+% \setbeamercolor{alerted text}{%
+%   fg=mSybilaRed
+% }
+    % \usetheme{CambridgeUS}
+    % \usecolortheme{beaver} % seahorse, dolphin, default, beaver
+    % \usefonttheme{professionalfonts}
+    % \useinnertheme{rectangles}
+    % %\useoutertheme{infolines}
+    % \setbeamercolor{block title}{fg=white,bg=darkred}
+    % \setbeamercolor{block body}{bg=lightred}
+    % \setbeamercolor{section in toc}{fg=thered}
+    % \setbeamercolor{section in toc shaded}{bg=structure!20, fg=thered}
+    % \setbeamercolor{section number projected}{fg=thered, bg=thered,fg=white}
+    % \setbeamercolor{subsection number projected}{fg=thered, bg=thered,fg=white}
+    % \setbeamertemplate{itemize item}{\scalebox{0.8}{\r{$\blacksquare$}}}
+    % \setbeamertemplate{subitemize item}{\scalebox{0.8}{\r{$\blacksquare$}}}
+    % \setbeamertemplate{enumerate item}{\scalebox{0.5}{\r{\rotatedsquare}}}
+    % \setbeamercovered{invisible} % invisible / transparent
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% DOCUMENT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@document
+    \RequirePackage[
+         activate={true,nocompatibility},
+         final,
+         tracking=true,
+         kerning=true,
+         factor=1100,
+         stretch=10,
+         shrink=10]{microtype}
+
+    % \RequirePackage{fullpage}
+
+    \RequirePackage[a4paper, left=3.3cm, right=3.3cm, bottom=5cm]{geometry}
+    \RequirePackage{fancyhdr}
+    \pagestyle{fancy}
+    \fancyhead{}
+    \fancyfoot{}
+    \renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+    % \renewcommand{\subsectionmark}[1]{\markright{\thesubsection\ #1}}
+    % \renewcommand{\subsubsectionmark}[1]{\markright{\thesubsubsection\ #1}}
+    % \fancyhead[CO]{\textsc{\rightmark}}
+    % \fancyhead[CE]{\textsc{Paul Patault}}
+    \fancyfoot[CO]{\thepage}
+    \renewcommand{\footrulewidth}{0pt}
+    \renewcommand{\headrulewidth}{0pt}
+    % \setlength{\headheight}{40pt}
+    % \addtolength{\topmargin}{-2pt}
+    \setlength{\headheight}{20pt}
+    \setlength{\topmargin}{-13.59999pt}
+    \renewcommand{\baselinestretch}{1.2}
+
+    \theoremstyle{plain}      \newtheorem{theoreme}{Théorème}%[section]
+    \theoremstyle{plain}      \newtheorem{conjecture}{Conjecture}%[section]
+    \theoremstyle{plain}      \newtheorem{corollaire}{Corollaire}%[theoreme]
+    \theoremstyle{plain}      \newtheorem{lemme}{Lemme}
+    \theoremstyle{definition} \newtheorem{definition}{Définition}%[section]
+    \theoremstyle{definition} \newtheorem{notation}{Notation}%[section]
+    \theoremstyle{remark}     \newtheorem{remarque}{Remarque}%[section]
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% FIGS LINK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@figs
+    \RequirePackage{caption}
+    \RequirePackage{float}
+    \RequirePackage{wrapfig}
+    \graphicspath{ {./img} }
+    % \RequirePackage{pdfpages}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% CODE LINK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@code
+    \RequirePackage{algorithm}
+    % \RequirePackage{algorithmic}
+    % \RequirePackage{algpseudocode}
+    \RequirePackage{minted}
+    \RequirePackage{listings}
+    \RequirePackage{mdframed}
+    \newcommand{\ocaml}[1]{\mintinline{ocaml}{#1}}
+    \newcommand{\bashi}[1]{\mintinline{bash}{#1}}
+    \renewcommand{\listingscaption}{Programme}
+    \lstdefinestyle{mystyle}{
+        % backgroundcolor=\color{lightgrey},
+        commentstyle=\color{g3},
+        keywordstyle=\color{blue1!90},%thered
+        numberstyle=\tiny\color{codegray},
+        stringstyle=\color{mgreen},
+        breakatwhitespace=false,
+        breaklines=true,
+        captionpos=b,
+        morecomment=[s]{(*}{*)},
+        keepspaces=true,
+        showspaces=false,
+        showstringspaces=false,
+        showtabs=false,
+        tabsize=2,
+    }
+    \lstdefinelanguage{gospel} {
+        keywords={%
+            type, let, match, with, rec, function, raise, of, if, then, else,% ocaml
+            val, requires, ensures, invariant, pure, when% gospel
+        },
+        sensitive=false,
+        emph={},
+        emphstyle=\color{myellow},
+        morecomment=[s]{(*}{*)},
+        commentstyle=\color{gray7},
+        % classoffset=1,
+        % keywords={},
+        % keywordstyle=\color{mblue},
+        % classoffset=0,
+    }
+    \lstset{
+        style=mystyle,
+        basicstyle=\Large\ttfamily\bfseries\color{black!60},
+        language=gospel,
+    }
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% HREF LINK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@href
+    \RequirePackage[bookmarks=true,colorlinks=true,
+        citecolor={thered}, filecolor={thered},
+        urlcolor={thered}, linkcolor={thered},
+        pdfstartview={XYZ null null 1.22}, hyperindex=true]{hyperref}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% GANT LINK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\if@gantt
+    \RequirePackage{graphicx}
+    \RequirePackage{tikz-uml}
+    \RequirePackage{pgfgantt}
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% MACROS / ALIASES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\providecommand{\keywords}[1]
+{
+  \small\textbf{\textit{Mots clés. }} #1
+}
+
+\newcommand{\bbk}[1]{[\![ #1 ]\!]}
+\newcommand{\defeq}{\stackrel{\text{\tiny def}}{=}}
+\newcommand{\comp}[1]{\mathcal{C}_{\textsc{\tiny Time}}(#1)}
+\newcommand{\compe}[1]{\mathcal{C}_\emph{\textsc{\tiny Time}}(#1)}
+% \renewcommand{\r}[1]{\textcolor{thered}{#1}}
+\newcommand{\ttA}{\texttt{\small A}}
+\newcommand{\ttB}{\texttt{\small B}}
+\newcommand{\ttws}{\texttt{\small \_}}
+\newcommand{\rab}{$[\Rightarrow]$}
+\newcommand{\lab}{$[\Leftarrow]$}
+\newcommand{\ttl}{\texttt{[}\,}
+\newcommand{\ttr}{\,\texttt{]}}
+\newcommand{\ttx}{\texttt{x}}
+\newcommand{\ttt}{\texttt{t}}
+\newcommand{\ttw}{\texttt{\_}}
+\newcommand{\cc}{:\!:}
+\newcommand{\cocoeq}{:\!:=}
+\newcommand{\ttu}{\texttt{usefulness}}
+\newcommand{\vq}{$\vec{\text{q}}$}
+\newcommand{\rvq}{\r{\vq}}
+\newcommand{\rbf}[1]{\r{\textbf{#1}}}
+\newcommand{\rotatedsquare}{\rotatebox[origin=c]{45}{$\blacksquare$}}
+\newcommand{\toprightarrow}{\rotatebox[origin=c]{180}{$\Lsh$}}
+% \newcommand{\mlab}{$\tiny\bullet~~$}
+\newcommand{\mlab}{--~}
+\newcommand{\cbullet}{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\renewcommand{\b}[1]{\textcolor{blue1!75}{#1}}
+\renewcommand{\r}[1]{\textcolor{thered!60}{#1}}
+\newcommand{\bb}[1]{\textbf{\b{#1}}}
+\newcommand{\br}[1]{\textbf{\r{#1}}}
+
+\renewcommand{\cc}[1]{\scalebox{1.2}{\textcolor{blue1!75}{\texttt{#1}}}}
+\newcommand{\ccl}[1]{\scalebox{1.1}{\textcolor{blue1!75}{\texttt{#1}}}}
+\renewcommand{\u}{\cc{is\_useful}}
+\newcommand{\bm}[1]{\b{$\boldsymbol{#1}$}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% END %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{csquotes}
+
+\endinput
