@@ -74,39 +74,36 @@ $ make promote -i            # mise à niveau de l'ensemble des tests
 
 ## Travail réalisé
 
-- Automates (non imbriqués)
-
-- ADT simple (sans paramètres)
-
-- `when`, `merge`, (`reset` ?)
+- `when`, `merge` (sur ADT simples), `reset`, `automates` : explications de fonctionnement présentées dans les slides (cf. [slides.pdf](./tex/slides.pdf))
 
 - ajouter `{% set const-main %}` en tête de code pour que les arguments du main soient constants
   (on les demande plus à chaque tour du `while` dans le main du code c généré) mais seulement en
   entrée de programme
 
-- Print (types simples (pas ADT)) dans lustre : TODO tuples
-
 - Phases de compilation
   + `Parsed` -> `Parsed`:
     - dé-sucrage des automates et des `print`
   + `Parsed` -> `Typed`:
-    - TODO
+    - vérification de la cohérence du typage explicite qui apparait dans le code source
   + `Typed` -> `Normalised`:
     - toutes les expressions sont "dé-inlinées" dans des variables locales aux noeuds
-    - ...
   + `Normalised` -> `Clocked`:
-    - vérifications des horloges (analyse à la typage (cf. article du sujet))
-    - ...
+    - vérifications de la cohérence des horloges (cf. [Biernacki, Colaco, Hamon, Pouzet](https://www.di.ens.fr/~pouzet/bib/lctes08a.pdf))
   + `Clocked` -> `Scheduled`:
     - mise en ordre des équations dans le noeud en fonction des liens de dépendances
-    - ...
+    - dans le même temps, analyse de causalité
   + `Scheduled` -> `Imp`:
     - traduction intermédiaire vers un AST de langage impératif avant la truduction en C
-    - ...
+    - création des mémoires des noeuds, fonctions d'initialisation des mémoires
   + `Imp` -> `C`:
-    - le retour de la fonction `main` du code lustre initial est affiché à chaque tour du `while (1)`
     - nous utilisons un l'ast C de la bibliothèque Goblint.Cil
-    - si le main n'a pas besoin de mémoire interne, pas besoin d'en fabriquer une pour rien (cf ex008)
-    - ...
+    - le retour de la fonction `main` du code lustre initial est affiché à chaque tour d'un `while (1)`
+    - gestion des arguments du noeud main en lustre :
+      + s'il contient des arguments, ceux-ci seront demandés en entrée à chaque tour du `while`,
+        sauf si l'on ajout le commentaire magique `{% set const-main %}` qui demandera alors uniquement
+        les arguments sur la ligne de commande en entrée du programme
+      + on pourra alors donner en entrée du programme un flux de données par
+        la commande `$ echo "0 0 0 0 1 0 0 0 1 " | ./a.out` pour envoyer au programme
+        `a.out` le flux de données `0 0 0 0 1 0 0 0 1` par exemple.
 
-- TODO Suite
+- Ajout d'une fonction `print` dans lustre
