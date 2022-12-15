@@ -22,11 +22,29 @@ $ opam install dune menhir goblint-cil --yes
 $ dune build
 ```
 
-### Utilisation
+### Utilisation par exemple
+
+- Suite `3n+1` :
+  ```
+  $ make
+  $ ./minilucy.exe demo/101-syracuse.lus main0 -no-nl
+  $ gcc demo/101-syracuse.c
+  $ ./a.out 13
+  ```
+
+- Reset :
+  ```
+  $ ./minilucy.exe demo/11-reset.lus main0 -no-nl
+  $ gcc demo/11-reset.c
+  $ echo "0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0" | ./a.out
+  ```
+
+### Utilisation générique
 
 Commande générique :
 ```
-$ dune exec src/minilucy.exe -- [file.lus] [OPTIONS] [main-node]
+$ make
+$ ./minilucy.exe [file.lus] [OPTIONS] [main-node]
 ```
 où `OPTIONS` :
 - `-v` | `-verbose` : verbose (affiches les ast successifs)
@@ -40,11 +58,6 @@ où `OPTIONS` :
 - `-c-only` : arrêt après la traduction vers `C`
 - `-no-sleep` : n'ajoute pas la fonction `sleep(1)` dans le main du fichier `C`
 - `-no-nl` : n'ajoute pas de `\n` dans le `printf` du `while` du main du fichier `C`
-
-Exemple :
-```
-$ dune exec src/minilucy.exe -- examples/ex005.lus -automaton-only -v main1
-```
 
 Sinon, `make` fabriquera un exécutable dans le répertoire principal, utilisable ensuite avec :
 ```
