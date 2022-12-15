@@ -385,13 +385,14 @@
     }
     \lstdefinelanguage{lustre} {
         keywords={%
-            automaton, node, until, continue, end, tel, pre, returns, mod, fby,
+            automaton, end,
+            node, until, continue, tel, pre, returns, mod, fby,
             let, type, match, with, when, merge, if, then, else, var,
             reset, every
         },
         sensitive=false,
             classoffset=1,
-            keywords={bool, int},
+            keywords={bool, int},% end, automaton},
             keywordstyle=\color{cranegreen!90},
             classoffset=0,
         % emph={},

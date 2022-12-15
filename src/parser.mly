@@ -3,8 +3,14 @@
   open Asttypes
   open Parse_ast
 
+  exception RedefinedConstructor of location * string
+  exception RedefinedType of location * string
+
   let mk_expr e l = { pexpr_desc = e; pexpr_loc = l }
   let mk_patt p l = { ppatt_desc = p; ppatt_loc = l }
+
+  let h_constr_ty = Hashtbl.create 10
+  let h_ty_constr = Hashtbl.create 10
 
   (* let get_typ =
     let h = Hashtbl.create 10 in
@@ -111,7 +117,13 @@ node_decs:
 
 ptype:
 | TYPE tname=IDENT EQUAL BAR? l=separated_list(BAR, constr)
-  { {name = tname; constr = l} }
+  { 
+    if Hashtbl.mem h_ty_constr tname then raise (RedefinedType ($sloc, tname));
+    Hashtbl.add h_ty_constr tname l;
+    List.iter (fun e ->
+       if Hashtbl.mem h_constr_ty e then raise (RedefinedConstructor ($sloc, e));
+       Hashtbl.add h_constr_ty e tname) l;
+    {name = tname; constr = l} }
 ;
 
 node:
@@ -294,6 +306,9 @@ const:
 | TCONSTR
     { let c, t = $1 in
       Cadt (t, Some c) }
+| CONSTR
+    { let t = Hashtbl.find h_constr_ty $1 in
+      Cadt (t, Some $1) }
 ;
 
 ident_comma_list:

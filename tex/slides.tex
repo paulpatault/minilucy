@@ -225,10 +225,10 @@ type t = A | B
 
 node main0 () returns (o: t);
 let
-  o = A't fby
+  o = A fby
         (merge o
-          (A't -> B't when A(o))
-          (B't -> A't when B(o)));
+          (A -> B when A(o))
+          (B -> A when B(o)));
 tel
 \end{lstlisting}
 
@@ -272,10 +272,10 @@ type t = A | B
 
 node main0 () returns (o: t);
 let
-  o = A't fby
+  o = A fby
         (merge o
-          (A't -> B't when A(o))
-          (B't -> A't when B(o)));
+          (A -> B when A(o))
+          (B -> A when B(o)));
 tel
 \end{lstlisting}
         \end{minipage}};
