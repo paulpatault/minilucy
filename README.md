@@ -39,6 +39,13 @@ $ dune build
   $ echo "0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0" | ./a.out
   ```
 
+- Automate a plusieurs sorties : (le fichier d'entrée fait que l'automate rentre en pause pendant 3 temps tous les 2 pas de temps).
+  ```
+  $ ./minilucy.exe tests/positifs/19-automaton_double_sortie.lus main0 -no-nl
+  $ gcc tests/positifs/19-automaton_double_sortie.c
+  $ cat tests/positifs/input_19.stream | ./a.out
+  ```
+
 ### Utilisation générique
 
 Commande générique :
