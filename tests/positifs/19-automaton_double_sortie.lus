@@ -1,0 +1,24 @@
+node oscillateur (lo, hi : int; pousse : bool) returns (x: int);
+let
+  automaton
+  | Chaud ->
+      x = 0 -> pre x + 1;
+      until (x >= hi) continue Froid
+      until pousse continue CC
+  | Froid ->
+      x = 0 -> pre x - 1;
+      until (x <= lo) continue Chaud
+      until pousse continue FF
+  | CC ->
+      x = 0 -> pre x + 5;
+      until x >= 30 continue Froid
+  | FF ->
+      x = 0 -> pre x - 5;
+      until x <= 30 continue Chaud
+  end
+tel
+
+node main0 (pousse: bool) returns (o: int);
+let
+  o = oscillateur (-2, 2, pousse);
+tel
