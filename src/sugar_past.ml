@@ -46,9 +46,13 @@ let trad_autom {pautom_loc; pautom} =
     | {pn_case={pn_constr;_};_} -> pn_constr
   ) pautom in
 
-  let () = match List.find_opt (fun e -> not @@ List.mem e.pn_out constrs) pautom with
-    | None -> ()
-    | Some e -> error pautom_loc (ConstrInconnu e.pn_out) in
+  (* vérification de cas *)
+  List.iter
+    (fun e ->
+      List.iter
+        (fun ee -> if not @@ List.mem ee constrs then error pautom_loc (ConstrInconnu ee))
+        e.pn_out)
+    pautom;
 
 
   let eqs = List.map (fun {pn_case={pn_equation;_}; _} -> pn_equation) pautom in

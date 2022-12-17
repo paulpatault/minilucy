@@ -206,10 +206,18 @@ eq:
 ;
 
 case_autom:
-| pn_case=case UNTIL pn_cond=expr CONTINUE pn_out=constr
-  { {pn_case; pn_cond; pn_out; pn_weak=true}  }
-| pn_case=case UNLESS pn_cond=expr THEN pn_out=constr
-  { {pn_case; pn_cond; pn_out; pn_weak=false}  }
+| pn_case=case o=outlist
+  { let pn_cond, pn_out = o in
+    { pn_case; pn_cond; pn_out; pn_weak=true}  }
+/* | pn_case=case UNLESS pn_cond=expr THEN pn_out=constr
+  { {pn_case; pn_cond; pn_out; pn_weak=false}  } */
+;
+
+outlist:
+| { [], [] }
+| UNTIL cc=expr CONTINUE oo=constr o=outlist
+  { let c, o = o in
+    cc :: c, oo :: o}
 ;
 
 case:
