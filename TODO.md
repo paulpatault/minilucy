@@ -3,12 +3,12 @@
 - pseudo-rapport du travial réalisé dans le README
   + expliquer le schéma de compilation
   + parler des features :
-    - [ ] clocks
-    - [ ] reset
-    - [ ] merge
-    - [ ] automaton (niveau 1 pour l'instant)
-    - [ ] ajout print en dur
-    - [ ] ..
+    - [x] clocks
+    - [x] reset
+    - [x] merge
+    - [x] automaton (niveau 1 pour l'instant)
+    - [x] ajout print en dur
+    - [x] ..
 
 - base
   - [x] compile simple : `pre`, `->`, `fby`
@@ -26,8 +26,9 @@
     - presque ok : ajouter pour les enum/mémoires/...
 
   - [ ] automate :
-    - "Automate d'automate" : cf. ex006.lus
-    - sortes automates : `until-then`, `unless-continue`, `unless-then`
+    - [x] plusieurs sorties
+    - [ ] "Automate d'automate" : cf. ex006.lus
+    - [ ] sortes automates : `until-then`, `unless-continue`, `unless-then`
 
   - [x] meilleur imp printer
 
@@ -35,4 +36,7 @@
 
   - [x] main avec float
 
-- tests positifs
+- meilleurs tests
+  - [x] tests positifs
+  - [x] tests négatifs
+  - [x] automatisation de la vérification des tests dans le makefile

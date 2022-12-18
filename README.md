@@ -114,3 +114,8 @@ $ make promote -i            # mise à niveau de l'ensemble des tests
         `a.out` le flux de données `0 0 0 0 1 0 0 0 1` par exemple.
 
 - Ajout d'une fonction `print` dans lustre
+
+- Séparation du travail (voir [onglet contributeurs](https://github.com/paulpatault/minilucy/graphs/contributors))
+  + Émilien a plutôt travaillé sur la base du compilateur minilustre (création des noeuds, des mémoires, ...)
+  + Paul a plutôt travaillé sur les extensions du langage (when, merge, automates, ...)
+  + une certaine partie du travail a été réalisé en "pair-programming"
