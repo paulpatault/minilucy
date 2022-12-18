@@ -46,9 +46,13 @@ let trad_autom {pautom_loc; pautom} =
     | {pn_case={pn_constr;_};_} -> pn_constr
   ) pautom in
 
-  let () = match List.find_opt (fun e -> not @@ List.mem e.pn_out constrs) pautom with
-    | None -> ()
-    | Some e -> error pautom_loc (ConstrInconnu e.pn_out) in
+  (* vérification de cas *)
+  List.iter
+    (fun e ->
+      List.iter
+        (fun ee -> if not @@ List.mem ee constrs then error pautom_loc (ConstrInconnu ee))
+        e.pn_out)
+    pautom;
 
 
   let eqs = List.map (fun {pn_case={pn_equation;_}; _} -> pn_equation) pautom in
@@ -74,15 +78,42 @@ let trad_autom {pautom_loc; pautom} =
   let (cond_locals, vars), eqs_state =
     List.fold_left_map
     (fun (cond_loc_acc, vars_acc) {pn_cond; pn_out; pn_case={pn_constr; pn_loc; _}} ->
-      let c1 = mk_constr_expr t.name pn_out pautom_loc in
-      let c2 = mk_constr_expr t.name pn_constr pautom_loc in
-      let name = gen "cond" in
-      let var_cond = { pexpr_desc = PE_ident name; pexpr_loc = pn_loc} in
-      let peq_patt =
-        { ppatt_desc = PP_ident name;
-          ppatt_loc = pn_loc } in
-      let acc = (PE_eq { peq_patt; peq_expr = pn_cond} ) :: cond_loc_acc, name::vars_acc in
-      acc, { pexpr_desc = PE_op (Asttypes.Op_if, [var_cond; c1; c2]); pexpr_loc = pautom_loc}
+      match pn_out, pn_cond with
+      (* | [pn_out], [pn_cond] ->
+          let c1 = mk_constr_expr t.name pn_out pautom_loc in
+          let c2 = mk_constr_expr t.name pn_constr pautom_loc in
+          let name = gen "cond" in
+          let var_cond = { pexpr_desc = PE_ident name; pexpr_loc = pn_loc} in
+          let peq_patt =
+            { ppatt_desc = PP_ident name;
+              ppatt_loc = pn_loc } in
+          let acc = (PE_eq { peq_patt; peq_expr = pn_cond} ) :: cond_loc_acc, name::vars_acc in
+          acc, { pexpr_desc = PE_op (Asttypes.Op_if, [var_cond; c1; c2]); pexpr_loc = pautom_loc} *)
+      | _::_, _::_ ->
+
+          let current = mk_constr_expr t.name pn_constr pautom_loc in
+          let pn_out = List.map (fun p -> mk_constr_expr t.name p pautom_loc) pn_out in
+          let name = List.map (fun _ -> gen "cond") pn_out in
+
+          let vars_cond = List.map (fun name -> { pexpr_desc = PE_ident name; pexpr_loc = pn_loc }) name in
+          let peq_patts = List.map (fun name -> { ppatt_desc = PP_ident name; ppatt_loc = pn_loc }) name in
+
+          let acc = (List.map2 (fun patt cond -> PE_eq { peq_patt=patt; peq_expr = cond}) peq_patts pn_cond)
+                    @ cond_loc_acc, name@vars_acc in
+
+          let mkif e = { pexpr_desc = PE_op (Asttypes.Op_if, e); pexpr_loc = pautom_loc} in
+
+          let rec next v o =
+            match v, o with
+            | [], [] -> current
+            | v::vtl, o::otl ->
+                mkif [v; o; next vtl otl]
+            | _ -> assert false
+          in
+
+          acc, next vars_cond pn_out
+
+      | _ -> assert false
     ) ([], []) pautom in
 
   let over =

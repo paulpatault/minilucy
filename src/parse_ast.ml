@@ -42,8 +42,8 @@ and p_automaton =
 
 and p_automaton_core =
   { pn_case: p_case;
-    pn_cond: p_expr;
-    pn_out: string;
+    pn_cond: p_expr list;
+    pn_out: string list;
     pn_weak: bool; (* slide 30
                       until : weak    (delay)       -> "default"
                       unless : strong (instantanné) -> TODO
